@@ -42,12 +42,14 @@ public class FixedNKmsManager extends KmsManager {
 
   public FixedNKmsManager(List<String> kmsWsUri) {
     for (String uri : kmsWsUri) {
+      log.debug("New KMS is created for " + uri);
       this.addKms(new Kms(KurentoClient.create(uri), uri));
     }
   }
 
   public FixedNKmsManager(List<String> kmsWsUri, int kmsLoadLimit) {
     for (String uri : kmsWsUri) {
+      log.debug("New KMS is created for " + uri);
       Kms kms = new Kms(KurentoClient.create(uri), uri);
       kms.setLoadManager(new MaxWebRtcLoadManager(kmsLoadLimit));
       this.addKms(kms);
@@ -67,6 +69,7 @@ public class FixedNKmsManager extends KmsManager {
     String participantId = sessionInfo.getParticipantId();
     Session session = notificationService.getSession(participantId);
     if (session != null) {
+      log.debug("Unable to find user name in session {}", participantId);
       Object sessionValue = session.getAttributes().get(ParticipantSession.SESSION_KEY);
       if (sessionValue != null) {
         ParticipantSession participantSession = (ParticipantSession) sessionValue;
@@ -77,6 +80,8 @@ public class FixedNKmsManager extends KmsManager {
       log.warn("Unable to find user name in session {}", participantId);
       throw new RoomException(RoomException.Code.ROOM_CANNOT_BE_CREATED_ERROR_CODE,
           "Not enough information");
+    } else {
+      log.debug("Unable to find user name in session {}", participantId);
     }
     if (!canCreateRoom(userName)) {
       throw new RoomException(RoomException.Code.ROOM_CANNOT_BE_CREATED_ERROR_CODE,

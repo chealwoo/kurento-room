@@ -524,7 +524,7 @@ function Stream(kurento, local, room, options) {
             }
         };
         
-        getUserMedia(constraints, function (userStream) {
+        navigator.getUserMedia(constraints, function (userStream) {
             wrStream = userStream;
             ee.emitEvent('access-accepted', null);
         }, function (error) {
