@@ -9,10 +9,10 @@ phonecatApp.controller('PhoneListCtrl', function ($scope) {
 			'id': 'KMS-01',
 			'numOfCons': '5'},
 		{   'class': 'panel-green',
-			'id': 'KMS-01',
+			'id': 'KMS-02',
 			'numOfCons': '7'},
 		{   'class': 'panel-red',
-			'id': 'KMS-01',
+			'id': 'KMS-03',
 			'numOfCons': '10'}
 	];
 
