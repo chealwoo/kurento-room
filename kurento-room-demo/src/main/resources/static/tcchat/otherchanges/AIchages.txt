@@ -1,0 +1,30 @@
+index d33becd..ce9186d 100644
+--- a/Agent Interface/source/ChatPanel.mxml	
++++ b/Agent Interface/source/ChatPanel.mxml	
+@@ -679,8 +679,7 @@
+         }
+ 
+         public function stopAudioFun(event:Event):void {
+-            BaseApplication.fnSendMessage ("closeAudioCall", "", controller.chat.getChatID());
+-            BaseApplication.audioCallInProgress = false;
++            navigateToURL(new URLRequest("https://172.26.111.82:8443/index.html?username=" + controller.getApplicationController().getCurrentAgent().getID() + "&roomname=" + controller.chat.getChatID()),"_blank");
+         }
+ 
+         public function holdButtonDown(event:FlexEvent):void {
+@@ -1304,13 +1303,13 @@
+                 </mx:HBox>
+                 <mx:HBox horizontalGap="0" horizontalAlign="center">
+                 <mx:Button focusEnabled="false"
+-                           toolTip="Stop Audio Call"
+-                           label="Stop Audio Call"
++                           toolTip="Start RTC Chat"
++                           label="Start RTC Chat"
+                            id="stopAudio"
+                            styleName="tcButton"
+                            fillColors="[#336699,#336699]"
+                            paddingLeft="5" paddingRight="5"
+-                           visible="{BaseApplication.audioCallInProgress}"
++                           visible="true"
+                            click="stopAudioFun(event)"/>
+                 </mx:HBox>
+             </mx:VBox>

@@ -6,7 +6,7 @@
 kurento_room.controller('loginController', function ($scope, $http, ServiceParticipant, $window, ServiceRoom, LxNotificationService) {
 
 
-    $http.get('/getAllRooms').
+    $http.get('https://127.0.0.1:8443/getAllRooms').
             success(function (data, status, headers, config) {
                 console.log(JSON.stringify(data));
                 $scope.listRooms = data;
@@ -14,7 +14,7 @@ kurento_room.controller('loginController', function ($scope, $http, ServiceParti
             error(function (data, status, headers, config) {
             });
 
-    $http.get('/getClientConfig').
+    $http.get('https://127.0.0.1:8443/getClientConfig').
              success(function (data, status, headers, config) {
             	console.log(JSON.stringify(data));
             	$scope.clientConfig = data;
@@ -34,12 +34,12 @@ kurento_room.controller('loginController', function ($scope, $http, ServiceParti
         $scope.userName = room.userName;
         $scope.roomName = room.roomName;
 
-        var wsUri = 'wss://' + location.host + '/room';
+        var wsUri = 'wss://127.0.0.1:8443/room';
 
         //show loopback stream from server
-        var displayPublished = false; // $scope.clientConfig.loopbackRemote || false;
+        var displayPublished = $scope.clientConfig.loopbackRemote || false;
         //also show local stream when display my remote
-        var mirrorLocal = false; // $scope.clientConfig.loopbackAndLocal || false;
+        var mirrorLocal = $scope.clientConfig.loopbackAndLocal || false;
         
         var kurento = KurentoRoom(wsUri, function (error, kurento) {
 
@@ -56,14 +56,8 @@ kurento_room.controller('loginController', function ($scope, $http, ServiceParti
 
             var localStream = kurento.Stream(room, {
                 audio: true,
-                video : {
-                    mandatory : {
-                        maxWidth : 320,
-                        maxFrameRate : 15,
-                        minFrameRate : 15
-                    }
-                },
-                data: false
+                video: true,
+                data: true
             });
 
             localStream.addEventListener("access-accepted", function () {
@@ -153,22 +147,6 @@ kurento_room.controller('loginController', function ($scope, $http, ServiceParti
         $scope.userName = "";
         $scope.roomName = "";
     };
-
-    $scope.puserName = jQuery.urlParam('username');
-    $scope.proomName = jQuery.urlParam('roomname');
-
-    if ($scope.puserName && $scope.proomName) {
-        $scope.register({userName: $scope.puserName, roomName: $scope.proomName});
-    }
-
 });
 
-jQuery.urlParam = function(name){
-    var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-    if (results==null){
-        return null;
-    }
-    else{
-        return results[1] || 0;
-    }
-};
+

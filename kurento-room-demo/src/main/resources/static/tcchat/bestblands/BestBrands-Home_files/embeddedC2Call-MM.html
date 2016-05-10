@@ -1,0 +1,414 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!-- saved from url=(0054)http://demo.touchcommerce.com/x/embeddedC2Call-MM.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="generator" content="Bluefish 2.0.0">
+  <title></title>
+  <script charset="utf-8" language="javascript" type="text/javascript" src="./xFormExtensions.js"></script>
+  
+  <style type="text/css">
+    body {
+        font-family: Arial;
+        color: #BBBBBB;
+        margin: 5px;
+    }
+    
+    td {
+        font-size: 0.7em;
+    }
+    
+    .dash {
+        color: #BBBBBB;
+        padding: 0 2px 0 2px;
+    }
+  </style>
+  
+  </head>
+  <body style="background-color: #2e2b2a">
+
+
+<script charset="utf-8" language="javascript" type="text/javascript">
+    var npa, nxx, sub;
+    var btnCallEnabled = false ;
+    var phoneNr ="";
+    
+    
+    String.prototype.trim = function () {
+        return this.replace(/^\s*/, "").replace(/\s*$/, "");
+    }
+    
+    String.prototype.ltrim = function () {
+        return this.replace(/^\s*/, "");
+    }
+    
+    String.prototype.rtrim = function () {
+        return this.replace(/\s*$/, "");
+    }
+
+    function giveFocus(where) {
+        var at = (where!=null)?where:"null";
+    	window.setTimeout("try{document.getElementById(\"" + this.id + "\").setFocusAt("+at+");}catch(e){}", 1) ;
+    } 
+    
+    function setCursorPosition(pos){
+        var elmnt = this ;
+        var textLen = this.value.length ;
+        elmnt.focus();
+		if (elmnt["createTextRange"] != null &&
+			document["selection"] != null &&
+			document.selection["createRange"]) {
+                var selectionRng =  null ;
+                selectionRng = elmnt.createTextRange();
+                if (selectionRng!=null)	
+                    selectionRng.select();			
+                 
+                selectionRng = document.selection.createRange();
+                pos =   (pos > 0)?textLen:0 ;
+                
+                selectionRng.collapse(true);
+                selectionRng.moveEnd('character',pos);
+                selectionRng.moveStart('character',pos);
+                selectionRng.select();
+				return ;
+		} 
+
+        if (elmnt["selectionStart"])  elmnt.selectionStart = (pos > 0)?textLen:0;
+        if (elmnt["selectionEnd"])  elmnt.selectionEnd  = (pos > 0)?textLen:0;         
+		
+        return ;
+    }
+    
+    function setFocusAt(at){
+        this.focus();
+        if (at) this.setCursorPosition(at);
+    }
+    
+    
+    /*
+	 * This function is to get the cursor position of the phone fields.
+	 * return  the cursor position of the phone field
+	 */
+	function getCursorPosition(elmnt)  {
+	    var text = elmnt.value;
+		if (elmnt["createTextRange"] != null &&
+			document["selection"] != null &&
+			document.selection["createRange"]) {
+				var selectionRng =  document.selection.createRange().duplicate();
+				selectionRng.moveEnd('character', text.trim().length);
+				if (selectionRng.text == '') return text.trim().length; 
+				return text.trim().lastIndexOf(selectionRng.text);
+		} 
+        else return elmnt["selectionStart"];		
+	} 
+	
+    /**
+    * This function is to implement the autoTab functionality for phone field3
+    * It auto-tab to phoneField3 upon completion of phoneField1.
+    *     
+    * @param KeyboardEvent
+    * @return void
+    *		
+    */
+    var KEY_RIGHTARROW = 39;
+    var KEY_LEFTARROW = 37 ;
+    var KEY_NUM9 = 0x39 ;
+    var KEY_NUM0 = 0x30 ;    
+    function actionAutoTabForPhoneField1(ev){
+        var keyCode = (ev)?ev.which:window.event.keyCode;            			
+        var callerPhoneField1 = npa ;
+        var callerPhoneField2 = nxx ;
+        onPossiblePhoneNumberChange();		
+
+        if(callerPhoneField1 != null && 
+            callerPhoneField1.value.trim().length == 3 && 
+            ((keyCode>=KEY_NUM0 && keyCode <=KEY_NUM9) ||  keyCode==KEY_RIGHTARROW) && 
+            getCursorPosition(callerPhoneField1) == 3) {
+                callerPhoneField2.giveFocus(0);
+                return true;     
+        } 
+        return true ;
+    }
+		
+    /**
+     * This function is to implement the autoTab functionality for phone field3
+     * It auto-tab to phoneField3 upon completion of phoneField2.
+     *     
+     * @param KeyboardEvent
+     * @return void
+     *		
+     */
+    
+    function actionAutoTabForPhoneField2(ev){
+        var keyCode = (ev)?ev.which:window.event.keyCode;
+        var callerPhoneField1 = npa ;        
+        var callerPhoneField2 = nxx ;
+        var callerPhoneField3 = sub ;
+        onPossiblePhoneNumberChange();		
+
+        if (callerPhoneField2 != null && 
+            callerPhoneField2.value.trim().length == 3 && 
+            ((keyCode>=KEY_NUM0 && keyCode <=KEY_NUM9) || keyCode==KEY_RIGHTARROW) && 
+            getCursorPosition(callerPhoneField2) == 3) {
+                callerPhoneField3.giveFocus(0);	
+                return true ;
+        }
+        else if (keyCode==KEY_LEFTARROW && 
+                getCursorPosition(callerPhoneField2) == 0) {
+                callerPhoneField1.giveFocus(3);	
+                return true ;
+        }        
+        return true;
+    }
+	
+     function actionAutoTabForPhoneField3(ev){
+        var keyCode = (ev)?ev.which:window.event.keyCode;
+        var callerPhoneField1 = npa ;        
+        var callerPhoneField2 = nxx ;
+        var callerPhoneField3 = sub ;
+        onPossiblePhoneNumberChange();		
+        if (keyCode==KEY_LEFTARROW && 
+                getCursorPosition(callerPhoneField3) == 0) {
+                callerPhoneField2.giveFocus(3);	
+                return false ;
+        }        
+        return true;
+    }
+          
+    function  _getSelectedText(elmnt) {
+		if (elmnt["selectionStart"] != null && 
+			elmnt["selectionEnd"] != null) {
+			return (elmnt.value).substring(elmnt.selectionStart, elmnt.selectionEnd);  
+		}
+		else if (elmnt["createTextRange"] != null &&
+				 document["selection"] != null &&
+				 document.selection["createRange"]) 
+			{	
+					 
+				var selectionRng = document.selection.createRange();
+				var inputRng = elmnt.createTextRange();
+				if (inputRng != null && 
+					selectionRng != null && 
+					selectionRng.text.length > 0) {
+					var isInRange =  inputRng.text.indexOf(selectionRng.text) >= 0 ;
+					if (isInRange)
+						return (selectionRng.text);
+				}				
+			}
+			
+		return "" ;
+	}
+	
+	function _onKeyPress(ev)
+	{
+        var target = this ;
+        var sRestrict = this["restrict"];
+        var sMaxChars = this["maxChars"];
+		var keyCode ;
+		var cntl = ((null != ev) ?   ev.ctrlKey :  window.event.ctrlKey)  ? true : false ;
+	
+		keyCode = (null != ev) ? keyCode = ev.which :  window.event.keyCode ;
+		if (cntl) return true ;
+		if (keyCode < 32) return true ;	
+		
+		maxChars = (sMaxChars != null) ? parseInt(sMaxChars) : 0 ;	
+		if (maxChars > 0) {
+            var sel = _getSelectedText(this);
+			var len = this.value.length - sel.length ;			
+			if (len >= maxChars) {					
+				return false ;				
+			}
+		}
+        		
+		if (sRestrict != null) {
+			var character = String.fromCharCode(keyCode);
+			if (sRestrict.indexOf(character) < 0)
+				return false ;
+		}
+		return true ;
+	}
+	
+	function _validate(text, validate) {
+		if (validate == null) return true ;
+		var rex = new RegExp(validate,"");
+		if (!rex.test(text)) {
+			return false ;
+		}	
+ 		return true ;
+	}
+    	
+    function _onChange(ev) {
+        var evType = (ev)?ev.type:window.event.type;
+        var elmnt = this;
+  
+        if (!_validate(elmnt.value, elmnt.validate)) {            
+        	window.setTimeout("try{document.getElementById(\"" + elmnt.id + "\").focus();}catch(e){}", 1) ;
+        	return false ;
+        }
+        
+        return true;
+    }   
+    
+    function onPossiblePhoneNumberChange() {
+    
+    var btnSource = "https://mediav3.inq.com/media/sites/10003715/flash/BestBrands_EmbeddedC2Call/callMe.png";
+    
+        var number = npa.value +
+    				 nxx.value +
+    				 sub.value ;  
+        if (!_validate(number, "\\d{10}")) {    				 
+            if (btnCallEnabled == true) {         
+                btnCallEnabled = false ; 
+                phoneNr = number ; 
+                xcd.showCallButton("Call", number, false, false);
+         	}
+        } else {
+            if (btnCallEnabled == false ||  phoneNr != number) {         
+                btnCallEnabled = true ;  
+                phoneNr = number ;                 
+                xcd.showCallButton("Call", number, true, false);
+		
+		
+            }
+       }
+    }
+     
+    function _onBlur(ev) {
+   
+        var pieces = [npa, nxx, sub] ;
+        var i, elmnt;
+        elmnt = this ;
+            
+        var number = npa.value +
+    				 nxx.value +
+    				 sub.value ;  				 
+        if (!_validate(number, "\\d{10}")) {
+            for (i=0; i < pieces.length; i++) {
+                elmnt = pieces[i];
+                if (!_validate(elmnt.value, elmnt.validate) && elmnt.value.length!=0) {      
+                 	window.setTimeout("try{document.getElementById(\"" + elmnt.id + "\").focus();}catch(e){}", 1) ;
+                 	return false ;
+                }
+
+
+            }    
+        	return false ;
+        }
+    	/// OK we check out	
+        /// C2C.prototype.showCallButton = function(source, left, top, number, show, giveFocus, title) {       	 
+        return true;
+    }
+    
+	function _initialize() {	
+	   npa = document.getElementById("NPA");
+	   nxx = document.getElementById("NXX");
+	   sub = document.getElementById("SUB");		
+	   
+	   
+	   npa["maxChars"] =  nxx["maxChars"] = 3 ; sub["maxChars"] = 4 ;
+	   npa["validate"] = "\\d{3}" ; nxx["validate"] ="\\d{3}" ; sub["validate"] = "\\d{4}" ;
+	   npa["restrict"] = nxx["restrict"] = sub["restrict"] = "0123456789" ;
+	   npa["giveFocus"] = nxx["giveFocus"] = sub["giveFocus"] = giveFocus;
+	   npa["setFocusAt"] = nxx["setFocusAt"] = sub["setFocusAt"] = setFocusAt;
+	   npa["setCursorPosition"] = nxx["setCursorPosition"] = sub["setCursorPosition"] = setCursorPosition;
+   
+	  
+	   npa.onkeypress = nxx.onkeypress = sub.onkeypress = _onKeyPress ;
+ 	   npa.onchange = nxx.onchange = sub.onchange = _onChange ;  
+	   npa.onblur = nxx.onblur = sub.onblur = _onBlur ;
+	   npa.onkeyup = actionAutoTabForPhoneField1 ;
+	   nxx.onkeyup = actionAutoTabForPhoneField2 ;
+	   sub.onkeyup = actionAutoTabForPhoneField3 ;
+	   var btnCall = document.getElementById("Call");
+//	   btnCall.setAttribute("style","display: none;"); 
+//	   btnCall.style.cssText="display: none;";
+//     btnCall.disabled=true;
+	   
+	   npa.onblur(null);
+	   npa.giveFocus(0);
+	   
+    }
+    
+    function call(){
+	window.alert('got here');
+    	var number = document.getElementById("NPA").value +
+    				 document.getElementById("NXX").value +
+    				 document.getElementById("SUB").value ;
+    	var callBtn = document.getElementById("Call");
+    	var callBtnTop = 0, callBtnLeft = 0;
+    	var p = callBtn ;
+    	while (p!=null) {
+    		callBtnTop += p.offsetTop;
+    		callBtnLeft+= p.offsetLeft;
+    		p = p.offsetParent ;
+    	}
+    	 
+    	alert("call: "+number + "\n Top: " + callBtnTop + "\n Left: " + callBtnLeft);
+    	window.xcd.call(number);
+    }
+    
+
+	function clearText(field){
+
+	    if (field.defaultValue == field.value) field.value = '';
+	    field.style.color = 'black';
+	   // else if (field.value == '') field.value = field.defaultValue;
+
+	}
+
+</script>
+
+<table cellpadding="0" cellspacing="0" border="0">
+    <tbody><tr>
+        <td colspan="6">Need assisstance? Have a specialist call you:</td>
+    </tr>
+    <tr>
+        <td><input type="text" id="NPA" name="NPA" style="width: 50px; height: 20px;" size="3" maxlength="3"></td>
+        <td class="dash"> - </td>
+        <td><input type="text" id="NXX" name="NXX" style="width: 50px; height: 20px;" size="3" maxlength="3"></td>
+        <td class="dash"> - </td>
+        <td><input type="text" id="SUB" name="SUB" style="width: 50px; height: 20px;" size="4" maxlength="4"></td>
+        <td>
+            <div style="padding-left: 15px;">
+                <img src="./callMe.png" style="margin-top: 5px;">
+                <input src="./clearCall.gif" type="image" id="Call" value="Call" style="width: 81px; height: 22px; margin-top: -20px;">
+            </div>
+        </td>	     
+    </tr>
+</tbody></table>
+
+<script charset="utf-8" language="javascript" type="text/javascript">
+//debugger;
+    var _call = document.getElementById("Call");
+    _call_onclick = function (){
+//debugger;		
+		var   npa = document.getElementById("NPA");
+		var   nxx = document.getElementById("NXX");
+		var  sub = document.getElementById("SUB");    
+		var number = npa.value +  nxx.value +    sub.value ; 
+
+		var errorSpan = document.getElementById("errorSpan");
+		
+		if (!_validate(number, "\\d{10}")) { 
+			if (number.length>=10)
+				//errorSpan.innerHTML="The phone number must be numbers only.";
+				alert('The phone number must be numbers only.');
+			else
+				//errorSpan.innerHTML="Please enter 10 digits";
+				alert('Please enter your 10-digit phone number.');
+		} 	
+		return false;
+    };
+	if 	(_call["addEventListener"]!=null)
+		_call.addEventListener('click',_call_onclick, false) ;
+	else if (_call["attachEvent"]!=null)
+	_call.attachEvent('onclick',_call_onclick) ;
+	
+	else	 _call.onclick = _call_onclick;	
+
+    _initialize();
+//		window.xcd.showCallButton("Call", number);
+</script>
+
+
+
+</body></html>
