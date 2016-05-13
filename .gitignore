@@ -13,3 +13,6 @@ nbactions.xml
 *bower_components/
 .externalToolBuilders
 *bin/
+
+.idea/
+*.iml
