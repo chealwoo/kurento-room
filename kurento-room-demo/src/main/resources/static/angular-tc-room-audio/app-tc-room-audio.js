@@ -34,7 +34,7 @@ jQuery(function() {
 		//jQuery('<link rel="stylesheet" type="text/css" href="https://bestbrands.inq.com/tagserver/kms/angular/lumX/dist/scss/main/_lumx.scss" >').appendTo("head");
 
 
-		inQ.loadScript(resourcePath + "angular-tc-room/app-tc-room-action.js");
+		inQ.loadScript(resourcePath + "angular-tc-room-audio/app-tc-room-audio-action.js");
 
 		if (top.inQ)
 		{

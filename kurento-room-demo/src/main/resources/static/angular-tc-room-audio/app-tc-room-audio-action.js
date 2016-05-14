@@ -4023,6 +4023,18 @@ angular.module("lumx.utils",["lumx.utils.transclude","lumx.utils.transclude-repl
 }]),angular.module("lumx.file-input").run(["$templateCache",function(e){e.put("lumx.file_input.html",'<div class="input-file">\n    <label>\n        <span class="input-file__label">{{ label }}</span>\n        <span class="input-file__filename"></span>\n        <input type="file">\n    </label>\n</div>')}]),angular.module("lumx.text-field").run(["$templateCache",function(e){e.put("lumx.text_field.html","<div class=\"text-field text-field--{{ theme }}-theme\"\n     ng-class=\"{ 'text-field--is-valid': valid(),\n                 'text-field--has-error': error(),\n                 'text-field--is-disabled': disabled(),\n                 'text-field--fixed-label': fixedLabel(),\n                 'text-field--is-active': data.model || data.focused,\n                 'text-field--is-focused': data.focused,\n                 'text-field--label-hidden': fixedLabel() && data.model,\n                 'text-field--with-icon': icon && fixedLabel() }\">\n    <label class=\"text-field__label\">\n        {{ label }}\n    </label>\n\n"+'    <div class="text-field__icon" ng-if="icon && fixedLabel() ">\n        <i class="mdi mdi--{{ icon }}"></i>\n    </div>\n\n    <div ng-transclude="1"></div>\n</div>\n')}]),angular.module("lumx.search-filter").run(["$templateCache",function(e){e.put("lumx.search_filter.html",'<div class="search-filter search-filter--{{ theme }}-theme"\n     ng-class="{ \'search-filter--is-focused\': model,\n                 \'search-filter--is-closed\': closed }">\n    <div class="search-filter__container">\n        <label class="search-filter__label"><i class="mdi mdi--search"></i></label>\n        <input type="text" class="search-filter__input" placeholder="{{ placeholder }}" ng-model="model">\n        <span class="search-filter__cancel" ng-click="clear()"><i class="mdi mdi--cancel"></i></span>\n    </div>\n</div>')}]),angular.module("lumx.select").run(["$templateCache",function(e){e.put("lumx.select_selected.html",'<div lx-dropdown-toggle>\n    <span class="lx-select__floating-label" ng-if="getSelectedElements().length !== 0 && floatingLabel">{{ placeholder }}</span>\n\n    <div class="lx-select__selected"\n         ng-class="{ \'lx-select__selected--is-unique\': !multiple,\n                     \'lx-select__selected--is-multiple\': multiple && getSelectedElements().length > 0,\n                     \'lx-select__selected--placeholder\': getSelectedElements().length === 0 }"\n         lx-ripple>\n        <span ng-if="getSelectedElements().length === 0">{{ placeholder }}</span>\n\n        <!-- ng-repeat is used to manage the initialization of the $select even for non-multiple selects -->\n        <div ng-repeat="$selected in getSelectedElements()" ng-if="!multiple">\n            <i class="lx-select__close mdi mdi--cancel" ng-click="unselect($selected, $event)" ng-if="allowClear"></i>\n            <span ng-transclude="child"></span>\n        </div>\n\n        <div ng-if="multiple">\n            <div class="lx-select__tag" ng-repeat="$selected in getSelectedElements()">\n                <span ng-transclude="child"></span>\n            </div>\n        </div>\n    </div>\n</div>'),e.put("lumx.select_choices.html",'<lx-dropdown-menu class="lx-select__choices">\n    <ul ng-if="!tree">\n        <li ng-if="getSelectedElements().length > 0">\n            <div class="lx-select__chosen"\n                 ng-class="{ \'lx-select__chosen--is-multiple\': multiple }"\n                 ng-bind-html="getSelectedTemplate()"></div>\n        </li>\n\n        <li>\n            <div class="lx-select__filter dropdown-filter">\n                <lx-search-filter model="data.filter" filter-width="100%" lx-dropdown-filter></lx-search-filter>\n            </div>\n        </li>\n\n        <li class="lx-select__help" ng-if="isHelperVisible()">\n            <span ng-if="filterNeeded()">Type minimum {{ minLength }} to search</span>\n            <span ng-if="hasNoResults() && !filterNeeded()">No results!</span>\n        </li>\n\n        <li ng-repeat="$choice in choices() | filter:data.filter" ng-if="isChoicesVisible()">\n            <a class="lx-select__choice dropdown-link"\n               ng-class="{ \'lx-select__choice--is-multiple\': multiple,\n                           \'lx-select__choice--is-selected\': isSelected($choice) }"\n               ng-click="toggle($choice, $event)"\n               ng-transclude="child"></a>\n        </li>\n\n        <li class="lx-select__loader" ng-if="loading === \'true\'">\n            <i class="mdi mdi--loop"></i>\n        </li>\n    </ul>\n</lx-dropdown-menu>'),e.put("lumx.select.html",'<div class="lx-select"\n     ng-class="{ \'lx-select--is-unique\': !multiple,\n                 \'lx-select--is-multiple\': multiple }">\n    <lx-dropdown width="32" from-top>\n        <div ng-transclude="parent"></div>\n    </lx-dropdown>\n</div>\n')}]),angular.module("lumx.tabs").run(["$templateCache",function(e){e.put("lumx.tabs.html",'<div class="tabs tabs--theme-{{ linksTc }} tabs--layout-{{ layout }}"\n     ng-class="{ \'tabs--no-divider\': noDivider }">\n    <ul class="tabs__links bgc-{{ linksBgc }} z-depth{{ zDepth }}">\n        <li ng-repeat="tab in getTabs()">\n            <a lx-tab-link\n               class="tabs-link"\n               ng-class="{ \'tabs-link--is-active\': $index === activeTab }"\n               ng-click="setActiveTab($index)"\n               lx-ripple="{{ indicator }}">\n               <span ng-if="tab.icon !== undefined"><i class="mdi mdi--{{ tab.icon }}"></i></span>\n               <span ng-if="tab.icon === undefined">{{ tab.heading }}</i></span>\n            </a>\n        </li>\n    </ul>\n\n    <div class="tabs__panes" ng-transclude="1"></div>\n\n    <div class="tabs__indicator bgc-{{ indicator }}"></div>\n</div>\n'),e.put("lumx.tab.html",'<div class="tabs-pane" ng-if="index === data.activeTab" ng-transclude="2"></div>\n')}]),angular.module("lumx.date-picker").run(["$templateCache",function(e){e.put("lumx.date_picker.html",'<div class="lx-date">\n    <lx-text-field class="lx-date-input" label="{{ label }}" ng-click="openPicker()">\n        <input type="text" ng-model="selectedDate.formatted" ng-disabled="true">\n    </lx-text-field>\n\n    <div class="lx-date-picker">\n        <div class="lx-date-picker__current-day-of-week">\n            <span ng-if="selectedDate.date">{{ localeData.weekdays(selectedDate.date) }}</span>\n            <span ng-if="!selectedDate.date">{{ localeData.weekdays(now) }}</span>\n        </div>\n\n        <div class="lx-date-picker__current-date">\n            <div ng-if="selectedDate.date">\n                <span>{{ localeData.monthsShort(selectedDate.date) }}</span>\n                <strong>{{ selectedDate.date.format(\'DD\') }}</strong>\n                <em>{{ selectedDate.date.format(\'YYYY\') }}</em>\n            </div>\n\n            <div ng-if="!selectedDate.date">\n                <span>{{ localeData.monthsShort(now) }}</span>\n                <strong>{{ now.format(\'DD\') }}</strong>\n                <em>{{ now.format(\'YYYY\') }}</em>\n            </div>\n        </div>\n\n        <div class="lx-date-picker__nav">\n            <button class="btn btn--xs btn--teal btn--icon" lx-ripple ng-click="previousMonth()">\n                <i class="mdi mdi--chevron-left"></i>\n            </button>\n\n            <span>{{ month.format(\'MMMM YYYY\') }}</span>\n\n            <button class="btn btn--xs btn--teal btn--icon" lx-ripple ng-click="nextMonth()">\n                <i class="mdi mdi--chevron-right"></i>\n            </button>\n        </div>\n\n        <div class="lx-date-picker__days-of-week">\n            <span ng-repeat="day in daysOfWeek">{{ day }}</span>\n        </div>\n\n        <div class="lx-date-picker__days">\n            <span class="lx-date-picker__day lx-date-picker__day--is-empty"\n                  ng-repeat="x in emptyFirstDays">&nbsp;</span><!--\n\n         --><div class="lx-date-picker__day"\n                 ng-class="{ \'lx-date-picker__day--is-selected\': day.selected,\n                             \'lx-date-picker__day--is-today\': day.today }"\n                 ng-repeat="day in days">\n                <a ng-click="select(day)">{{ day ? day.format(\'D\') : \'\' }}</a>\n            </div><!--\n\n         --><span class="lx-date-picker__day lx-date-picker__day--is-empty"\n                  ng-repeat="x in emptyLastDays">&nbsp;</span>\n        </div>\n\n        <div class="lx-date-picker__actions">\n            <button class="btn btn--m btn--teal btn--flat" lx-ripple ng-click="closePicker()">Ok</button>\n        </div>\n    </div>\n</div>')}]);
 
 
+jQuery.urlParam = function(name){
+	var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+	if (results==null){
+		return null;
+	}
+	else{
+		return results[1] || 0;
+	}
+};
+
+
+
 var kurento_room = angular.module('kurento_room', ['FBAngular', 'lumx']);
 //var kurento_room = angular.module('kurento_room', ['lumx']);
 
@@ -4033,6 +4045,7 @@ kurento_room.controller('callController', function ($scope, $window, ServicePart
 	$scope.showRoom = false;
 	$scope.register = function (room) {
 
+		if(!room) { room = {}; }
 		if (false && !room)
 			ServiceParticipant.showError($window, LxNotificationService, {
 				error: {
@@ -4040,8 +4053,8 @@ kurento_room.controller('callController', function ($scope, $window, ServicePart
 				}
 			});
 
-		$scope.userName = "test"; // room.userName;
-		$scope.roomName = "testuser"; // room.roomName;
+		$scope.userName = room.userName || "test"; // room.userName;
+		$scope.roomName = room.roomName || "testuser"; // room.roomName;
 
 		var wsUri = 'wss://172.26.111.82:8443/room';
 
@@ -4065,14 +4078,10 @@ kurento_room.controller('callController', function ($scope, $window, ServicePart
 
 			var localStream = kurento.Stream(room, {
 				audio: true,
-				video : {
-					mandatory : {
-						maxWidth : 320,
-						maxFrameRate : 15,
-						minFrameRate : 15
-					}
-				}
+				video: false
 			});
+
+			localStream.videoEnabled = false;
 
 			localStream.addEventListener("access-accepted", function () {
 				room.addEventListener("room-connected", function (roomEvent) {
@@ -4088,6 +4097,7 @@ kurento_room.controller('callController', function ($scope, $window, ServicePart
 				});
 
 				room.addEventListener("stream-published", function (streamEvent) {
+					/*
 					ServiceParticipant.addLocalParticipant(localStream);
 					if (mirrorLocal && localStream.displayMyRemote()) {
 						var localVideo = kurento.Stream(room, {
@@ -4097,6 +4107,7 @@ kurento_room.controller('callController', function ($scope, $window, ServicePart
 						localVideo.mirrorLocalStream(localStream.getWrStream());
 						ServiceParticipant.addLocalMirror(localVideo);
 					}
+					*/
 				});
 
 				room.addEventListener("stream-added", function (streamEvent) {
@@ -4251,7 +4262,12 @@ kurento_room.controller('callController', function ($scope, $window, ServicePart
 		$scope.message = "";
 	};
 
-	$scope.register();
+	$scope.puserName = jQuery.urlParam('username');
+	$scope.proomName = jQuery.urlParam('roomname');
+
+	if ($scope.puserName && $scope.proomName) {
+		$scope.register({userName: $scope.puserName, roomName: $scope.proomName});
+	}
 //});
 
 //});
@@ -4311,3 +4327,5 @@ kurento_room.service('ServiceRoom', function () {
 angular.element(document).ready(function() {
 	angular.bootstrap(document, ['kurento_room']);
 });
+
+
