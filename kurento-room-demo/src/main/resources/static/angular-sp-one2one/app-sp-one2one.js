@@ -55,7 +55,7 @@ kurento_room.controller('callController', function ($scope, $window, ServicePart
 					localStream.publish();
 					ServiceRoom.setLocalStream(localStream.getWebRtcPeer());
 					for (var i = 0; i < streams.length; i++) {
-						ServiceParticipant.addParticipant(streams[i]);
+						ServiceParticipant.addParticipant(streams[i], false);
 					}
 				});
 
@@ -72,7 +72,7 @@ kurento_room.controller('callController', function ($scope, $window, ServicePart
 				});
 
 				room.addEventListener("stream-added", function (streamEvent) {
-					ServiceParticipant.addParticipant(streamEvent.stream);
+					ServiceParticipant.addParticipant(streamEvent.stream, false);
 				});
 
 				room.addEventListener("stream-removed", function (streamEvent) {

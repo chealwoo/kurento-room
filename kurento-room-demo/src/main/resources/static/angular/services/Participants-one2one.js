@@ -1,4 +1,4 @@
-function AppParticipant(stream) {
+function AppParticipant(stream, isThumbnail) {
 
     this.stream = stream;
     this.videoElement;
@@ -36,31 +36,34 @@ function AppParticipant(stream) {
         }
     }
 
-    function playVideo() {
+    function playVideo(isThumbnail) {
 
         that.thumbnailId = "video-" + stream.getGlobalID();
 
-        that.videoElement = document.createElement('div');
-        that.videoElement.setAttribute("id", that.thumbnailId);
-        that.videoElement.className = "video";
+            that.videoElement = document.createElement('div');
+            that.videoElement.setAttribute("id", that.thumbnailId);
+            that.videoElement.className = "video";
 
-        var buttonVideo = document.createElement('button');
-        buttonVideo.className = 'action btn btn--m btn--orange btn--fab mdi md-desktop-mac';
-        //FIXME this won't work, Angular can't get to bind the directive ng-click nor lx-ripple
-        buttonVideo.setAttribute("ng-click", "disconnectStream();$event.stopPropagation();");
-        buttonVideo.setAttribute("lx-ripple", "");
-        buttonVideo.style.position = "absolute";
-        buttonVideo.style.left = "75%";
-        buttonVideo.style.top = "60%";
-        buttonVideo.style.zIndex = "100";
-        that.videoElement.appendChild(buttonVideo);      
+            var buttonVideo = document.createElement('button');
+            buttonVideo.className = 'action btn btn--m btn--orange btn--fab mdi md-desktop-mac';
+            //FIXME this won't work, Angular can't get to bind the directive ng-click nor lx-ripple
+            buttonVideo.setAttribute("ng-click", "disconnectStream();$event.stopPropagation();");
+            buttonVideo.setAttribute("lx-ripple", "");
+            buttonVideo.style.position = "absolute";
+            buttonVideo.style.left = "75%";
+            buttonVideo.style.top = "60%";
+            buttonVideo.style.zIndex = "100";
+            that.videoElement.appendChild(buttonVideo);
 
-        document.getElementById("participants").appendChild(that.videoElement);
-        
-        that.stream.playThumbnail(that.thumbnailId);
+        // By default true
+        if(isThumbnail || typeof isThumbnail == "undefined") {
+            document.getElementById("participants").appendChild(that.videoElement);
+
+            that.stream.playThumbnail(that.thumbnailId);
+        }
     }
 
-    playVideo();
+    playVideo(isThumbnail);
 }
 
 function Participants() {
@@ -113,18 +116,20 @@ function Participants() {
     }
 
     this.addLocalParticipant = function (stream) {
-        localParticipant = that.addParticipant(stream);
-        mainParticipant = localParticipant;
-        mainParticipant.setMain();
+        localParticipant = that.addParticipant(stream, true, true);
+        if(!mainParticipant) {
+            mainParticipant = localParticipant;
+            mainParticipant.setMain();
+        }
     };
 
     this.addLocalMirror = function (stream) {
 		mirrorParticipant = that.addParticipant(stream);
 	};
     
-    this.addParticipant = function (stream) {
+    this.addParticipant = function (stream, isThumbnail, isLocal) {
 
-        var participant = new AppParticipant(stream);
+        var participant = new AppParticipant(stream, isThumbnail);
         participants[stream.getGlobalID()] = participant;
 
         updateVideoStyle();
@@ -133,7 +138,9 @@ function Participants() {
             updateMainParticipant(participant);
         });
 
-        //updateMainParticipant(participant);
+        if(!isLocal) {
+            updateMainParticipant(participant);
+        }
 
         return participant;
     };
