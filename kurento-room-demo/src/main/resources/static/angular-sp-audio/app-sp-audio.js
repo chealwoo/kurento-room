@@ -15,7 +15,7 @@ kurento_room.controller('callController', function ($scope, $window, ServicePart
 		$scope.userName = room.userName; // room.userName;
 		$scope.roomName = room.roomName; // room.roomName;
 
-		var wsUri = 'wss://172.26.111.82:8443/room';
+		var wsUri = 'wss://10.0.0.12:8443/room';
 
 		//show loopback stream from server
 		var displayPublished = false;
@@ -37,7 +37,9 @@ kurento_room.controller('callController', function ($scope, $window, ServicePart
 
 			var localStream = kurento.Stream(room, {
 				audio: true,
-				video : false
+				video : false,
+				recvVideo: false,
+				videoEnabled:false
 			});
 
 			localStream.addEventListener("access-accepted", function () {
@@ -58,6 +60,8 @@ kurento_room.controller('callController', function ($scope, $window, ServicePart
 					if (mirrorLocal && localStream.displayMyRemote()) {
 						var localVideo = kurento.Stream(room, {
 							video: false,
+							recvVideo:false,
+							videoEnabled:false,
 							id: "localStream"
 						});
 						localVideo.mirrorLocalStream(localStream.getWrStream());

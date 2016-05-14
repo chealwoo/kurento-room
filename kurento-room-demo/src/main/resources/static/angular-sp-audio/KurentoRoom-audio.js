@@ -513,15 +513,16 @@ function Stream(kurento, local, room, options) {
         participant.addStream(that);
         var constraints = {
             audio: true,
-            video: {
-                mandatory: {
-                    maxWidth: 640
-                },
-                optional: [
-                           {maxFrameRate: 15}, 
-                           {minFrameRate: 15}
-                           ]
-            }
+            video: false
+//            video: {
+//                mandatory: {
+//                    maxWidth: 640
+//                },
+//                optional: [
+//                           {maxFrameRate: 15},
+//                           {minFrameRate: 15}
+//                           ]
+//            }
         };
         
         getUserMedia(constraints, function (userStream) {
