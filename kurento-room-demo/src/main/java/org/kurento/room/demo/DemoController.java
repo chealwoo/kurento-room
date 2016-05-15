@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 public class DemoController {
@@ -73,16 +75,17 @@ public class DemoController {
 
 
   @RequestMapping("/getKmsReport")
-  public String report() {
+  public Set<KMSReport> report() {
     List<KmsManager.KmsLoad> kmsloads = new ArrayList<>();
     if(kmsManager instanceof FixedNKmsManager) {
       kmsloads = ((FixedNKmsManager) kmsManager).getKmsLoads();
     }
 
-    StringBuffer result = new StringBuffer("-- KMS Status Report --");
+    Set<KMSReport> kmsSet = new HashSet<>();
+
     for (KmsManager.KmsLoad kl: kmsloads) {
-      result.append(kl.getKms().getUri()).append("       ").append(kl.getLoad()).append("\n");
+      kmsSet.add(new KMSReport(kl.getKms().getUri(), kl.getKms().getLoad(), kl.getKms().getKurentoClient().getSessionId()));
     }
-    return result.toString();
+    return kmsSet;
   }
 }
