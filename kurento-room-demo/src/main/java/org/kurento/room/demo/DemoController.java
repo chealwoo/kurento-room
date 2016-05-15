@@ -3,6 +3,7 @@ package org.kurento.room.demo;
 import org.kurento.commons.PropertiesManager;
 import org.kurento.room.NotificationRoomManager;
 import org.kurento.room.exception.RoomException;
+import org.kurento.room.kms.KmsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 public class DemoController {
@@ -33,6 +37,9 @@ public class DemoController {
 
   @Autowired
   private NotificationRoomManager roomManager;
+
+  @Autowired
+  private KmsManager kmsManager;
 
   @ResponseStatus(value = HttpStatus.NOT_FOUND)
   public class ResourceNotFoundException extends RuntimeException {
@@ -62,5 +69,20 @@ public class DemoController {
   public ClientConfig clientConfig() {
     log.debug("Sending client config {}", config);
     return config;
+  }
+
+
+  @RequestMapping("/getKmsReport")
+  public String report() {
+    List<KmsManager.KmsLoad> kmsloads = new ArrayList<>();
+    if(kmsManager instanceof FixedNKmsManager) {
+      kmsloads = ((FixedNKmsManager) kmsManager).getKmsLoads();
+    }
+
+    StringBuffer result = new StringBuffer("-- KMS Status Report --");
+    for (KmsManager.KmsLoad kl: kmsloads) {
+      result.append(kl.getKms().getUri()).append("       ").append(kl.getLoad()).append("\n");
+    }
+    return result.toString();
   }
 }

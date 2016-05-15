@@ -104,7 +104,7 @@ public abstract class KmsManager implements KurentoClientProvider {
     return kmsLoads;
   }
 
-  private List<KmsLoad> getKmsLoads() {
+  public List<KmsLoad> getKmsLoads() {
     ArrayList<KmsLoad> kmsLoads = new ArrayList<>();
     for (Kms kms : kmss) {
       double load = kms.getLoad();

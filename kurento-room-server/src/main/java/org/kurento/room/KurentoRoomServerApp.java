@@ -22,6 +22,7 @@ import org.kurento.jsonrpc.internal.server.config.JsonRpcConfiguration;
 import org.kurento.jsonrpc.server.JsonRpcConfigurer;
 import org.kurento.jsonrpc.server.JsonRpcHandlerRegistry;
 import org.kurento.room.api.KurentoClientProvider;
+import org.kurento.room.internal.helper.RoomEventManager;
 import org.kurento.room.kms.FixedOneKmsManager;
 import org.kurento.room.rpc.JsonRpcNotificationService;
 import org.kurento.room.rpc.JsonRpcUserControl;
@@ -89,6 +90,11 @@ public class KurentoRoomServerApp implements JsonRpcConfigurer {
   @Bean
   public NotificationRoomManager roomManager() {
     return new NotificationRoomManager(userNotificationService, kmsManager());
+  }
+
+  @Bean
+  public RoomEventManager roomEventManager(){
+    return new RoomEventManager();
   }
 
   @Bean

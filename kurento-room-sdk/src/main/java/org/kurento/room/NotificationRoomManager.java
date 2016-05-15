@@ -32,6 +32,7 @@ import org.kurento.room.exception.RoomException;
 import org.kurento.room.exception.RoomException.Code;
 import org.kurento.room.internal.DefaultKurentoClientSessionInfo;
 import org.kurento.room.internal.DefaultNotificationRoomHandler;
+import org.kurento.room.internal.helper.RoomEventManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +51,7 @@ public class NotificationRoomManager {
 
   private NotificationRoomHandler notificationRoomHandler;
   private RoomManager internalManager;
+  private RoomEventManager roomEventManager;
 
   /**
    * Provides an instance of the room manager by setting an user notification service that will be
@@ -65,9 +67,13 @@ public class NotificationRoomManager {
       KurentoClientProvider kcProvider) {
     super();
     this.notificationRoomHandler = new DefaultNotificationRoomHandler(notificationService);
-    this.internalManager = new RoomManager(notificationRoomHandler, kcProvider);
+    this.roomEventManager = new RoomEventManager();
+    this.internalManager = new RoomManager(notificationRoomHandler, kcProvider, roomEventManager);
   }
 
+  public RoomEventManager getRoomEventManager() {
+    return roomEventManager;
+  }
   /**
    * Provides an instance of the room manager by setting an event handler.
    *
@@ -80,7 +86,8 @@ public class NotificationRoomManager {
       KurentoClientProvider kcProvider) {
     super();
     this.notificationRoomHandler = notificationRoomHandler;
-    this.internalManager = new RoomManager(notificationRoomHandler, kcProvider);
+    this.roomEventManager = new RoomEventManager();
+    this.internalManager = new RoomManager(notificationRoomHandler, kcProvider, roomEventManager);
   }
 
   // ----------------- CLIENT-ORIGINATED REQUESTS ------------

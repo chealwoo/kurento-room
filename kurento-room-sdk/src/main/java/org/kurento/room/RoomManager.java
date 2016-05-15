@@ -40,6 +40,7 @@ import org.kurento.room.exception.RoomException;
 import org.kurento.room.exception.RoomException.Code;
 import org.kurento.room.internal.Participant;
 import org.kurento.room.internal.Room;
+import org.kurento.room.internal.helper.RoomEventManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +64,8 @@ public class RoomManager {
 
   private volatile boolean closed = false;
 
+  private RoomEventManager roomEventManager;
+
   /**
    * Provides an instance of the room manager by setting a room handler and the
    * {@link KurentoClient} provider.
@@ -76,6 +79,13 @@ public class RoomManager {
     super();
     this.roomHandler = roomHandler;
     this.kcProvider = kcProvider;
+  }
+
+  public RoomManager(RoomHandler roomHandler, KurentoClientProvider kcProvider, RoomEventManager roomEventManager) {
+    super();
+    this.roomHandler = roomHandler;
+    this.kcProvider = kcProvider;
+    this.roomEventManager = roomEventManager;
   }
 
   /**
@@ -111,6 +121,8 @@ public class RoomManager {
     Room room = rooms.get(roomName);
     if (room == null && kcSessionInfo != null) {
       createRoom(kcSessionInfo);
+      KurentoClient kurentoClient = kcProvider.getKurentoClient(kcSessionInfo);
+      roomEventManager.createRoomEvent(roomName, userName, kurentoClient.getSessionId());
     }
     room = rooms.get(roomName);
     if (room == null) {
@@ -164,6 +176,8 @@ public class RoomManager {
       log.debug("No more participants in room '{}', removing it and closing it", roomName);
       room.close();
       rooms.remove(roomName);
+
+      roomEventManager.closeRoomEvent(roomName);
       log.warn("Room '{}' removed and closed", roomName);
     }
     return remainingParticipants;
@@ -874,6 +888,9 @@ public class RoomManager {
     }
     room.close();
     rooms.remove(roomName);
+
+    roomEventManager.closeRoomEvent(roomName);
+
     log.warn("Room '{}' removed and closed", roomName);
     return participants;
   }
