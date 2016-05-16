@@ -21,7 +21,7 @@
         <script src="./js/kurento-jsonrpc.js"></script>
         <script src="./js/EventEmitter.js"></script>
         <script src="./angular-sp-audio/KurentoRoom-audio.js"></script>
-        <script src="./angular/services/Participants.js"></script>
+        <script src="./angular-sp-audio/Participants-audio.js"></script>
         <!--jquery-->
         <script src="./js/jquery-2.1.1.min.js"></script>
         <script src="./js/jquery-ui.min.js"></script>
@@ -49,6 +49,9 @@
             <div id="room" ng-show="showRoom">
                 <div id="content">
                     <div id="main-video">             <!--big videos-->         </div>
+
+                    <div id="main-audio">             <!-- cover the big videos-->         </div>
+
                     <!--         <div id="logo">             <img src="img/kurento.png" />         </div>                 <div id="room-name">{{roomName}}</div> -->
                     <div class="mb" align="right" style="margin: 1em; padding-bottom: 5px" id="buttonActions">
                         <!--eliminado class action de los botones para cambiar el css-->
@@ -76,6 +79,7 @@
                         <!--fullscreen-->
                         <!--  <button class="btn btn--xl btn--blue btn--fab mdi md-chat" lx-ripple ng-click="toggleChat()" title="Chat toggle"></button> chat-->
                     </div>
+
                     <div id="participants">             <!--small videos-->         </div>
                 </div>
                 <!--CHAT-->

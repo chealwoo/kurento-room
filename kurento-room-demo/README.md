@@ -15,6 +15,8 @@ of the Room API. This API is made up of the Room SDK and the signaling
 component. For client-server communications the API uses JSON-RPC messages 
 over WebSockets.
 
+http://ui.lumapps.com/components/card
+https://design.google.com/
 
 What is Kurento
 ---------------

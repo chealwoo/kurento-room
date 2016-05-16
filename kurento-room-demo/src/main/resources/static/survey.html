@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+    <head>
+        <title>Kurento Room Demo</title>
+        <meta name="author" content="Raquel Díaz González">
+        <!-- Disable content caching -->
+        <!-- <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="0" /> -->
+    </head>
+
+    <body>
+
+    <div id="kurento_room_app" ng-app="kurento_room">
+        <div ng-controller="callController">
+
+            <div id="survey" ng-show="callStage === 'survey'" class="p+">
+                <div class="card">
+                    <div class="p+">
+                        <form name="yourForm" id="theForm" action="/survey" method="post" role="form">
+                            <strong class="fs-headline display-block">How was your call experience?</strong>
+                            <br><span class="fs-subhead tc-black-2 display-block">User Survey</span>
+
+                            <div class="paragraph fs-body-1 ml+ mt mb">
+                                <input type="hidden" name="chatId" value="">
+                                <input type="radio" name="quality" value="Excellent"> Excellent<br>
+                                <input type="radio" name="quality" value="Good"> Good<br>
+                                <input type="radio" name="quality" value="Fair"> Fair<br>
+                                <input type="radio" name="quality" value="Bad"> Bad<br>
+                            </div>
+                            <div align="center">
+                                <input type="button" name="submit" class="btn btn--l btn--green btn--raised" lx-ripple value="submit">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    </body>
+
+</html>
