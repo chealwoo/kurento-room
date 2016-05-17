@@ -14,6 +14,8 @@ kurento_room.controller('loginController', function ($scope, $http, ServiceParti
             error(function (data, status, headers, config) {
             });
 
+    $scope.clientConfig = {};
+
     $http.get('/getClientConfig').
              success(function (data, status, headers, config) {
             	console.log(JSON.stringify(data));
@@ -147,6 +149,25 @@ kurento_room.controller('loginController', function ($scope, $http, ServiceParti
         $scope.userName = "";
         $scope.roomName = "";
     };
+
+    $scope.puserName = jQuery.urlParam('username');
+    $scope.proomName = jQuery.urlParam('roomname');
+
+    if ($scope.puserName && $scope.proomName) {
+        $scope.register({userName: $scope.puserName, roomName: $scope.proomName});
+    }
+
 });
+
+jQuery.urlParam = function(name){
+    var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+    if (results==null){
+        return null;
+    }
+    else{
+        return results[1] || 0;
+    }
+};
+
 
 
