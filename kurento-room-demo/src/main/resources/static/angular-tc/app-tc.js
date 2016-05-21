@@ -1529,8 +1529,7 @@ kurento_room.service('ServiceRoom', function () {
 });
 
 
- /*
+
 angular.element(document).ready(function() {
 	angular.bootstrap(document, ['kurento_room']);
 });
-   */
