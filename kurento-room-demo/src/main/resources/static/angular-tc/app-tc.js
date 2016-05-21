@@ -1267,7 +1267,7 @@ kurento_room.controller('callController', function ($scope, $window, ServicePart
 		$scope.userName = room.userName; // room.userName;
 		$scope.roomName = room.roomName; // room.roomName;
 
-		var wsUri = 'wss://172.26.111.82:8443/room';
+		var wsUri = 'wss://10.0.0.13:8443/room';
 
 		//show loopback stream from server
 		var displayPublished = false;
