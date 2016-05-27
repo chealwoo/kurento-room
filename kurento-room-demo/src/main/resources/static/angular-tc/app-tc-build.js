@@ -12,16 +12,17 @@ jQuery(function() {
 
 
     jQuery('#kurento_room_app').ready(function(){
-        //jQuery('<link rel="stylesheet" type="text/css" href="https://bestbrands.inq.com/tagserver/kms/css/googleapis-fonts.css" >').appendTo("head");
-        //jQuery('<link rel="stylesheet" type="text/css" href="https://bestbrands.inq.com/tagserver/kms/css/jquery-ui.min.css" >').appendTo("head");
-        //jQuery('<link rel="stylesheet" type="text/css" href="https://bestbrands.inq.com/tagserver/kms/css/room.css" >').appendTo("head");
-        //jQuery('<link rel="stylesheet" type="text/css" href="https://bestbrands.inq.com/tagserver/kms/angular/lumX/dist/css/lumx.css" >').appendTo("head");
-        //jQuery('<link rel="stylesheet" type="text/css" href="https://bestbrands.inq.com/tagserver/kms/angular/lumX/dist/_bourbon.scss" >').appendTo("head");
-        //jQuery('<link rel="stylesheet" type="text/css" href="https://bestbrands.inq.com/tagserver/kms/angular/lumX/material-design-iconic-font/css/material-design-iconic-font.min.css" >').appendTo("head");
-        //jQuery('<link rel="stylesheet" type="text/css" href="https://bestbrands.inq.com/tagserver/kms/angular/lumX/dist/_neat.scss" >').appendTo("head");
-        //jQuery('<link rel="stylesheet" type="text/css" href="https://bestbrands.inq.com/tagserver/kms/angular/lumX/dist/scss/core/_core.scss" >').appendTo("head");
-        //jQuery('<link rel="stylesheet" type="text/css" href="https://bestbrands.inq.com/tagserver/kms/angular/lumX/dist/scss/main/_lumx.scss" >').appendTo("head");
+        jQuery('<link rel="stylesheet" type="text/css" href="https://bestbrands.inq.com/tagserver/kms/css/googleapis-fonts.css" >').appendTo("head");
+        jQuery('<link rel="stylesheet" type="text/css" href="https://bestbrands.inq.com/tagserver/kms/css/jquery-ui.min.css" >').appendTo("head");
+        jQuery('<link rel="stylesheet" type="text/css" href="https://bestbrands.inq.com/tagserver/kms/css/room.css" >').appendTo("head");
+        jQuery('<link rel="stylesheet" type="text/css" href="https://bestbrands.inq.com/tagserver/kms/angular/lumX/dist/css/lumx.css" >').appendTo("head");
+        jQuery('<link rel="stylesheet" type="text/css" href="https://bestbrands.inq.com/tagserver/kms/angular/lumX/dist/_bourbon.scss" >').appendTo("head");
+        jQuery('<link rel="stylesheet" type="text/css" href="https://bestbrands.inq.com/tagserver/kms/angular/lumX/material-design-iconic-font/css/material-design-iconic-font.min.css" >').appendTo("head");
+        jQuery('<link rel="stylesheet" type="text/css" href="https://bestbrands.inq.com/tagserver/kms/angular/lumX/dist/_neat.scss" >').appendTo("head");
+        jQuery('<link rel="stylesheet" type="text/css" href="https://bestbrands.inq.com/tagserver/kms/angular/lumX/dist/scss/core/_core.scss" >').appendTo("head");
+        jQuery('<link rel="stylesheet" type="text/css" href="https://bestbrands.inq.com/tagserver/kms/angular/lumX/dist/scss/main/_lumx.scss" >').appendTo("head");
 
+        alert("css are added   ");
         top.inQ.loadScript("/angular-tc/app-tc.js");
 
 
