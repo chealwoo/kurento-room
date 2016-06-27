@@ -1,15 +1,17 @@
 /*
  * (C) Copyright 2014 Kurento (http://kurento.org/)
  *
- * All rights reserved. This program and the accompanying materials are made
- * available under the terms of the GNU Lesser General Public License (LGPL)
- * version 2.1 which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/lgpl-2.1.html
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This library is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.kurento.room;
 
@@ -38,8 +40,11 @@ import org.springframework.context.annotation.Import;
 import com.google.gson.JsonArray;
 
 /**
+ * Room server application.
+ *
  * @author Ivan Gracia (izanmail@gmail.com)
  * @author Micael Gallego (micael.gallego@gmail.com)
+ * @author Radu Tom Vlad (rvlad@naevatec.com)
  * @since 1.0.0
  */
 @Import(JsonRpcConfiguration.class)
@@ -50,8 +55,6 @@ public class KurentoRoomServerApp implements JsonRpcConfigurer {
   public static final String KMSS_URIS_DEFAULT = "[ \"ws://localhost:8888/kurento\" ]";
 
   private static final Logger log = LoggerFactory.getLogger(KurentoRoomServerApp.class);
-
-  private static JsonRpcNotificationService userNotificationService = new JsonRpcNotificationService();
 
   @Bean
   @ConditionalOnMissingBean
@@ -68,15 +71,10 @@ public class KurentoRoomServerApp implements JsonRpcConfigurer {
     String firstKmsWsUri = kmsWsUris.get(0);
 
     if (firstKmsWsUri.equals("autodiscovery")) {
-
       log.info("Using autodiscovery rules to locate KMS on every pipeline");
-
       return new AutodiscoveryKurentoClientProvider();
-
     } else {
-
       log.info("Configuring Kurento Room Server to use first of the following kmss: " + kmsWsUris);
-
       return new FixedOneKmsManager(firstKmsWsUri);
     }
   }
@@ -84,12 +82,13 @@ public class KurentoRoomServerApp implements JsonRpcConfigurer {
   @Bean
   @ConditionalOnMissingBean
   public JsonRpcNotificationService notificationService() {
-    return userNotificationService;
+    return new JsonRpcNotificationService();
   }
 
   @Bean
+  @ConditionalOnMissingBean
   public NotificationRoomManager roomManager() {
-    return new NotificationRoomManager(userNotificationService, kmsManager());
+    return new NotificationRoomManager(notificationService(), kmsManager());
   }
 
   @Bean
@@ -100,18 +99,18 @@ public class KurentoRoomServerApp implements JsonRpcConfigurer {
   @Bean
   @ConditionalOnMissingBean
   public JsonRpcUserControl userControl() {
-    return new JsonRpcUserControl();
+    return new JsonRpcUserControl(roomManager());
   }
 
   @Bean
   @ConditionalOnMissingBean
   public RoomJsonRpcHandler roomHandler() {
-    return new RoomJsonRpcHandler();
+    return new RoomJsonRpcHandler(userControl(), notificationService());
   }
 
   @Override
   public void registerJsonRpcHandlers(JsonRpcHandlerRegistry registry) {
-    registry.addHandler(roomHandler(), "/room");
+    registry.addHandler(roomHandler().withPingWatchdog(true), "/room");
   }
 
   public static void main(String[] args) throws Exception {
@@ -119,6 +118,8 @@ public class KurentoRoomServerApp implements JsonRpcConfigurer {
   }
 
   public static ConfigurableApplicationContext start(String[] args) {
+    log.info("Using /dev/urandom for secure random generation");
+    System.setProperty("java.security.egd", "file:/dev/./urandom");
     return SpringApplication.run(KurentoRoomServerApp.class, args);
   }
 }

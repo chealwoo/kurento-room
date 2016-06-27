@@ -1,15 +1,17 @@
 /*
  * (C) Copyright 2015 Kurento (http://kurento.org/)
  *
- * All rights reserved. This program and the accompanying materials are made
- * available under the terms of the GNU Lesser General Public License (LGPL)
- * version 2.1 which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/lgpl-2.1.html
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This library is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.kurento.room.client;
@@ -87,18 +89,20 @@ public class ServerJsonRpcHandler extends DefaultJsonRpcHandler<JsonObject> {
           notif = participantSendMessage(transaction, request);
           break;
         default :
-          log.error("Unrecognized request {}", request);
-          break;
+          throw new Exception("Unrecognized request " + request.getMethod());
       }
     } catch (Exception e) {
       log.error("Exception processing request {}", request, e);
       transaction.sendError(e);
+      return;
     }
-    try {
-      notifications.put(notif);
-      log.debug("Enqueued notification {}", notif);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
+    if (notif != null) {
+      try {
+        notifications.put(notif);
+        log.debug("Enqueued notification {}", notif);
+      } catch (InterruptedException e) {
+        log.warn("Interrupted when enqueuing notification {}", notif, e);
+      }
     }
   }
 

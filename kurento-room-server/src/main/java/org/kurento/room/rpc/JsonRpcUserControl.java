@@ -1,15 +1,17 @@
 /*
  * (C) Copyright 2015 Kurento (http://kurento.org/)
  *
- * All rights reserved. This program and the accompanying materials are made
- * available under the terms of the GNU Lesser General Public License (LGPL)
- * version 2.1 which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/lgpl-2.1.html
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This library is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.kurento.room.rpc;
@@ -34,14 +36,18 @@ import com.google.gson.JsonObject;
 /**
  * Controls the user interactions by delegating her JSON-RPC requests to the room API.
  *
- * @author <a href="mailto:rvlad@naevatec.com">Radu Tom Vlad</a>
+ * @author Radu Tom Vlad (rvlad@naevatec.com)
  */
 public class JsonRpcUserControl {
 
   private static final Logger log = LoggerFactory.getLogger(JsonRpcUserControl.class);
 
-  @Autowired
   protected NotificationRoomManager roomManager;
+
+  @Autowired
+  public JsonRpcUserControl(NotificationRoomManager roomManager) {
+    this.roomManager = roomManager;
+  }
 
   public void joinRoom(Transaction transaction, Request<JsonObject> request,
       ParticipantRequest participantRequest) throws IOException, InterruptedException,
@@ -169,21 +175,21 @@ public class JsonRpcUserControl {
     return participantSession;
   }
 
-  protected String getStringParam(Request<JsonObject> request, String key) {
+  public static String getStringParam(Request<JsonObject> request, String key) {
     if (request.getParams() == null || request.getParams().get(key) == null) {
       throw new RuntimeException("Request element '" + key + "' is missing");
     }
     return request.getParams().get(key).getAsString();
   }
 
-  protected int getIntParam(Request<JsonObject> request, String key) {
+  public static int getIntParam(Request<JsonObject> request, String key) {
     if (request.getParams() == null || request.getParams().get(key) == null) {
       throw new RuntimeException("Request element '" + key + "' is missing");
     }
     return request.getParams().get(key).getAsInt();
   }
 
-  protected boolean getBooleanParam(Request<JsonObject> request, String key) {
+  public static boolean getBooleanParam(Request<JsonObject> request, String key) {
     if (request.getParams() == null || request.getParams().get(key) == null) {
       throw new RuntimeException("Request element '" + key + "' is missing");
     }

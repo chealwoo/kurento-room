@@ -1,15 +1,17 @@
 /*
  * (C) Copyright 2015 Kurento (http://kurento.org/)
  *
- * All rights reserved. This program and the accompanying materials are made
- * available under the terms of the GNU Lesser General Public License (LGPL)
- * version 2.1 which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/lgpl-2.1.html
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This library is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.kurento.room.demo;
@@ -20,6 +22,7 @@ import org.kurento.client.FaceOverlayFilter;
 import org.kurento.client.MediaElement;
 import org.kurento.jsonrpc.Transaction;
 import org.kurento.jsonrpc.message.Request;
+import org.kurento.room.NotificationRoomManager;
 import org.kurento.room.api.pojo.ParticipantRequest;
 import org.kurento.room.rpc.JsonRpcUserControl;
 import org.slf4j.Logger;
@@ -30,9 +33,10 @@ import com.google.gson.JsonObject;
 /**
  * User control that applies a face overlay filter when publishing video.
  *
- * @author <a href="mailto:rvlad@naevatec.com">Radu Tom Vlad</a>
+ * @author Radu Tom Vlad (rvlad@naevatec.com)
  */
 public class DemoJsonRpcUserControl extends JsonRpcUserControl {
+
   private static final String SESSION_ATTRIBUTE_HAT_FILTER = "hatFilter";
 
   private static final String CUSTOM_REQUEST_HAT_PARAM = "hat";
@@ -45,6 +49,10 @@ public class DemoJsonRpcUserControl extends JsonRpcUserControl {
   private float offsetYPercent;
   private float widthPercent;
   private float heightPercent;
+
+  public DemoJsonRpcUserControl(NotificationRoomManager roomManager) {
+    super(roomManager);
+  }
 
   public void setHatUrl(String hatUrl) {
     this.hatUrl = hatUrl;

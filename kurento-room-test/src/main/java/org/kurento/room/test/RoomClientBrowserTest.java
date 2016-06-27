@@ -1,15 +1,17 @@
 /*
  * (C) Copyright 2016 Kurento (http://kurento.org/)
  *
- * All rights reserved. This program and the accompanying materials are made
- * available under the terms of the GNU Lesser General Public License (LGPL)
- * version 2.1 which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/lgpl-2.1.html
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This library is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.kurento.room.test;
 
@@ -181,14 +183,14 @@ public abstract class RoomClientBrowserTest<W extends WebPage> extends BrowserTe
       for (final String browserKey : testScenario.getBrowserMap().keySet()) {
         Browser browser = getPage(browserKey).getBrowser();
         browser.getWebDriver().manage().window()
-        .setSize(new Dimension(WEB_TEST_BROWSER_WIDTH, WEB_TEST_BROWSER_HEIGHT));
+            .setSize(new Dimension(WEB_TEST_BROWSER_WIDTH, WEB_TEST_BROWSER_HEIGHT));
         browser
-        .getWebDriver()
-        .manage()
-        .window()
-        .setPosition(
-            new Point(col * WEB_TEST_BROWSER_WIDTH + WEB_TEST_LEFT_BAR_WIDTH, row
-                * WEB_TEST_BROWSER_HEIGHT + WEB_TEST_TOP_BAR_WIDTH));
+            .getWebDriver()
+            .manage()
+            .window()
+            .setPosition(
+                new Point(col * WEB_TEST_BROWSER_WIDTH + WEB_TEST_LEFT_BAR_WIDTH, row
+                    * WEB_TEST_BROWSER_HEIGHT + WEB_TEST_TOP_BAR_WIDTH));
         col++;
         if (col * WEB_TEST_BROWSER_WIDTH + WEB_TEST_LEFT_BAR_WIDTH > WEB_TEST_MAX_WIDTH) {
           col = 0;
@@ -211,7 +213,7 @@ public abstract class RoomClientBrowserTest<W extends WebPage> extends BrowserTe
           .scope(BrowserScope.LOCAL).build();
       test.addBrowser(getBrowserKey(i), browser);
     }
-    log.debug("{}: Num browsers: {}, webPageType: {}, test scope: {}, Browsers map keySet: {}",
+    log.debug("{}: Web browsers: {}, webPageType: {}, test scope: {}, Browsers map keySet: {}",
         caller, browsers, pageType, testScope.toString(), test.getBrowserMap().keySet());
     return Arrays.asList(new Object[][] { { test } });
   }
@@ -332,8 +334,7 @@ public abstract class RoomClientBrowserTest<W extends WebPage> extends BrowserTe
     }
   }
 
-  protected void parallelTasks(int numThreads, final String thPrefix, String taskName,
-      final Task task) {
+  public void parallelTasks(int numThreads, final String thPrefix, String taskName, final Task task) {
     ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
     ExecutorCompletionService<Void> exec = new ExecutorCompletionService<>(threadPool);
     try {
@@ -437,7 +438,7 @@ public abstract class RoomClientBrowserTest<W extends WebPage> extends BrowserTe
   public WebElement findElement(String label, Browser browser, String id) {
     try {
       return new WebDriverWait(browser.getWebDriver(), testTimeout, POLLING_LATENCY)
-      .until(ExpectedConditions.presenceOfElementLocated(By.id(id)));
+          .until(ExpectedConditions.presenceOfElementLocated(By.id(id)));
     } catch (TimeoutException e) {
       log.warn("Timeout when waiting for element {} to exist in browser {}", id, label);
       int originalTimeout = 60;
@@ -465,11 +466,11 @@ public abstract class RoomClientBrowserTest<W extends WebPage> extends BrowserTe
     int originalTimeout = 60;
     try {
       originalTimeout = browser.getTimeout();
-      log.debug("Original browser timeout (s): {}, set to 5", originalTimeout);
-      browser.setTimeout(5);
-      browser.changeTimeout(5);
+      log.debug("Original browser timeout (s): {}, set to 1", originalTimeout);
+      browser.setTimeout(1);
+      browser.changeTimeout(1);
       new WebDriverWait(browser.getWebDriver(), testTimeout, POLLING_LATENCY)
-      .until(ExpectedConditions.invisibilityOfElementLocated(By.id(id)));
+          .until(ExpectedConditions.invisibilityOfElementLocated(By.id(id)));
     } catch (org.openqa.selenium.TimeoutException e) {
       log.warn("Timeout when waiting for element {} to disappear in browser {}", id, label, e);
       throw new TimeoutException("Element with id='" + id + "' is present in page after "
@@ -492,6 +493,20 @@ public abstract class RoomClientBrowserTest<W extends WebPage> extends BrowserTe
    */
   public void waitForStream(int index, String label, int targetIndex) {
     waitForStream(index, label, getBrowserNativeStreamName(targetIndex));
+  }
+
+  /**
+   * Wait for stream of a fake user.
+   *
+   * @param index
+   *          own user index
+   * @param label
+   *          browser name (user name)
+   * @param targetIndex
+   *          the target user index
+   */
+  public void waitForStreamFake(int index, String label, int targetIndex) {
+    waitForStream(index, label, getFakeNativeStreamName(targetIndex));
   }
 
   /**
@@ -574,7 +589,7 @@ public abstract class RoomClientBrowserTest<W extends WebPage> extends BrowserTe
         && !activeFakeUsers.isEmpty() ? "& " + activeFakeUsers : "", duration);
   }
 
-  private void verifyVideoInBrowser(Browser browser, String browserLabel, String chromeName,
+  public void verifyVideoInBrowser(Browser browser, String browserLabel, String chromeName,
       String videoElementId, boolean isActive) {
     if (isActive) {
       log.debug("Verifing element {} exists in browser of {}", videoElementId, chromeName);
@@ -602,12 +617,18 @@ public abstract class RoomClientBrowserTest<W extends WebPage> extends BrowserTe
     if (!failed && !execExceptions.isEmpty()) {
       failed = true;
       StringBuffer sb = new StringBuffer();
+      log.warn("\n+-------------------------------------------------------+\n"
+          + "|   Failing because of the following test errors:       |\n"
+          + "+-------------------------------------------------------+");
       for (String exKey : execExceptions.keySet()) {
         Exception e = execExceptions.get(exKey);
-        log.error("Error on '{}'", exKey, e);
+        log.warn("Error on '{}'", exKey, e);
         sb.append(exKey).append(" - ").append(e.getMessage()).append("\n");
       }
       sb.append("Check logs for more details");
+      log.warn("\n+-------------------------------------------------------+\n"
+          + "|   End of errors list                                  |\n"
+          + "+-------------------------------------------------------+");
       Assert.fail(sb.toString());
     }
   }

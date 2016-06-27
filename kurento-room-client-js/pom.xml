@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.kurento</groupId>
 		<artifactId>kurento-room</artifactId>
-		<version>6.3.1</version>
+		<version>6.5.0</version>
 	</parent>
 
 	<artifactId>kurento-room-client-js</artifactId>
@@ -19,8 +19,8 @@
 
 	<licenses>
 		<license>
-			<name>GNU Lesser General Public License</name>
-			<url>http://www.gnu.org/licenses/lgpl-2.1.txt</url>
+			<name>Apache 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
@@ -53,13 +53,14 @@
 				<artifactId>exec-maven-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>bower</id>
-						<phase>generate-sources</phase>
+						<id>exec-bower-install</id>
+						<phase>compile</phase>
 						<goals>
 							<goal>exec</goal>
 						</goals>
 						<configuration>
 							<executable>bower</executable>
+							<workingDirectory>${project.build.directory}/classes</workingDirectory>
 							<arguments>
 								<argument>install</argument>
 								<argument>--allow-root</argument>
@@ -67,16 +68,8 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-
-			<plugin>
-				<artifactId>maven-clean-plugin</artifactId>
 				<configuration>
-					<filesets>
-						<fileset>
-							<directory>src/main/resources/static/bower_components</directory>
-						</fileset>
-					</filesets>
+					<mainClass>${start-class}</mainClass>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -100,6 +93,10 @@
 		<dependency>
 			<groupId>org.kurento</groupId>
 			<artifactId>kurento-utils-js</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.kurento</groupId>
+			<artifactId>kurento-jsonrpc-js</artifactId>
 		</dependency>
 	</dependencies>
 

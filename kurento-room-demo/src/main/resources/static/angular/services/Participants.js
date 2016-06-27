@@ -1,3 +1,19 @@
+/*
+ * (C) Copyright 2016 Kurento (http://kurento.org/)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 function AppParticipant(stream) {
 
     this.stream = stream;
@@ -53,10 +69,19 @@ function AppParticipant(stream) {
         buttonVideo.style.left = "75%";
         buttonVideo.style.top = "60%";
         buttonVideo.style.zIndex = "100";
-        that.videoElement.appendChild(buttonVideo);      
+        that.videoElement.appendChild(buttonVideo);
+        
+        var speakerSpeakingVolumen = document.createElement('div');
+        speakerSpeakingVolumen.setAttribute("id","speaker" + that.thumbnailId);
+        speakerSpeakingVolumen.className = 'btn--m btn--green btn--fab mdi md-volume-up blinking';
+        speakerSpeakingVolumen.style.position = "absolute";
+        speakerSpeakingVolumen.style.left = "3%";
+        speakerSpeakingVolumen.style.top = "60%";
+        speakerSpeakingVolumen.style.zIndex = "100";
+        speakerSpeakingVolumen.style.display = "none";
+        that.videoElement.appendChild(speakerSpeakingVolumen);
 
         document.getElementById("participants").appendChild(that.videoElement);
-        
         that.stream.playThumbnail(that.thumbnailId);
     }
 
@@ -68,11 +93,12 @@ function Participants() {
     var mainParticipant;
     var localParticipant;
     var mirrorParticipant;
-    
     var participants = {};
     var roomName;
     var that = this;
     var connected = true;
+    var displayingRelogin = false;
+    var mainSpeaker = true;
     
     this.isConnected = function() {
     	return connected;
@@ -196,8 +222,9 @@ function Participants() {
         updateVideoStyle();
     };
 
+    //only called when leaving the room
     this.removeParticipants = function () {
-
+    	connected = false;
         for (var index in participants) {
             var participant = participants[index];
             participant.remove();
@@ -207,6 +234,14 @@ function Participants() {
     this.getParticipants = function () {
         return participants;
     };
+
+    this.enableMainSpeaker = function () {
+    	mainSpeaker = true;
+    }
+
+    this.disableMainSpeaker = function () {
+    	mainSpeaker = false;
+    }
 
     // Open the chat automatically when a message is received
     function autoOpenChat() {
@@ -219,15 +254,17 @@ function Participants() {
     };
 
     this.showMessage = function (room, user, message) {
-//        console.log(JSON.stringify(mainParticipant.videoElement));
-//        console.log(JSON.stringify(localParticipant.videoElement()));
-//        console.log(user);
-
         var ul = document.getElementsByClassName("list");
-        console.log(ul);
-        console.log(localParticipant.videoElement.innerText);
-        console.log(localParticipant.videoElement.innerText.replace("_webcam", ""));
-        var localUser = localParticipant.videoElement.innerText.replace("_webcam", "");
+
+        var chatDiv = document.getElementById('chatDiv');
+        var messages = $("#messages");
+        var updateScroll = true;
+
+        if (messages.outerHeight() - chatDiv.scrollTop > chatDiv.offsetHeight) {
+        	updateScroll = false;
+        }
+        console.log(localParticipant)
+        var localUser = localParticipant.thumbnailId.replace("_webcam", "").replace("video-", "");
         if (room === roomName && user === localUser) { //me
 
             var li = document.createElement('li');
@@ -296,31 +333,49 @@ function Participants() {
 //                        </div>
 //                    </li>
         }
+        
+        if (updateScroll) {
+        	chatDiv.scrollTop = messages.outerHeight();
+        }
     };
 
     this.showError = function ($window, LxNotificationService, e) {
+        if (displayingRelogin) {
+            console.warn('Already displaying an alert that leads to relogin');
+            return false;
+          }
+        displayingRelogin = true;
+        that.removeParticipants();
         LxNotificationService.alert('Error!', e.error.message, 'Reconnect', function(answer) {
-        	connected = false;
-            $window.location.href = '#/login';
+        	displayingRelogin = false;
+            $window.location.href = '/';
         });
     };
     
     this.forceClose = function ($window, LxNotificationService, msg) {
+        if (displayingRelogin) {
+            console.warn('Already displaying an alert that leads to relogin');
+            return false;
+          }
+        displayingRelogin = true;
+        that.removeParticipants();
         LxNotificationService.alert('Warning!', msg, 'Reload', function(answer) {
-        	that.removeParticipants();
-        	connected = false;
+        	displayingRelogin = false;
             $window.location.href = '/';
         });
     };
     
     this.alertMediaError = function ($window, LxNotificationService, msg, callback) {
-    	LxNotificationService.confirm('Warning!', 'Server media error: <<' + msg
-    			+ ">>. Please reconnect.", { cancel:'Disagree', ok:'Agree' }, 
+        if (displayingRelogin) {
+            console.warn('Already displaying an alert that leads to relogin');
+            return false;
+          }
+    	LxNotificationService.confirm('Warning!', 'Server media error: ' + msg
+    			+ ". Please reconnect.", { cancel:'Disagree', ok:'Agree' }, 
     			function(answer) {
     	            console.log("User agrees upon media error: " + answer);
     	            if (answer) {
     	            	that.removeParticipants();
-    	            	connected = false;
     	                $window.location.href = '/';
     	            }
     	            if (typeof callback === "function") {
@@ -328,4 +383,21 @@ function Participants() {
     	            }
     			});
 	};
+
+    this.streamSpeaking = function(participantId) {
+    	if (participants[participantId.participantId] != undefined)
+    		document.getElementById("speaker" + participants[participantId.participantId].thumbnailId).style.display='';
+    }
+
+    this.streamStoppedSpeaking = function(participantId) {
+    	if (participants[participantId.participantId] != undefined)
+    		document.getElementById("speaker" + participants[participantId.participantId].thumbnailId).style.display = "none";
+    }
+
+    this.updateMainSpeaker = function(participantId) {
+    	if (participants[participantId.participantId] != undefined) {
+    		if (mainSpeaker)
+    			updateMainParticipant(participants[participantId.participantId]);
+    	}
+    }
 }

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.kurento</groupId>
 		<artifactId>kurento-room</artifactId>
-		<version>6.3.1</version>
+		<version>6.5.0</version>
 	</parent>
 	<artifactId>kurento-room-demo</artifactId>
 	<packaging>jar</packaging>
@@ -16,8 +16,8 @@
 
 	<licenses>
 		<license>
-			<name>GNU Lesser General Public License</name>
-			<url>http://www.gnu.org/licenses/lgpl-2.1.txt</url>
+			<name>Apache 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
@@ -27,12 +27,12 @@
 		<url>http://www.kurento.org</url>
 	</organization>
 
-    <scm>
-        <url>${kurento-room.scm.url}</url>
-        <connection>scm:git:${kurento-room.scm.connection}</connection>
-        <developerConnection>scm:git:${kurento-room.scm.connection}</developerConnection>
-        <tag>develop</tag>
-    </scm>
+	<scm>
+		<url>${kurento-room.scm.url}</url>
+		<connection>scm:git:${kurento-room.scm.connection}</connection>
+		<developerConnection>scm:git:${kurento-room.scm.connection}</developerConnection>
+		<tag>develop</tag>
+	</scm>
 
 	<developers>
 		<developer>
@@ -49,6 +49,7 @@
 	</properties>
 
 	<build>
+		<!-- Filtering resources (${label}) -->
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -59,6 +60,13 @@
 				<filtering>true</filtering>
 				<includes>
 					<include>banner.txt</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>.</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>bower.json</include>
 				</includes>
 			</resource>
 		</resources>
@@ -80,15 +88,26 @@
 					</execution>
 				</executions>
 			</plugin>
+
+			<!-- Call to bower install when compiling -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>java</id>
+						<id>exec-bower-install</id>
+						<phase>compile</phase>
 						<goals>
-							<goal>java</goal>
+							<goal>exec</goal>
 						</goals>
+						<configuration>
+							<executable>bower</executable>
+							<workingDirectory>${project.build.directory}/classes</workingDirectory>
+							<arguments>
+								<argument>install</argument>
+								<argument>--allow-root</argument>
+							</arguments>
+						</configuration>
 					</execution>
 				</executions>
 				<configuration>
@@ -162,4 +181,33 @@
 		</dependency>
 	</dependencies>
 
+	<profiles>
+		<profile>
+			<id>default</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<skipTests>true</skipTests>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-failsafe-plugin</artifactId>
+						<configuration>
+							<skipTests>true</skipTests>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>integration</id>
+		</profile>
+	</profiles>
 </project>
