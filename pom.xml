@@ -73,6 +73,7 @@
 				<module>kurento-room-client-js</module>
 				<module>kurento-room-test</module>
 				<module>kurento-room-demo</module>
+				<module>tc-webcall-router</module>
 				<module>kurento-room-basicapp</module>
 			</modules>
 		</profile>

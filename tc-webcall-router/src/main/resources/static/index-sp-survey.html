@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+    <head>
+        <title>Kurento Room Demo</title>
+        <meta name="author" content="Raquel Díaz González">
+        <!-- Disable content caching -->
+        <!-- <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="0" /> -->
+
+	<link rel="shortcut icon" href="img/kurento.png" type="image/png" />	
+        <!--css-->
+        <link type="text/css" rel="stylesheet" href="./css/googleapis-fonts.css">
+        <link type="text/css" rel="stylesheet" href="./css/jquery-ui.min.css">
+        <link type="text/css" rel="stylesheet" href="./css/room.css" />
+        <!--kurento-->
+        <script src="./js/adapter.js"></script>
+        <script src="./js/kurento-utils.js"></script>
+        <script src="./js/kurento-jsonrpc.js"></script>
+        <script src="./js/EventEmitter.js"></script>
+        <script src="./js/KurentoRoom.js"></script>
+        <script src="./angular/services/Participants.js"></script>
+        <!--jquery-->
+        <script src="./js/jquery-2.1.1.min.js"></script>
+        <script src="./js/jquery-ui.min.js"></script>
+        <!--angularjs-->
+        <script src="./js/angular.min.js"></script>
+        <script src="./angular-sp-survey/app-sp-survey.js"></script>
+        <script src="./angular/angular-fullscreen.js"></script>
+        <!--lumx-->
+        <link rel="stylesheet" href="./angular/lumX/dist/css/lumx.css">
+        <link rel="stylesheet" href="./angular/lumX/material-design-iconic-font/css/material-design-iconic-font.min.css">
+        <link rel="stylesheet" href="./angular/lumX/dist/_bourbon.scss">
+        <link rel="stylesheet" href="./angular/lumX/dist/_neat.scss">
+        <script src="./angular/lumX/dist/velocity.js"></script>
+        <script src="./angular/lumX/dist/moment-with-locales.min.js"></script>
+        <script src="./angular/lumX/dist/js/lumx.js"></script>
+        <script src="./angular/lumX/dist/scss/core/_core.scss"></script>
+        <script src="./angular/lumX/dist/scss/main/_lumx.scss"></script>
+    </head>
+
+    <body>
+
+    <div id="kurento_room_app" ng-app="kurento_room">
+        <div ng-controller="callController">
+
+            <div id="room" ng-show="callStage === 'room'">
+                <div id="content">
+                    <div id="main-video">             <!--big videos-->         </div>
+                    <!--         <div id="logo">             <img src="img/kurento.png" />         </div>                 <div id="room-name">{{roomName}}</div> -->
+                    <div class="mb" align="right" style="margin: 1em; padding-bottom: 5px" id="buttonActions">
+                        <!--eliminado class action de los botones para cambiar el css-->
+                        <!--aumentado el tamaño de los iconos con css (room.css)-->
+                        <button class="btn btn--l btn--teal btn--fab mdi md-volume-up" lx-ripple
+                                ng-click="onOffVolume()" id="buttonVolume" title="Audio toggle"></button>
+                        <!--mute audio-->
+                        <button class="btn btn--l btn--grey btn--fab mdi md-videocam" lx-ripple
+                                ng-click="onOffVideocam()" id="buttonVideocam" title="Video toggle"></button>
+                        <!--mute video-->
+                        <button class="btn btn--l btn--blue-grey btn--fab mdi md-not-interested" lx-ripple
+                                ng-click="disconnectStream()" id="buttonDisconnect"
+                                title="Disconnect media stream"></button>
+                        <!--unpublish or unsubscribe media-->
+                        <!-- <button class="btn btn--xl btn--deep-purple btn--fab mdi md-mood" lx-ripple ng-click="showHat()" id="hatButton" title="Hat toggle"></button> hat-->
+                        <button class="btn btn--l btn--orange btn--fab mdi md-desktop-mac " lx-ripple
+                                onclick="top.inQ.chatInfo.acceptCob();" title="Desktop sharing" id="cobstart"
+                                style="display:none;"></button>
+                        <!--compartir escritorio-->
+                        <button class="btn btn--l btn--red btn--fab mdi md-call-end " lx-ripple ng-click="leaveRoom()"
+                                id="buttonLeaveRoom" title="Leave room" style="display:none;"></button>
+                        <!--colgar-->
+                        <button class="btn btn--l btn--green btn--fab mdi md-fullscreen" lx-ripple
+                                ng-click="goFullscreen()" title="Fullscreen"></button>
+                        <!--fullscreen-->
+                        <!--  <button class="btn btn--xl btn--blue btn--fab mdi md-chat" lx-ripple ng-click="toggleChat()" title="Chat toggle"></button> chat-->
+                    </div>
+                    <div id="participants">             <!--small videos-->         </div>
+                </div>
+                <!--CHAT-->
+                <div class="toggler" style="width: 20%;height: 100%;float: right">
+                    <div id="effect" style="display:none">             <!--head-->
+                        <div><strong>Chat</strong>
+                            <button class="btn btn--s btn--blue btn--icon mdi md-close" lx-ripple
+                                    ng-click="toggleChat()" id="button"></button>
+                            <!--close-->             </div>
+                        <div style="height: 30em;  overflow: scroll;">
+                            <ul class="list">                     <!--chat messages with scroll-->                 </ul>
+                        </div>
+                        <!--message and button to send-->
+                        <div>
+                            <form>
+                                <lx-text-field label="Message"><input id="inputMessage" type="text" ng-model="message">
+                                </lx-text-field>
+                                <button type="submit" class="btn btn--m btn--green btn--raised" lx-ripple
+                                        ng-click="sendMessage()">Send
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="join" ng-show="callStage === 'join'">
+                <div id="join-title">Kurento Room</div>
+                <div class="card" id="join">
+                    <form role="form" ng-submit="register(room)" accept-charset="UTF-8">
+                        <div class="card__content">
+                            <lx-text-field label="Username"><input type="text" id="name" ng-model="room.userName"
+                                                                   required></lx-text-field>
+                            <div class="grid">
+                                <div class="grid__col6">
+                                    <lx-text-field label="Room"><input type="text" id="roomName"
+                                                                       ng-model="room.roomName" required>
+                                    </lx-text-field>
+                                </div>
+                                <div class="grid__col6">
+                                    <lx-select ng-model="room.roomName" placeholder="Choose an existing room"
+                                               choices="listRooms" floating-label>
+                                        <lx-select-selected> {{ $selected}}</lx-select-selected>
+                                        <lx-select-choices> {{ $choice}}</lx-select-choices>
+                                    </lx-select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card__actions">
+                            <div class="grid">
+                                <div class="grid__col6">
+                                    <button class="btn btn--l btn--blue btn--raised" lx-ripple type="button"
+                                            ng-click="clear()">Clear
+                                    </button>
+                                </div>
+                                <div class="grid__col6">
+                                    <button id="joinBtn" class="btn btn--l btn--green btn--raised" lx-ripple
+                                            type="submit">Join room!
+                                    </button>
+                                </div>
+                            </div>
+                            <br></div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="survey" ng-show="callStage === 'survey'" class="p+">
+                <div class="card">
+                    <div class="p+">
+                        <form name="yourForm" id="theForm" action="/survey" method="post" role="form">
+                        <strong class="fs-headline display-block">How was your call experience?</strong>
+                        <br><span class="fs-subhead tc-black-2 display-block">User Survey</span>
+
+                                <div class="paragraph fs-body-1 ml+ mt mb">
+                                <input type="hidden" name="chatId" value="">
+                                <input type="radio" name="quality" value="Excellent"> Excellent<br>
+                                <input type="radio" name="quality" value="Good"> Good<br>
+                                <input type="radio" name="quality" value="Fair"> Fair<br>
+                                <input type="radio" name="quality" value="Bad"> Bad<br>
+                                </div>
+                            <div align="center">
+                                <input type="button" name="submit" class="btn btn--l btn--green btn--raised" lx-ripple value="submit">
+                            </div>
+                         </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    </body>
+
+</html>
