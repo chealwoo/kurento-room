@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.inq.webcall.service;
+package com.inq.webcall.room.rpc;
 
 import java.io.IOException;
 

@@ -2,17 +2,21 @@ package com.inq.webcall;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.inq.webcall.room.InqRoomJsonRpcHandler;
 import org.kurento.commons.ConfigFileManager;
 import org.kurento.commons.PropertiesManager;
 import org.kurento.jsonrpc.JsonUtils;
+import org.kurento.jsonrpc.server.JsonRpcHandlerRegistry;
 import org.kurento.room.KurentoRoomServerApp;
-import com.inq.webcall.service.InqJsonRpcUserControl;
+import com.inq.webcall.room.rpc.InqJsonRpcUserControl;
 import com.inq.webcall.service.FixedNKmsManager;
 import org.kurento.room.kms.KmsManager;
 import org.kurento.room.rpc.JsonRpcUserControl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
 
 import java.util.List;
 
@@ -77,6 +81,17 @@ public class WebCallApplication  extends KurentoRoomServerApp {
         uc.setHatUrl(hatUrl);
         uc.setHatCoords(DEMO_HAT_COORDS);
         return uc;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public InqRoomJsonRpcHandler inqRoomHandler() {
+        return new InqRoomJsonRpcHandler(userControl(), notificationService());
+    }
+
+    @Override
+    public void registerJsonRpcHandlers(JsonRpcHandlerRegistry registry) {
+        registry.addHandler(inqRoomHandler().withPingWatchdog(true), "/room");
     }
 
     public static void main(String[] args) throws Exception {
