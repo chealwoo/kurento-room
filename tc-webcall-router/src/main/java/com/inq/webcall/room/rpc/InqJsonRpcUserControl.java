@@ -18,6 +18,7 @@ package com.inq.webcall.room.rpc;
 
 import java.io.IOException;
 
+import com.inq.webcall.room.InqNotificationRoomManager;
 import org.kurento.client.FaceOverlayFilter;
 import org.kurento.client.MediaElement;
 import org.kurento.jsonrpc.Transaction;
@@ -50,7 +51,7 @@ public class InqJsonRpcUserControl extends JsonRpcUserControl {
   private float widthPercent;
   private float heightPercent;
 
-  public InqJsonRpcUserControl(NotificationRoomManager roomManager) {
+  public InqJsonRpcUserControl(InqNotificationRoomManager roomManager) {
     super(roomManager);
   }
 

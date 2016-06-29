@@ -1,7 +1,7 @@
 package com.inq.webcall.controller;
 
+import com.inq.webcall.room.InqNotificationRoomManager;
 import org.kurento.commons.PropertiesManager;
-import org.kurento.room.NotificationRoomManager;
 import com.inq.webcall.service.FixedNKmsManager;
 import com.inq.webcall.service.KMSReport;
 import org.kurento.room.exception.RoomException;
@@ -43,7 +43,7 @@ public class AppController {
     }
 
     @Autowired
-    private NotificationRoomManager roomManager;
+    private InqNotificationRoomManager roomManager;
 
     @Autowired
     private KmsManager kmsManager;

@@ -2,6 +2,7 @@ package com.inq.webcall;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.inq.webcall.room.InqNotificationRoomManager;
 import com.inq.webcall.room.InqRoomJsonRpcHandler;
 import org.kurento.commons.ConfigFileManager;
 import org.kurento.commons.PropertiesManager;
@@ -70,7 +71,7 @@ public class WebCallApplication  extends KurentoRoomServerApp {
 
     @Override
     public JsonRpcUserControl userControl() {
-        InqJsonRpcUserControl uc = new InqJsonRpcUserControl(roomManager());
+        InqJsonRpcUserControl uc = new InqJsonRpcUserControl(inqRoomManager());
         String appServerUrl = System.getProperty("app.server.url", DEFAULT_APP_SERVER_URL);
         String hatUrl;
         if (appServerUrl.endsWith("/")) {
@@ -81,6 +82,12 @@ public class WebCallApplication  extends KurentoRoomServerApp {
         uc.setHatUrl(hatUrl);
         uc.setHatCoords(DEMO_HAT_COORDS);
         return uc;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public InqNotificationRoomManager inqRoomManager() {
+        return new InqNotificationRoomManager(notificationService(), kmsManager());
     }
 
     @Bean
