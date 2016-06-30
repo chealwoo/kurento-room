@@ -18,6 +18,7 @@ package com.inq.webcall.room;
 
 import com.inq.webcall.room.internal.InqParticipant;
 import com.inq.webcall.room.internal.InqRoom;
+import com.inq.webcall.util.log.InqEtlMgr;
 import org.kurento.client.*;
 import org.kurento.room.api.KurentoClientProvider;
 import org.kurento.room.api.KurentoClientSessionInfo;
@@ -27,8 +28,6 @@ import org.kurento.room.api.pojo.UserParticipant;
 import org.kurento.room.endpoint.SdpType;
 import org.kurento.room.exception.RoomException;
 import org.kurento.room.exception.RoomException.Code;
-import org.kurento.room.internal.Participant;
-import org.kurento.room.internal.Room;
 import org.kurento.room.internal.helper.RoomEventManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,6 +106,8 @@ public class InqRoomManager {
                 userName, roomName, webParticipant, kcSessionInfo != null
                         ? kcSessionInfo.getRoomName()
                         : null, participantId);
+
+        InqEtlMgr.logWebCallRequested(roomName, userName);
 
         InqRoom room = rooms.get(roomName);
         if (room == null && kcSessionInfo != null) {
