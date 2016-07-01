@@ -1,9 +1,12 @@
 {
    "kms": {
-      "uris": ["ws://172.26.111.99:8888/kurento"]
+      "uris": ["ws://172.26.111.153:8888/kurento"]
    },
    "app": {
       "uri": "https://172.26.111.53:8443/"
+   },
+   "repository": {
+      "uri": "http://172.26.111.99:7676"
    },
    "kurento": {
       "client": {

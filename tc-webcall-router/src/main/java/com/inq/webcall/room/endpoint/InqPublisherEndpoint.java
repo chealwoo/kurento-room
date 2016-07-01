@@ -55,6 +55,11 @@ public class InqPublisherEndpoint extends InqMediaEndpoint {
     super(web, owner, endpointName, pipeline, log);
   }
 
+  public InqPublisherEndpoint(boolean web, InqParticipant owner, String endpointName,
+                              MediaPipeline pipeline, RecorderEndpoint recorder) {
+    super(web, owner, endpointName, pipeline, log, recorder);
+  }
+
   @Override
   protected void internalEndpointInitialization(final CountDownLatch endpointLatch) {
     super.internalEndpointInitialization(endpointLatch);

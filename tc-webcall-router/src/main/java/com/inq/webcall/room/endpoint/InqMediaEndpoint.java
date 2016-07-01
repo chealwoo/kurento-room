@@ -41,6 +41,7 @@ public abstract class InqMediaEndpoint {
   private boolean web = false;
 
   private WebRtcEndpoint webEndpoint = null;
+  private RecorderEndpoint recorder = null;
   private RtpEndpoint endpoint = null;
 
   private InqParticipant owner;
@@ -71,6 +72,20 @@ public abstract class InqMediaEndpoint {
     this.owner = owner;
     this.setEndpointName(endpointName);
     this.setMediaPipeline(pipeline);
+  }
+
+  public InqMediaEndpoint(boolean web, InqParticipant owner, String endpointName, MediaPipeline pipeline,
+                          Logger log, RecorderEndpoint recorder) {
+    if (log == null) {
+      InqMediaEndpoint.log = LoggerFactory.getLogger(InqMediaEndpoint.class);
+    } else {
+      InqMediaEndpoint.log = log;
+    }
+    this.web = web;
+    this.owner = owner;
+    this.setEndpointName(endpointName);
+    this.setMediaPipeline(pipeline);
+    this.recorder = recorder;
   }
 
   public boolean isWeb() {
@@ -225,6 +240,13 @@ public abstract class InqMediaEndpoint {
         @Override
         public void onSuccess(WebRtcEndpoint result) throws Exception {
           webEndpoint = result;
+          // Adding recorder
+          if(recorder != null) {
+            log.debug("recorder has been connected to endpoint");
+            webEndpoint.connect(recorder);
+          } else {
+            log.warn("Recorder is nul");
+          }
           endpointLatch.countDown();
           log.trace("EP {}: Created a new WebRtcEndpoint", endpointName);
           endpointSubscription = registerElemErrListener(webEndpoint);

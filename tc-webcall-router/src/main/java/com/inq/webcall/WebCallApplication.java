@@ -8,6 +8,8 @@ import org.kurento.commons.ConfigFileManager;
 import org.kurento.commons.PropertiesManager;
 import org.kurento.jsonrpc.JsonUtils;
 import org.kurento.jsonrpc.server.JsonRpcHandlerRegistry;
+import org.kurento.repository.RepositoryClient;
+import org.kurento.repository.RepositoryClientProvider;
 import org.kurento.room.KurentoRoomServerApp;
 import com.inq.webcall.room.rpc.InqJsonRpcUserControl;
 import com.inq.webcall.service.FixedNKmsManager;
@@ -55,6 +57,11 @@ public class WebCallApplication  extends KurentoRoomServerApp {
     private final JsonObject DEMO_HAT_COORDS = PropertiesManager.getPropertyJson("demo.hatCoords",
             DEFAULT_HAT_COORDS.toString(), JsonObject.class);
 
+    private static final String DEFAULT_REPOSITORY_SERVER_URI = "http://172.26.111.99:7676";
+
+    public static final String REPOSITORY_SERVER_URI = PropertiesManager.getProperty("repository.uri",
+            DEFAULT_REPOSITORY_SERVER_URI);
+
     @Override
     public KmsManager kmsManager() {
         JsonArray kmsUris = getPropertyJson(KurentoRoomServerApp.KMSS_URIS_PROPERTY,
@@ -82,6 +89,19 @@ public class WebCallApplication  extends KurentoRoomServerApp {
         uc.setHatUrl(hatUrl);
         uc.setHatCoords(DEMO_HAT_COORDS);
         return uc;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public RepositoryClient repositoryServiceProvider() {
+        log.debug("REPOSITORY_SERVER_URI {}", REPOSITORY_SERVER_URI);
+        RepositoryClient repositoryClient =
+         REPOSITORY_SERVER_URI.startsWith("file://") ? null
+                : RepositoryClientProvider.create(REPOSITORY_SERVER_URI);
+        if(repositoryClient == null) {
+            log.warn("repositoryClient is null with {}", REPOSITORY_SERVER_URI);
+        }
+        return repositoryClient;
     }
 
     @Bean

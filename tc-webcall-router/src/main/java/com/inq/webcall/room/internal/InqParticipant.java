@@ -15,10 +15,14 @@
  */
 package com.inq.webcall.room.internal;
 
+import com.inq.webcall.WebCallApplication;
 import com.inq.webcall.room.endpoint.InqPublisherEndpoint;
 import com.inq.webcall.room.endpoint.InqSubscriberEndpoint;
 import org.kurento.client.*;
 import org.kurento.client.internal.server.KurentoServerException;
+import org.kurento.repository.RepositoryClient;
+import org.kurento.repository.RepositoryClientProvider;
+import org.kurento.repository.service.pojo.RepositoryItemRecorder;
 import org.kurento.room.api.MutedMediaType;
 import org.kurento.room.endpoint.PublisherEndpoint;
 import org.kurento.room.endpoint.SdpType;
@@ -28,9 +32,10 @@ import org.kurento.room.exception.RoomException.Code;
 import org.kurento.room.internal.Room;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
@@ -46,6 +51,11 @@ public class InqParticipant {
 
     private static final Logger log = LoggerFactory.getLogger(InqParticipant.class);
 
+    // slightly larger timeout
+    private static final int REPOSITORY_DISCONNECT_TIMEOUT = 5500;
+
+    private static final String RECORDING_EXT = ".webm";
+
     private boolean web = false;
 
     private String id;
@@ -53,7 +63,13 @@ public class InqParticipant {
 
     private final InqRoom room;
 
+    @Autowired
+    private RepositoryClient repositoryClient;
+
+    private final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-S");
+
     private final MediaPipeline pipeline;
+    private RepositoryItemRecorder repoItem;
 
     private InqPublisherEndpoint publisher;
     private CountDownLatch endPointLatch = new CountDownLatch(1);
@@ -69,7 +85,41 @@ public class InqParticipant {
         this.name = name;
         this.pipeline = pipeline;
         this.room = room;
-        this.publisher = new InqPublisherEndpoint(web, this, name, pipeline);
+
+        log.info("Creating participant with name {}", this.name);
+        if (repositoryClient == null) {
+            log.info("repositoryClient is null and try to reinitate it.");
+            repositoryClient = RepositoryClientProvider.create(WebCallApplication.REPOSITORY_SERVER_URI);
+        }
+        if (repositoryClient != null) {
+            log.info("create repoItem with repositoryClient room {}, name {}", this.room.getName(), this.name);
+            try {
+                Map<String, String> metadata = new HashMap<>();
+                metadata.put("chatId", this.room.getName());
+                metadata.put("participant", this.name);
+                this.repoItem = repositoryClient.createRepositoryItem(metadata);
+            } catch (Exception e) {
+                log.warn("Unable to create kurento repository items", e);
+            }
+        } else {
+            log.info("create repoItem as file room {}, name {}", this.room.getName(), this.name);
+            String now = df.format(new Date());
+            String filePath = WebCallApplication.REPOSITORY_SERVER_URI + "/" + now + RECORDING_EXT;
+            this.repoItem = new RepositoryItemRecorder();
+            this.repoItem.setId(now);
+            this.repoItem.setUrl(filePath);
+        }
+        log.info("Media will be recorded {}by KMS: id={} , url={}",
+                (repositoryClient == null ? "locally " : ""), this.repoItem.getId(), this.repoItem.getUrl());
+
+
+        RecorderEndpoint recorder = new RecorderEndpoint.Builder(pipeline, this.repoItem.getUrl())
+                .withMediaProfile(MediaProfileSpecType.WEBM).build();
+
+        this.publisher = new InqPublisherEndpoint(web, this, name, pipeline, recorder);
+
+      //  this.publisher.connect(recorder);
+
 
         for (InqParticipant other : room.getParticipants()) {
             if (!other.getName().equals(this.name)) {
@@ -120,6 +170,14 @@ public class InqParticipant {
 
     public MediaPipeline getPipeline() {
         return pipeline;
+    }
+
+    public RepositoryItemRecorder getRepoItem() {
+        return repoItem;
+    }
+
+    public void setRepoItem(RepositoryItemRecorder repoItem) {
+        this.repoItem = repoItem;
     }
 
     public boolean isClosed() {
