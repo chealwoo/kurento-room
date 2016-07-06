@@ -425,6 +425,11 @@ public abstract class InqMediaEndpoint {
         owner.sendIceCandidate(endpointName, event.getCandidate());
       }
     });
+
+    if(recorder != null) {
+      log.debug("*** Start recorder recording");
+      recorder.record();
+    }
   }
 
   /**
