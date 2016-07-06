@@ -259,6 +259,7 @@ public abstract class InqMediaEndpoint {
           if(hubPort != null) {
             log.debug("hubPort has been connected to endpoint");
             webEndpoint.connect(hubPort);
+            hubPort.connect(webEndpoint);
           } else {
             log.warn("hubPort is nul");
           }
@@ -266,6 +267,10 @@ public abstract class InqMediaEndpoint {
           if(recorder != null) {
             log.debug("recorder has been connected to endpoint");
             webEndpoint.connect(recorder);
+            if(hubPort != null) {
+              recorder.connect(hubPort);
+              hubPort.connect(recorder);
+            }
           } else {
             log.warn("Recorder is nul");
           }
