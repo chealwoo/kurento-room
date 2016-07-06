@@ -91,11 +91,12 @@ public class FixedNKmsManager extends KmsManager {
           "User cannot create a new room");
     }
     Kms kms = null;
-    String type = "";
-    boolean hq = isUserHQ(userName);
-    if (hq) {
+//    String type = "";
+//    boolean hq = isUserHQ(userName);
+// No special
+//    if (hq) {
       kms = getLessLoadedKms();
-    } else {
+/*    } else {
       kms = getNextLessLoadedKms();
       if (!kms.allowMoreElements()) {
         kms = getLessLoadedKms();
@@ -103,13 +104,15 @@ public class FixedNKmsManager extends KmsManager {
         type = "next ";
       }
     }
+*/
     if (!kms.allowMoreElements()) {
-      log.debug("Was trying Kms which has no resources left: highQ={}, "
-          + "{}less loaded KMS, uri={}", hq, type, kms.getUri());
+//      log.debug("Was trying Kms which has no resources left: highQ={}, " + "{}less loaded KMS, uri={}", hq, type, kms.getUri());
+      log.debug("Was trying Kms which has no resources left: less loaded KMS, uri={}", kms.getUri());
       throw new RoomException(RoomException.Code.ROOM_CANNOT_BE_CREATED_ERROR_CODE,
           "No resources left to create new room");
     }
-    log.debug("Offering Kms: highQ={}, {}less loaded KMS, uri={}", hq, type, kms.getUri());
+//    log.debug("Offering Kms: highQ={}, {}less loaded KMS, uri={}", hq, type, kms.getUri());
+    log.debug("Offering Kms: less loaded KMS, uri={}", kms.getUri());
     return kms;
   }
 
