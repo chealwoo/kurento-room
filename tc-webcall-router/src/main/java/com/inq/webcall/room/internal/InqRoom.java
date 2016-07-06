@@ -61,6 +61,8 @@ public class InqRoom {
     private volatile boolean pipelineReleased = false;
     private boolean destroyKurentoClient;
 
+    private Composite composite = null;
+
     public InqRoom(String roomName, KurentoClient kurentoClient, RoomHandler roomHandler,
                    boolean destroyKurentoClient) {
         this.name = roomName;
@@ -267,6 +269,7 @@ public class InqRoom {
                         pipeline = result;
                         pipelineLatch.countDown();
                         log.debug("ROOM {}: Created MediaPipeline", name);
+                        composite = new Composite.Builder(pipeline).build();
                     }
 
                     @Override
@@ -316,5 +319,9 @@ public class InqRoom {
                 }
             });
         }
+    }
+
+    public Composite getComposite() {
+        return composite;
     }
 }

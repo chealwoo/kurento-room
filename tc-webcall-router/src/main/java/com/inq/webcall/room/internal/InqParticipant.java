@@ -96,7 +96,7 @@ public class InqParticipant {
             try {
                 Map<String, String> metadata = new HashMap<>();
                 metadata.put("chatId", this.room.getName());
-                metadata.put("participant", this.name);
+                // metadata.put("participant", this.name);
                 this.repoItem = repositoryClient.createRepositoryItem(metadata);
             } catch (Exception e) {
                 log.warn("Unable to create kurento repository items", e);
@@ -116,7 +116,11 @@ public class InqParticipant {
         RecorderEndpoint recorder = new RecorderEndpoint.Builder(pipeline, this.repoItem.getUrl())
                 .withMediaProfile(MediaProfileSpecType.WEBM).build();
 
-        this.publisher = new InqPublisherEndpoint(web, this, name, pipeline, recorder);
+        HubPort hubPort = new HubPort.Builder(room.getComposite()).build();
+
+        this.publisher = new InqPublisherEndpoint(web, this, name, pipeline, recorder, hubPort);
+
+       // publisher.getWebEndpoint().connect(hubPort);
 
       //  this.publisher.connect(recorder);
 
