@@ -15,16 +15,20 @@
  */
 package com.inq.webcall.room.internal;
 
+import com.inq.webcall.WebCallApplication;
 import org.kurento.client.*;
+import org.kurento.client.EventListener;
+import org.kurento.repository.RepositoryClient;
+import org.kurento.repository.RepositoryClientProvider;
+import org.kurento.repository.service.pojo.RepositoryItemRecorder;
 import org.kurento.room.api.RoomHandler;
 import org.kurento.room.exception.RoomException;
 import org.kurento.room.exception.RoomException.Code;
-import org.kurento.room.internal.Participant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collection;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
@@ -62,6 +66,13 @@ public class InqRoom {
     private boolean destroyKurentoClient;
 
     private Composite composite = null;
+    private static final String RECORDING_EXT = ".webm";
+
+    @Autowired
+    private RepositoryClient repositoryClient;
+    private RepositoryItemRecorder repoItem;
+    private RecorderEndpoint recorder;
+    private HubPort hubPort;
 
     public InqRoom(String roomName, KurentoClient kurentoClient, RoomHandler roomHandler,
                    boolean destroyKurentoClient) {
@@ -106,6 +117,71 @@ public class InqRoom {
                 webParticipant));
 
         log.info("ROOM {}: Added participant {}", name, userName);
+
+        /*
+        Try composite recording.
+         */
+        if (participants.size() >= 2 && false) {
+            createRecorder(pipeline);
+
+//            for(InqParticipant part: participants.values()) {
+//                part.connectHubPort(part.getPublisher().getWebEndpoint());
+//                // owner.connectHubPort(webEndpoint);
+//            }
+
+            HubPort hubPort = new HubPort.Builder(composite).build();
+            hubPort.connect(recorder);
+
+            log.info("Room composite Media will be recorded {}by KMS: id={} , url={}",
+                    (repositoryClient == null ? "locally " : ""), this.repoItem.getId(), this.repoItem.getUrl());
+
+            recorder.record();
+        }
+    }
+
+    /**
+     *
+     * @param pipeline
+     */
+    private void createRecorder(MediaPipeline pipeline){
+
+        if(this.recorder == null) {
+            try {
+                if (repositoryClient == null) {
+                    log.info("repositoryClient is null and try to reinitate it.");
+                    repositoryClient = RepositoryClientProvider.create(WebCallApplication.REPOSITORY_SERVER_URI);
+                }
+
+                if (repositoryClient != null) {
+                    log.info("create repoItem with repositoryClient room name {}", name);
+                    try {
+                        Map<String, String> metadata = new HashMap<>();
+                        metadata.put("chatId", name);
+                        // metadata.put("participant", this.name);
+                        this.repoItem = repositoryClient.createRepositoryItem(metadata);
+                    } catch (Exception e) {
+                        log.warn("Unable to create kurento repository items", e);
+                    }
+                } else {
+                    log.info("create repoItem as file room name {}", this.name);
+                    String now = InqParticipant.df.format(new Date());
+                    String filePath = WebCallApplication.REPOSITORY_SERVER_URI + "/" + now + RECORDING_EXT;
+                    this.repoItem = new RepositoryItemRecorder();
+                    this.repoItem.setId(now);
+                    this.repoItem.setUrl(filePath);
+                }
+                log.info("Media will be recorded {}by KMS: id={} , url={}",
+                        (repositoryClient == null ? "locally " : ""), this.repoItem.getId(), this.repoItem.getUrl());
+
+                this.recorder = new RecorderEndpoint.Builder(pipeline, this.repoItem.getUrl())
+                        .withMediaProfile(MediaProfileSpecType.WEBM).build();
+                log.info("recorder has been created for participant {}", this.name);
+            } catch (Exception e) {
+                log.error("Fail to create recorder of participant id={}; " + e.getMessage(), name, e);
+            }
+        } else {
+            recorder.stop();
+        }
     }
 
     public void newPublisher(InqParticipant participant) {

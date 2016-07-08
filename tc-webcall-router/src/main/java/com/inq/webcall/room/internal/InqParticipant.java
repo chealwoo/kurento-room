@@ -24,7 +24,6 @@ import org.kurento.repository.RepositoryClient;
 import org.kurento.repository.RepositoryClientProvider;
 import org.kurento.repository.service.pojo.RepositoryItemRecorder;
 import org.kurento.room.api.MutedMediaType;
-import org.kurento.room.endpoint.PublisherEndpoint;
 import org.kurento.room.endpoint.SdpType;
 import org.kurento.room.endpoint.SubscriberEndpoint;
 import org.kurento.room.exception.RoomException;
@@ -54,7 +53,8 @@ public class InqParticipant {
     // slightly larger timeout
     private static final int REPOSITORY_DISCONNECT_TIMEOUT = 5500;
 
-    private static final String RECORDING_EXT = ".webm";
+    public static final String RECORDING_EXT = ".webm";
+    public final static SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-S");
 
     private boolean web = false;
 
@@ -65,11 +65,11 @@ public class InqParticipant {
 
     @Autowired
     private RepositoryClient repositoryClient;
-
-    private final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-S");
+    private RepositoryItemRecorder repoItem;
+    private RecorderEndpoint recorder;
+    private HubPort hubPort;
 
     private final MediaPipeline pipeline;
-    private RepositoryItemRecorder repoItem;
 
     private InqPublisherEndpoint publisher;
     private CountDownLatch endPointLatch = new CountDownLatch(1);
@@ -86,49 +86,129 @@ public class InqParticipant {
         this.pipeline = pipeline;
         this.room = room;
 
-        log.info("Creating participant with name {}", this.name);
-        if (repositoryClient == null) {
-            log.info("repositoryClient is null and try to reinitate it.");
-            repositoryClient = RepositoryClientProvider.create(WebCallApplication.REPOSITORY_SERVER_URI);
-        }
-        if (repositoryClient != null) {
-            log.info("create repoItem with repositoryClient room {}, name {}", this.room.getName(), this.name);
-            try {
-                Map<String, String> metadata = new HashMap<>();
-                metadata.put("chatId", this.room.getName());
-                // metadata.put("participant", this.name);
-                this.repoItem = repositoryClient.createRepositoryItem(metadata);
-            } catch (Exception e) {
-                log.warn("Unable to create kurento repository items", e);
-            }
-        } else {
-            log.info("create repoItem as file room {}, name {}", this.room.getName(), this.name);
-            String now = df.format(new Date());
-            String filePath = WebCallApplication.REPOSITORY_SERVER_URI + "/" + now + RECORDING_EXT;
-            this.repoItem = new RepositoryItemRecorder();
-            this.repoItem.setId(now);
-            this.repoItem.setUrl(filePath);
-        }
-        log.info("Media will be recorded {}by KMS: id={} , url={}",
-                (repositoryClient == null ? "locally " : ""), this.repoItem.getId(), this.repoItem.getUrl());
+        createRecorder(pipeline);
 
+        createHubPort();
 
-        RecorderEndpoint recorder = new RecorderEndpoint.Builder(pipeline, this.repoItem.getUrl())
-                .withMediaProfile(MediaProfileSpecType.WEBM).build();
-
-        HubPort hubPort = new HubPort.Builder(room.getComposite()).build();
-
-        this.publisher = new InqPublisherEndpoint(web, this, name, pipeline, recorder, hubPort);
+        this.publisher = new InqPublisherEndpoint(web, this, name, pipeline);
 
        // publisher.getWebEndpoint().connect(hubPort);
 
       //  this.publisher.connect(recorder);
 
-
         for (InqParticipant other : room.getParticipants()) {
             if (!other.getName().equals(this.name)) {
                 getNewOrExistingSubscriber(other.getName());
             }
+        }
+    }
+
+    /**
+     *
+     * @param pipeline
+     */
+    private void createRecorder(MediaPipeline pipeline){
+
+        try {
+            if (repositoryClient == null) {
+                log.info("PARTICIPANT [{}] repositoryClient is null and try to reinitate it.", name);
+                repositoryClient = RepositoryClientProvider.create(WebCallApplication.REPOSITORY_SERVER_URI);
+            }
+
+            if (repositoryClient != null) {
+                log.info("PARTICIPANT [{}] in room {} create repoItem with repositoryClient with repository", this.name, this.room.getName());
+                try {
+                    Map<String, String> metadata = new HashMap<>();
+                    metadata.put("chatId", this.room.getName());
+                    // metadata.put("participant", this.name);
+                    this.repoItem = repositoryClient.createRepositoryItem(metadata);
+                } catch (Exception e) {
+                    log.warn("Unable to create kurento repository items", e);
+                }
+            } else {
+                log.info("PARTICIPANT [{}] in room {} create repoItem with repositoryClient in file", this.name, this.room.getName());
+                String now = df.format(new Date());
+                String filePath = WebCallApplication.REPOSITORY_SERVER_URI + "/" + now + RECORDING_EXT;
+                this.repoItem = new RepositoryItemRecorder();
+                this.repoItem.setId(now);
+                this.repoItem.setUrl(filePath);
+            }
+            log.info("Media will be recorded {}by KMS: id={} , url={}",
+                    (repositoryClient == null ? "locally " : ""), this.repoItem.getId(), this.repoItem.getUrl());
+
+            this.recorder = new RecorderEndpoint.Builder(pipeline, this.repoItem.getUrl())
+                    .withMediaProfile(MediaProfileSpecType.WEBM).build();
+            log.info("recorder has been created for participant {}", this.name);
+        } catch (Exception e) {
+            log.error("Fail to create recorder of participant id={}; " + e.getMessage(), name, e);
+        }
+    }
+
+    /**
+     *
+     * @param webRtcEndpoint
+     */
+    public void connectRecorder(WebRtcEndpoint webRtcEndpoint) {
+        try {
+            log.info("Participant {} connect recorder ", name);
+            webRtcEndpoint.connect(webRtcEndpoint);
+            webRtcEndpoint.connect(this.recorder);
+            this.recorder.connect(webRtcEndpoint);
+        } catch (Exception e) {
+            log.error("Fail to connect webRtcEndpoint to recorder in participant id={}; " + e.getMessage(), name, e);
+        }
+    }
+
+
+    /**
+     *
+     * @param webRtcEndpoint
+     */
+    private boolean isRecording = false;
+    public void startRecorder() {
+        try {
+            if(!isRecording) {
+                log.info("Participant {} start recording ", name);
+                this.recorder.record();
+                isRecording = true;
+            } else {
+                log.info("Participant {} already recording ", name);
+            }
+        } catch (Exception e) {
+            log.error("Fail to connect webRtcEndpoint to recorder in participant id={}; " + e.getMessage(), name, e);
+        }
+    }
+
+    public void stopRecorder(WebRtcEndpoint webRtcEndpoint) {
+        try {
+            if(isRecording) {
+                log.info("Participant {} stop recording ", name);
+                this.recorder.stop();
+                isRecording = false;
+            } else {
+                log.info("Participant {} is not recording ", name);
+            }
+        } catch (Exception e) {
+            log.error("Fail to connect webRtcEndpoint to recorder in participant id={}; " + e.getMessage(), name, e);
+        }
+    }
+
+    /**
+     *
+     */
+    private void createHubPort() {
+        try {
+            this.hubPort = new HubPort.Builder(room.getComposite()).build();
+        } catch (Exception e) {
+            log.error("Fail to create hubPort of participant id={} " + e.getMessage(), name, e);
+        }
+    }
+
+    public void connectHubPort(WebRtcEndpoint webRtcEndpoint) {
+        try {
+            webRtcEndpoint.connect(this.hubPort);
+        } catch (Exception e) {
+            log.error("Fail to connect webRtcEndpoint.connect(hubPort) in participant id={} " + e.getMessage(), name, e);
         }
     }
 
@@ -530,5 +610,13 @@ public class InqParticipant {
             return false;
         }
         return true;
+    }
+
+    public RecorderEndpoint getRecorder() {
+        return recorder;
+    }
+
+    public HubPort getHubPort() {
+        return hubPort;
     }
 }

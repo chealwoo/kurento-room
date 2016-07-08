@@ -57,7 +57,7 @@ public class WebCallApplication  extends KurentoRoomServerApp {
     private final JsonObject DEMO_HAT_COORDS = PropertiesManager.getPropertyJson("demo.hatCoords",
             DEFAULT_HAT_COORDS.toString(), JsonObject.class);
 
-    private static final String DEFAULT_REPOSITORY_SERVER_URI = "http://172.26.111.99:7676";
+    private static final String DEFAULT_REPOSITORY_SERVER_URI = "http://kms-repo.inq.com:7676";
 
     public static final String REPOSITORY_SERVER_URI = PropertiesManager.getProperty("repository.uri",
             DEFAULT_REPOSITORY_SERVER_URI);

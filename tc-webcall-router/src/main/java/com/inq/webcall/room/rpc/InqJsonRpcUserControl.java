@@ -57,7 +57,7 @@ public class InqJsonRpcUserControl extends JsonRpcUserControl {
 
   public void setHatUrl(String hatUrl) {
     this.hatUrl = hatUrl;
-    log.info("Hat URL: {}", hatUrl);
+//    log.info("Hat URL: {}", hatUrl);
   }
 
   public void setHatCoords(JsonObject hatCoords) {
@@ -73,9 +73,9 @@ public class InqJsonRpcUserControl extends JsonRpcUserControl {
     if (hatCoords.get("heightPercent") != null) {
       heightPercent = hatCoords.get("heightPercent").getAsFloat();
     }
-    log.info("Hat coords:\n\toffsetXPercent = {}\n\toffsetYPercent = {}"
-        + "\n\twidthPercent = {}\n\theightPercent = {}", offsetXPercent, offsetYPercent,
-        widthPercent, heightPercent);
+//    log.info("Hat coords:\n\toffsetXPercent = {}\n\toffsetYPercent = {}"
+//        + "\n\twidthPercent = {}\n\theightPercent = {}", offsetXPercent, offsetYPercent,
+//        widthPercent, heightPercent);
   }
 
   @Override

@@ -16,16 +16,25 @@
 
 package com.inq.webcall.room.endpoint;
 
+import com.inq.webcall.WebCallApplication;
 import com.inq.webcall.room.internal.InqParticipant;
 import org.kurento.client.*;
+import org.kurento.repository.RepositoryClient;
+import org.kurento.repository.RepositoryClientProvider;
+import org.kurento.repository.service.pojo.RepositoryItemRecorder;
 import org.kurento.room.api.MutedMediaType;
 import org.kurento.room.exception.RoomException;
 import org.kurento.room.exception.RoomException.Code;
 import org.kurento.room.internal.Participant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -41,8 +50,7 @@ public abstract class InqMediaEndpoint {
   private boolean web = false;
 
   private WebRtcEndpoint webEndpoint = null;
-  private RecorderEndpoint recorder = null;
-  private HubPort hubPort = null;
+
   private RtpEndpoint endpoint = null;
 
   private InqParticipant owner;
@@ -73,35 +81,6 @@ public abstract class InqMediaEndpoint {
     this.owner = owner;
     this.setEndpointName(endpointName);
     this.setMediaPipeline(pipeline);
-  }
-
-  public InqMediaEndpoint(boolean web, InqParticipant owner, String endpointName, MediaPipeline pipeline,
-                          Logger log, RecorderEndpoint recorder) {
-    if (log == null) {
-      InqMediaEndpoint.log = LoggerFactory.getLogger(InqMediaEndpoint.class);
-    } else {
-      InqMediaEndpoint.log = log;
-    }
-    this.web = web;
-    this.owner = owner;
-    this.setEndpointName(endpointName);
-    this.setMediaPipeline(pipeline);
-    this.recorder = recorder;
-  }
-
-  public InqMediaEndpoint(boolean web, InqParticipant owner, String endpointName, MediaPipeline pipeline,
-                          Logger log, RecorderEndpoint recorder, HubPort hubPort) {
-    if (log == null) {
-      InqMediaEndpoint.log = LoggerFactory.getLogger(InqMediaEndpoint.class);
-    } else {
-      InqMediaEndpoint.log = log;
-    }
-    this.web = web;
-    this.owner = owner;
-    this.setEndpointName(endpointName);
-    this.setMediaPipeline(pipeline);
-    this.recorder = recorder;
-    this.hubPort = hubPort;
   }
 
   public boolean isWeb() {
@@ -252,33 +231,25 @@ public abstract class InqMediaEndpoint {
    */
   protected void internalEndpointInitialization(final CountDownLatch endpointLatch) {
     if (this.isWeb()) {
+      log.debug("internalEndpointInitialization");
       new WebRtcEndpoint.Builder(pipeline).buildAsync(new Continuation<WebRtcEndpoint>() {
         @Override
         public void onSuccess(WebRtcEndpoint result) throws Exception {
+          log.debug("onSuccess ");
           webEndpoint = result;
-          if(hubPort != null) {
-            log.debug("hubPort has been connected to endpoint");
-            webEndpoint.connect(hubPort);
-            hubPort.connect(webEndpoint);
-          } else {
-            log.warn("hubPort is nul");
-          }
-          // Adding recorder
-          if(recorder != null) {
-            log.debug("recorder has been connected to endpoint");
-            webEndpoint.connect(recorder);
-            if(hubPort != null) {
-              recorder.connect(hubPort);
-              hubPort.connect(recorder);
-            }
-          } else {
-            log.warn("Recorder is nul");
-          }
+
+          owner.connectRecorder(webEndpoint);
+//          owner.connectHubPort(webEndpoint);
+//            for(InqParticipant part: participants.values()) {
+//                part.connectHubPort(part.getPublisher().getWebEndpoint());
+//                // owner.connectHubPort(webEndpoint);
+//            }
+
           endpointLatch.countDown();
           log.trace("EP {}: Created a new WebRtcEndpoint", endpointName);
           endpointSubscription = registerElemErrListener(webEndpoint);
-        }
 
+        }
         @Override
         public void onError(Throwable cause) throws Exception {
           endpointLatch.countDown();
@@ -452,11 +423,6 @@ public abstract class InqMediaEndpoint {
         owner.sendIceCandidate(endpointName, event.getCandidate());
       }
     });
-
-    if(recorder != null) {
-      log.debug("*** Start recorder recording");
-      recorder.record();
-    }
   }
 
   /**

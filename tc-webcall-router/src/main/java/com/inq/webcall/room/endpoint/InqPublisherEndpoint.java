@@ -55,16 +55,6 @@ public class InqPublisherEndpoint extends InqMediaEndpoint {
     super(web, owner, endpointName, pipeline, log);
   }
 
-  public InqPublisherEndpoint(boolean web, InqParticipant owner, String endpointName,
-                              MediaPipeline pipeline, RecorderEndpoint recorder) {
-    super(web, owner, endpointName, pipeline, log, recorder);
-  }
-
-  public InqPublisherEndpoint(boolean web, InqParticipant owner, String endpointName,
-                              MediaPipeline pipeline, RecorderEndpoint recorder, HubPort hubPort) {
-    super(web, owner, endpointName, pipeline, log, recorder, hubPort);
-  }
-
   @Override
   protected void internalEndpointInitialization(final CountDownLatch endpointLatch) {
     super.internalEndpointInitialization(endpointLatch);
@@ -136,6 +126,12 @@ public class InqPublisherEndpoint extends InqMediaEndpoint {
         throw new RoomException(Code.MEDIA_SDP_ERROR_CODE, "Sdp type not supported: " + sdpType);
     }
     gatherCandidates();
+
+    if(getOwner().getRecorder() != null) {
+      log.debug("Start recording participant {}", getOwner().getName());
+      getOwner().startRecorder();
+    }
+
     return sdpResponse;
   }
 
