@@ -120,7 +120,7 @@ public class InqParticipant {
                 try {
                     Map<String, String> metadata = new HashMap<>();
                     metadata.put("chatId", this.room.getName());
-                    // metadata.put("participant", this.name);
+                    metadata.put("participant", this.name);
                     this.repoItem = repositoryClient.createRepositoryItem(metadata);
                 } catch (Exception e) {
                     log.warn("Unable to create kurento repository items", e);
@@ -150,10 +150,22 @@ public class InqParticipant {
      */
     public void connectRecorder(WebRtcEndpoint webRtcEndpoint) {
         try {
-            log.info("Participant {} connect recorder ", name);
+            log.info("Participant {} connect recorder {}", name, webRtcEndpoint.getName());
             webRtcEndpoint.connect(webRtcEndpoint);
-            webRtcEndpoint.connect(this.recorder);
-            this.recorder.connect(webRtcEndpoint);
+            webRtcEndpoint.connect(this.recorder, new Continuation<Void>() {
+                @Override
+                public void onSuccess(Void result) throws Exception {
+                    log.debug("EP {}: Elements have been connected (source {} -> sink {})", getPublisher().getEndpointName(),
+                            webRtcEndpoint.getId(), recorder.getId());
+                }
+
+                @Override
+                public void onError(Throwable cause) throws Exception {
+                    log.warn("EP {}: Failed to connect media elements (source {} -> sink {})",
+                            getPublisher().getEndpointName(),
+                            webRtcEndpoint.getId(), recorder.getId(), cause);
+                }
+            });
         } catch (Exception e) {
             log.error("Fail to connect webRtcEndpoint to recorder in participant id={}; " + e.getMessage(), name, e);
         }
@@ -168,7 +180,7 @@ public class InqParticipant {
     public void startRecorder() {
         try {
             if(!isRecording) {
-                log.info("Participant {} start recording ", name);
+                log.info("Participant {} start recording recorder {}", name, recorder.getName());
                 this.recorder.record();
                 isRecording = true;
             } else {
