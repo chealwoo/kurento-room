@@ -121,21 +121,13 @@ public class InqRoom {
         /*
         Try composite recording.
          */
-        if (participants.size() >= 2 && false) {
-            createRecorder(pipeline);
+        if (participants.size() >= 2) {
 
 //            for(InqParticipant part: participants.values()) {
 //                part.connectHubPort(part.getPublisher().getWebEndpoint());
 //                // owner.connectHubPort(webEndpoint);
 //            }
 
-            HubPort hubPort = new HubPort.Builder(composite).build();
-            hubPort.connect(recorder);
-
-            log.info("Room composite Media will be recorded {}by KMS: id={} , url={}",
-                    (repositoryClient == null ? "locally " : ""), this.repoItem.getId(), this.repoItem.getUrl());
-
-            recorder.record();
         }
     }
 
@@ -181,6 +173,40 @@ public class InqRoom {
             }
         } else {
             recorder.stop();
+        }
+    }
+
+    private boolean isRecording = false;
+    public void startRecorder() {
+        try {
+            if(!isRecording) {
+                createRecorder(pipeline);
+                log.info("Room composite Media will be recorded {}by KMS: id={} , url={}",
+                        (repositoryClient == null ? "locally " : ""), this.repoItem.getId(), this.repoItem.getUrl());
+
+                hubPort = new HubPort.Builder(composite).build();
+                hubPort.connect(recorder, new Continuation<Void>() {
+                    @Override
+                    public void onSuccess(Void result) throws Exception {
+                        recorder.record();
+                        log.info("Composite start recording recorder {}", name, recorder.getName());
+                        isRecording = true;
+                        log.debug("EP {}: Elements have been connected (source {} -> sink {})",
+                                hubPort.getId(), recorder.getId());
+                    }
+
+                    @Override
+                    public void onError(Throwable cause) throws Exception {
+                        log.warn("Composite Failed to connect media elements (source {} -> sink {})",
+                                hubPort.getId(), recorder.getId(), cause);
+                    }
+                });
+
+            } else {
+                log.info("Participant {} already recording ", name);
+            }
+        } catch (Exception e) {
+            log.error("Fail to connect webRtcEndpoint to recorder in participant id={}; " + e.getMessage(), name, e);
         }
     }
 
@@ -345,7 +371,9 @@ public class InqRoom {
                         pipeline = result;
                         pipelineLatch.countDown();
                         log.debug("ROOM {}: Created MediaPipeline", name);
+
                         composite = new Composite.Builder(pipeline).build();
+                        log.debug("ROOM {}: Created composite {}", name, composite.getName());
                     }
 
                     @Override

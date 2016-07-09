@@ -88,7 +88,7 @@ public class InqParticipant {
 
         createRecorder(pipeline);
 
-        createHubPort();
+     //   createHubPort();
 
         this.publisher = new InqPublisherEndpoint(web, this, name, pipeline);
 
@@ -183,6 +183,10 @@ public class InqParticipant {
                 log.info("Participant {} start recording recorder {}", name, recorder.getName());
                 this.recorder.record();
                 isRecording = true;
+
+                if (room.getParticipants().size() >= 2) {
+                    room.startRecorder();
+                }
             } else {
                 log.info("Participant {} already recording ", name);
             }
@@ -208,9 +212,10 @@ public class InqParticipant {
     /**
      *
      */
-    private void createHubPort() {
+    public void createHubPort() {
         try {
             this.hubPort = new HubPort.Builder(room.getComposite()).build();
+            log.debug("PARTICIPANT {}: HubPort: created hubPort {}", name, hubPort.getId());
         } catch (Exception e) {
             log.error("Fail to create hubPort of participant id={} " + e.getMessage(), name, e);
         }
@@ -218,7 +223,20 @@ public class InqParticipant {
 
     public void connectHubPort(WebRtcEndpoint webRtcEndpoint) {
         try {
-            webRtcEndpoint.connect(this.hubPort);
+            webRtcEndpoint.connect(this.hubPort, new Continuation<Void>() {
+                @Override
+                public void onSuccess(Void result) throws Exception {
+                    log.debug("PARTICIPANT {}: HubPort: Elements have been connected (EndPoint {} -> hubPort {})", getPublisher().getEndpointName(),
+                            webRtcEndpoint.getId(), hubPort.getId());
+                }
+
+                @Override
+                public void onError(Throwable cause) throws Exception {
+                    log.warn("PARTICIPANT {}: Failed to connect media elements (source {} -> sink {})",
+                            getPublisher().getEndpointName(),
+                            webRtcEndpoint.getId(), hubPort.getId(), cause);
+                }
+            });
         } catch (Exception e) {
             log.error("Fail to connect webRtcEndpoint.connect(hubPort) in participant id={} " + e.getMessage(), name, e);
         }

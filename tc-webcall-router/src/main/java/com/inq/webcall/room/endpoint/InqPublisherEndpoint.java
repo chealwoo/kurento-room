@@ -130,6 +130,9 @@ public class InqPublisherEndpoint extends InqMediaEndpoint {
     if(getOwner().getRecorder() != null) {
       log.debug("Start recording participant {}", getOwner().getName());
       getOwner().startRecorder();
+
+      getOwner().createHubPort();
+      getOwner().connectHubPort(getWebEndpoint());
     }
 
     return sdpResponse;
