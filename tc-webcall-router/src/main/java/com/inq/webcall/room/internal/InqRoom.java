@@ -149,7 +149,7 @@ public class InqRoom {
                     try {
                         Map<String, String> metadata = new HashMap<>();
                         metadata.put("chatId", name);
-                        // metadata.put("participant", this.name);
+                        metadata.put("participant", name);
                         this.repoItem = repositoryClient.createRepositoryItem(metadata);
                     } catch (Exception e) {
                         log.warn("Unable to create kurento repository items", e);
@@ -172,6 +172,7 @@ public class InqRoom {
                 log.error("Fail to create recorder of participant id={}; " + e.getMessage(), name, e);
             }
         } else {
+            log.info("Stoping recorder");
             recorder.stop();
         }
     }
