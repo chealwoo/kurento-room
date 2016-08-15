@@ -5,6 +5,9 @@
    "app": {
       "uri": "http://localhost:8080/"
    },
+   "repository": {
+      "uri": "http://kms-repo.inq.com:7676"
+   },
    "kurento": {
       "client": {
          //milliseconds
