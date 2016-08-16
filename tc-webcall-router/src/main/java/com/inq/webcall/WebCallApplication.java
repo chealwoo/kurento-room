@@ -46,7 +46,7 @@ public class WebCallApplication  extends KurentoRoomServerApp {
 
     private static final String IMG_FOLDER = "img/";
 
-    private final String DEFAULT_APP_SERVER_URL = PropertiesManager.getProperty("app.uri",
+    public static final String DEFAULT_APP_SERVER_URL = PropertiesManager.getProperty("app.uri",
             "https://localhost:8443");
 
     private final Integer DEMO_KMS_NODE_LIMIT = PropertiesManager.getProperty("demo.kmsLimit", 1000);

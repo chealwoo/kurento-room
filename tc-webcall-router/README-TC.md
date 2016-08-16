@@ -3,7 +3,7 @@ TC Data Event
 http://confluence.touchcommerce.com/display/dev/TouchCommerce+Data+Events#TouchCommerceDataEvents-call.connected
 
 
-Compile with the following commend
+Compile with the following command
 ```
 $ cd kurento-room
 $ mvn clean package -am -pl tc-webcall-router -DskipTests

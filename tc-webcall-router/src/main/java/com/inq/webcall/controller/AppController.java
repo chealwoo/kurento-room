@@ -1,5 +1,6 @@
 package com.inq.webcall.controller;
 
+import com.inq.webcall.WebCallApplication;
 import com.inq.webcall.room.InqNotificationRoomManager;
 import org.kurento.commons.PropertiesManager;
 import com.inq.webcall.service.FixedNKmsManager;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -55,6 +58,15 @@ public class AppController {
         public ResourceNotFoundException(String msg) {
             super(msg);
         }
+    }
+
+    /**
+     * Returns
+     * @return
+     */
+    @RequestMapping("/getappid")
+    public String getAppId() {
+        return  "{ appurl : '" + WebCallApplication.DEFAULT_APP_SERVER_URL + "'}";
     }
 
     @RequestMapping("/close")
