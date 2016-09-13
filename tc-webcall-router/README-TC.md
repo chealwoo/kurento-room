@@ -15,6 +15,10 @@ unzip tc-webcall-router-x.x.x.zip
 
 
 
+
+
+
+
 ## Start WebCall
 https://localhost:8443
 
