@@ -384,6 +384,7 @@ public class InqRoom {
                     }
                 });
             } catch (Exception e) {
+                // TODO CL KMS might down, need to start fail over.
                 log.error("Unable to create media pipeline for room '{}'", name, e);
                 pipelineLatch.countDown();
             }

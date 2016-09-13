@@ -14,6 +14,9 @@
          "requestTimeout": 20000
       }
    },
+   "security": {
+      "ssoAuthCheck": false
+   },
    "demo": {
       //mario-wings.png or wizard.png
       "hatUrl": "mario-wings.png",

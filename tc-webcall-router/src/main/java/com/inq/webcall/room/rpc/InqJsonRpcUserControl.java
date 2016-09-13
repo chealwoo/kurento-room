@@ -17,6 +17,7 @@
 package com.inq.webcall.room.rpc;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import com.inq.webcall.room.InqNotificationRoomManager;
 import org.kurento.client.FaceOverlayFilter;
@@ -25,7 +26,9 @@ import org.kurento.jsonrpc.Transaction;
 import org.kurento.jsonrpc.message.Request;
 import org.kurento.room.NotificationRoomManager;
 import org.kurento.room.api.pojo.ParticipantRequest;
+import org.kurento.room.internal.ProtocolElements;
 import org.kurento.room.rpc.JsonRpcUserControl;
+import org.kurento.room.rpc.ParticipantSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +55,28 @@ public class InqJsonRpcUserControl extends JsonRpcUserControl {
   private float heightPercent;
 
   public InqJsonRpcUserControl(InqNotificationRoomManager roomManager) {
-    super(roomManager);
+    super((NotificationRoomManager) roomManager);
+  }
+
+  public void joinRoom(Transaction transaction, Request<JsonObject> request,
+                       ParticipantRequest participantRequest) throws IOException, InterruptedException,
+          ExecutionException {
+    String roomName = getStringParam(request, ProtocolElements.JOINROOM_ROOM_PARAM);
+    String userName = getStringParam(request, ProtocolElements.JOINROOM_USER_PARAM);
+    String authToken = "";
+    try {
+        authToken = getStringParam(request, ProtocolElements.JOINROOM_TOKEN_PARAM);
+    } catch ( RuntimeException e ) {
+        if( !e.getMessage().contains("Request element") ) {
+            throw e;
+        }
+    }
+
+    ParticipantSession participantSession = getParticipantSession(transaction);
+    participantSession.setParticipantName(userName);
+    participantSession.setRoomName(roomName);
+
+    ((InqNotificationRoomManager) roomManager).joinRoom(userName, roomName, true, participantRequest, authToken);
   }
 
   public void setHatUrl(String hatUrl) {
@@ -93,10 +117,10 @@ public class InqJsonRpcUserControl extends JsonRpcUserControl {
         }
         log.info("Applying face overlay filter to session {}", pid);
         FaceOverlayFilter faceOverlayFilter = new FaceOverlayFilter.Builder(
-            roomManager.getPipeline(pid)).build();
+                ((InqNotificationRoomManager) roomManager).getPipeline(pid)).build();
         faceOverlayFilter.setOverlayedImage(this.hatUrl, this.offsetXPercent, this.offsetYPercent,
             this.widthPercent, this.heightPercent);
-        roomManager.addMediaElement(pid, faceOverlayFilter);
+          ((InqNotificationRoomManager) roomManager).addMediaElement(pid, faceOverlayFilter);
         transaction.getSession().getAttributes()
         .put(SESSION_ATTRIBUTE_HAT_FILTER, faceOverlayFilter);
       } else {
@@ -104,7 +128,7 @@ public class InqJsonRpcUserControl extends JsonRpcUserControl {
           throw new RuntimeException("This user has no hat filter yet");
         }
         log.info("Removing face overlay filter from session {}", pid);
-        roomManager.removeMediaElement(pid, (MediaElement) transaction.getSession().getAttributes()
+          ((InqNotificationRoomManager) roomManager).removeMediaElement(pid, (MediaElement) transaction.getSession().getAttributes()
             .get(SESSION_ATTRIBUTE_HAT_FILTER));
         transaction.getSession().getAttributes().remove(SESSION_ATTRIBUTE_HAT_FILTER);
       }

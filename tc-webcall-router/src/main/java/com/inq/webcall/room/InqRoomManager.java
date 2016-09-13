@@ -16,6 +16,8 @@
 
 package com.inq.webcall.room;
 
+import com.inq.saml.TokenValidator;
+import com.inq.webcall.WebCallApplication;
 import com.inq.webcall.room.internal.InqParticipant;
 import com.inq.webcall.room.internal.InqRoom;
 import com.inq.webcall.util.log.InqEtlMgr;
@@ -101,7 +103,7 @@ public class InqRoomManager {
      * @throws RoomException on error while joining (like the room is not found or is closing)
      */
     public Set<UserParticipant> joinRoom(String userName, String roomName, boolean webParticipant,
-                                         KurentoClientSessionInfo kcSessionInfo, String participantId) throws RoomException {
+                                         KurentoClientSessionInfo kcSessionInfo, String participantId, String authToken) throws RoomException {
         log.debug("Request [JOIN_ROOM] user={}, room={}, web={} " + "kcSessionInfo.room={} ({})",
                 userName, roomName, webParticipant, kcSessionInfo != null
                         ? kcSessionInfo.getRoomName()
@@ -110,7 +112,9 @@ public class InqRoomManager {
         InqEtlMgr.logWebCallRequested(roomName, userName);
 
         InqRoom room = rooms.get(roomName);
-        if (room == null && kcSessionInfo != null) {
+        if (room == null && kcSessionInfo != null
+                && ( !WebCallApplication.SSO_AUTH_CHECK || TokenValidator.validateToken(userName, authToken) ) ) {
+                      // if WebCallApplication.SSO_AUTH_CHECK is true, call validatieToken()
             createRoom(kcSessionInfo);
             KurentoClient kurentoClient = kcProvider.getKurentoClient(kcSessionInfo);
             roomEventManager.createRoomEvent(roomName, userName, kurentoClient.getSessionId());

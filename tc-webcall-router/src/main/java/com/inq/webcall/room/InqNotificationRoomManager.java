@@ -1,5 +1,6 @@
 package com.inq.webcall.room;
 
+import com.inq.webcall.room.internal.InqNotificationRoomHandler;
 import org.kurento.client.MediaElement;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.MediaType;
@@ -10,7 +11,6 @@ import org.kurento.room.api.pojo.ParticipantRequest;
 import org.kurento.room.api.pojo.UserParticipant;
 import org.kurento.room.exception.RoomException;
 import org.kurento.room.internal.DefaultKurentoClientSessionInfo;
-import org.kurento.room.internal.DefaultNotificationRoomHandler;
 import org.kurento.room.internal.helper.RoomEventManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
 
     public InqNotificationRoomManager(UserNotificationService notificationService, KurentoClientProvider kcProvider) {
         super(notificationService, kcProvider);
-        this.notificationRoomHandler = new DefaultNotificationRoomHandler(notificationService);
+        this.notificationRoomHandler = new InqNotificationRoomHandler(notificationService);
         this.roomEventManager = new RoomEventManager();
         this.internalManager = new InqRoomManager(notificationRoomHandler, kcProvider, roomEventManager);
     }
@@ -36,7 +36,7 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
     // ----------------- CLIENT-ORIGINATED REQUESTS ------------
 
     /**
-     * Calls {@link InqRoomManager#joinRoom(String, String, boolean, KurentoClientSessionInfo, String)}
+     * Calls {@link InqRoomManager#joinRoom(String, String, boolean, KurentoClientSessionInfo, String, String)}
      * with a {@link DefaultKurentoClientSessionInfo} bean as implementation of the
      * {@link KurentoClientSessionInfo}.
      *
@@ -45,10 +45,10 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
      *          request id (optional identifier of the request at the communications level, included
      *          when responding back to the client)
      *
-     * @see InqRoomManager#joinRoom(String, String, boolean, KurentoClientSessionInfo, String)
+     * @see InqRoomManager#joinRoom(String, String, boolean, KurentoClientSessionInfo, String, String)
      */
     public void joinRoom(String userName, String roomName, boolean webParticipant,
-                         ParticipantRequest request) {
+                         ParticipantRequest request, String authToken) {
         Set<UserParticipant> existingParticipants = null;
 
         log.debug("***** PARTICIPANT {}: joining/creating room {}", userName, roomName);
@@ -57,7 +57,7 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
             KurentoClientSessionInfo kcSessionInfo = new DefaultKurentoClientSessionInfo(
                     request.getParticipantId(), roomName);
             existingParticipants = internalManager.joinRoom(userName, roomName, webParticipant,
-                    kcSessionInfo, request.getParticipantId());
+                    kcSessionInfo, request.getParticipantId(), authToken);
         } catch (RoomException e) {
             log.warn("PARTICIPANT {}: Error joining/creating room {}", userName, roomName, e);
             notificationRoomHandler.onParticipantJoined(request, roomName, userName, null, e);

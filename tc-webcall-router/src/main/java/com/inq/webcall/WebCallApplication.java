@@ -25,9 +25,6 @@ import java.util.List;
 
 import static org.kurento.commons.PropertiesManager.getPropertyJson;
 
-/**
- * Created by dlee on 6/28/2016.
- */
 public class WebCallApplication  extends KurentoRoomServerApp {
 
     private static final Logger log = LoggerFactory.getLogger(WebCallApplication.class);
@@ -61,6 +58,11 @@ public class WebCallApplication  extends KurentoRoomServerApp {
 
     public static final String REPOSITORY_SERVER_URI = PropertiesManager.getProperty("repository.uri",
             DEFAULT_REPOSITORY_SERVER_URI);
+
+    private static final boolean DEFAULT_SSO_AUTH_CHECK = true;
+
+    public static final boolean SSO_AUTH_CHECK = PropertiesManager.getProperty("security.ssoAuthCheck",
+            DEFAULT_SSO_AUTH_CHECK);
 
     @Override
     public KmsManager kmsManager() {
