@@ -21,6 +21,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 
+import java.io.File;
 import java.util.List;
 
 import static org.kurento.commons.PropertiesManager.getPropertyJson;
@@ -63,6 +64,8 @@ public class WebCallApplication  extends KurentoRoomServerApp {
 
     public static final boolean SSO_AUTH_CHECK = PropertiesManager.getProperty("security.ssoAuthCheck",
             DEFAULT_SSO_AUTH_CHECK);
+    public static final String SAML_TOKEN_PATH = PropertiesManager.getProperty("security.certificationPath",
+            File.separator + "keys" + File.separator + "saml.crt");
 
     @Override
     public KmsManager kmsManager() {

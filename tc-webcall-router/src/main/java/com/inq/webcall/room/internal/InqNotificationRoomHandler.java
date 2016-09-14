@@ -2,8 +2,9 @@ package com.inq.webcall.room.internal;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.inq.webcall.WebCallApplication;
+import com.inq.webcall.room.api.InqINotificationRoomHandler;
 import org.kurento.client.IceCandidate;
-import org.kurento.room.api.NotificationRoomHandler;
 import org.kurento.room.api.UserNotificationService;
 import org.kurento.room.api.pojo.ParticipantRequest;
 import org.kurento.room.api.pojo.UserParticipant;
@@ -12,10 +13,8 @@ import org.kurento.room.internal.ProtocolElements;
 
 import java.util.Set;
 
-/**
- * Created by dlee on 9/13/2016.
- */
-public class InqNotificationRoomHandler  implements NotificationRoomHandler {
+
+public class InqNotificationRoomHandler implements InqINotificationRoomHandler {
 
     private UserNotificationService notifService;
 
@@ -40,8 +39,44 @@ public class InqNotificationRoomHandler  implements NotificationRoomHandler {
             notifService.sendErrorResponse(request, null, error);
             return;
         }
+        JsonArray result = new JsonArray();
+        for (UserParticipant participant : existingParticipants) {
+            JsonObject participantJson = new JsonObject();
+            participantJson
+                    .addProperty(ProtocolElements.JOINROOM_PEERID_PARAM, participant.getUserName());
+            if (participant.isStreaming()) {
+                JsonObject stream = new JsonObject();
+                stream.addProperty(ProtocolElements.JOINROOM_PEERSTREAMID_PARAM, "webcam");
+                JsonArray streamsArray = new JsonArray();
+                streamsArray.add(stream);
+                participantJson.add(ProtocolElements.JOINROOM_PEERSTREAMS_PARAM, streamsArray);
+            }
+            result.add(participantJson);
+
+            JsonObject notifParams = new JsonObject();
+            notifParams.addProperty(ProtocolElements.PARTICIPANTJOINED_USER_PARAM, newUserName);
+            notifService.sendNotification(participant.getParticipantId(),
+                    ProtocolElements.PARTICIPANTJOINED_METHOD, notifParams);
+        }
+        notifService.sendResponse(request, result);
+    }
+
+    @Override
+    public void onRoomCreated(ParticipantRequest request, String roomName, String newUserName,
+                                    Set<UserParticipant> existingParticipants, String authToken, RoomException error) {
+        if (error != null) {
+            notifService.sendErrorResponse(request, null, error);
+            return;
+        }
         // TODO CL - Add APP server id and room token.
         JsonArray result = new JsonArray();
+
+        // Adding new room notification
+        JsonObject newRoom = new JsonObject();
+        newRoom.addProperty(ProtocolElements.CREATEROOM_APPID_PARAM, WebCallApplication.DEFAULT_APP_SERVER_URL);
+        newRoom.addProperty(ProtocolElements.CREATEROOM_TOKEN_PARAM, authToken);
+        result.add(newRoom);
+
         for (UserParticipant participant : existingParticipants) {
             JsonObject participantJson = new JsonObject();
             participantJson

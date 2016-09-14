@@ -1,5 +1,6 @@
 package com.inq.saml.service;
 
+import com.inq.webcall.WebCallApplication;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -17,13 +18,11 @@ public class MetaDataService {
     private static final String descriptorFirst = "-----BEGIN CERTIFICATE-----";
     private static final String descriptorLast = "-----END CERTIFICATE-----";
 
-    public static String samlCertPath = File.separator + "keys" + File.separator + "saml.crt";
 
     public static String readCertBase64() throws IOException {
-
         /* initiate base64Text */
         if (null == base64Text) {
-            File samlCertFile = new File(samlCertPath);
+            File samlCertFile = new File(WebCallApplication.SAML_TOKEN_PATH);
 
             String lineIn;
 

@@ -15,7 +15,8 @@
       }
    },
    "security": {
-      "ssoAuthCheck": false
+      "ssoAuthCheck": false,
+      "certificationPath": "C:\\code\\samples\\kurento\\kurento-room\\tc-webcall-router\\src\\main\\resources\\keys\\saml.crt"
    },
    "demo": {
       //mario-wings.png or wizard.png

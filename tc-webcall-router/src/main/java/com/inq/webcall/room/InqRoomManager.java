@@ -18,6 +18,7 @@ package com.inq.webcall.room;
 
 import com.inq.saml.TokenValidator;
 import com.inq.webcall.WebCallApplication;
+import com.inq.webcall.room.api.InqIKurentoClientSessionInfo;
 import com.inq.webcall.room.internal.InqParticipant;
 import com.inq.webcall.room.internal.InqRoom;
 import com.inq.webcall.util.log.InqEtlMgr;
@@ -103,7 +104,7 @@ public class InqRoomManager {
      * @throws RoomException on error while joining (like the room is not found or is closing)
      */
     public Set<UserParticipant> joinRoom(String userName, String roomName, boolean webParticipant,
-                                         KurentoClientSessionInfo kcSessionInfo, String participantId, String authToken) throws RoomException {
+                                         InqIKurentoClientSessionInfo kcSessionInfo, String participantId, String authToken) throws RoomException {
         log.debug("Request [JOIN_ROOM] user={}, room={}, web={} " + "kcSessionInfo.room={} ({})",
                 userName, roomName, webParticipant, kcSessionInfo != null
                         ? kcSessionInfo.getRoomName()
@@ -134,7 +135,13 @@ public class InqRoomManager {
         }
 
         Set<UserParticipant> existingParticipants = getParticipants(roomName);
-        room.join(participantId, userName, webParticipant);
+        // Auth Token may required to join room.
+        if ( !WebCallApplication.SSO_AUTH_CHECK || TokenValidator.validateToken(userName, authToken) ) {
+            room.join(participantId, userName, webParticipant);
+        } else {
+            throw new RoomException(Code.ROOM_CLOSED_ERROR_CODE, "'" + userName
+                    + "' is trying to join room '" + roomName + "' without valid token");
+        }
         return existingParticipants;
     }
 
@@ -760,7 +767,7 @@ public class InqRoomManager {
      *                      {@link KurentoClient} that will be used by the room
      * @throws RoomException in case of error while creating the room
      */
-    public void createRoom(KurentoClientSessionInfo kcSessionInfo) throws RoomException {
+    public void createRoom(InqIKurentoClientSessionInfo kcSessionInfo) throws RoomException {
         String roomName = kcSessionInfo.getRoomName();
         InqRoom room = rooms.get(kcSessionInfo);
         if (room != null) {
@@ -785,8 +792,15 @@ public class InqRoomManager {
         if (kurentoClient.getServerManager() != null) {
             kcName = kurentoClient.getServerManager().getName();
         }
+
+        // flag indicate a room is created and will be used to fire event to client.
+        kcSessionInfo.setRoomCreated(true);
+        kcSessionInfo.setAuthToken(room.getAuthToken());
+
         log.warn("No room '{}' exists yet. Created one " + "using KurentoClient '{}'.", roomName,
                 kcName);
+
+
     }
 
     /**

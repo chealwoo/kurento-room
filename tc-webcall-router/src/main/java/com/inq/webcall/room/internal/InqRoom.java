@@ -64,6 +64,7 @@ public class InqRoom {
     private Object pipelineReleaseLock = new Object();
     private volatile boolean pipelineReleased = false;
     private boolean destroyKurentoClient;
+    private String authToken = "";
 
     private Composite composite = null;
     private static final String RECORDING_EXT = ".webm";
@@ -80,6 +81,7 @@ public class InqRoom {
         this.kurentoClient = kurentoClient;
         this.destroyKurentoClient = destroyKurentoClient;
         this.roomHandler = roomHandler;
+        this.authToken = "" + System.currentTimeMillis() + roomName;
         log.debug("New ROOM instance, named '{}'", roomName);
     }
 
@@ -429,5 +431,9 @@ public class InqRoom {
 
     public Composite getComposite() {
         return composite;
+    }
+
+    public String getAuthToken() {
+        return authToken;
     }
 }
