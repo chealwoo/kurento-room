@@ -60,6 +60,7 @@ public class InqRoomManager {
     private KurentoClientProvider kcProvider;
 
     private final ConcurrentMap<String, InqRoom> rooms = new ConcurrentHashMap<>();
+    private final ConcurrentMap<KurentoClient, ConcurrentMap<String, InqRoom> > kmsRooms = new ConcurrentHashMap<>();
 
     private volatile boolean closed = false;
 
@@ -178,6 +179,7 @@ public class InqRoomManager {
         if (remainingParticipants.isEmpty()) {
             log.debug("No more participants in room '{}', removing it and closing it", roomName);
             room.close();
+            kmsRooms.get(room.getKurentoClient()).remove(roomName);
             rooms.remove(roomName);
 
             roomEventManager.closeRoomEvent(roomName);
@@ -788,6 +790,14 @@ public class InqRoomManager {
             // + roomName
             // + "' already exists (has just been created by another thread)");
         }
+
+        ConcurrentMap roomsTmp = kmsRooms.get(room.getKurentoClient());
+        if (null == roomsTmp) {
+            roomsTmp = new ConcurrentHashMap<>();
+            kmsRooms.put(room.getKurentoClient(), roomsTmp);
+        }
+        roomsTmp.put(room.getName(), room);
+
         String kcName = "[NAME NOT AVAILABLE]";
         if (kurentoClient.getServerManager() != null) {
             kcName = kurentoClient.getServerManager().getName();

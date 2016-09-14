@@ -436,4 +436,8 @@ public class InqRoom {
     public String getAuthToken() {
         return authToken;
     }
+
+    public KurentoClient getKurentoClient() {
+        return kurentoClient;
+    }
 }

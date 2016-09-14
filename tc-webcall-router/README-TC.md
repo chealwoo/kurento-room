@@ -15,7 +15,7 @@ unzip tc-webcall-router-x.x.x.zip
 
 
 
-
+git pull.
 
 
 

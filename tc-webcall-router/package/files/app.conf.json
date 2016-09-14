@@ -1,9 +1,9 @@
 {
    "kms": {
-      "uris": ["ws://localhost:8888/kurento", "ws://127.0.0.1:8888/kurento"]
+      "uris": ["ws://localhost:8888/kurento"]
    },
    "app": {
-      "uri": "http://localhost:8080/"
+      "uri": "wss://kms.inq.com:8443/room"
    },
    "repository": {
       "uri": "http://kms-repo.inq.com:7676"
@@ -13,6 +13,10 @@
          //milliseconds
          "requestTimeout": 20000
       }
+   },
+   "security": {
+      "ssoAuthCheck": true,
+      "certificationPath": "/etc/kurento/saml.crt"
    },
    "demo": {
       //mario-wings.png or wizard.png
