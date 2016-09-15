@@ -1,6 +1,7 @@
 package com.inq.webcall.room;
 
 import com.inq.webcall.room.api.InqIKurentoClientSessionInfo;
+import com.inq.webcall.room.api.InqKurentoClientProvider;
 import com.inq.webcall.room.internal.InqKurentoClientSessionInfo;
 import com.inq.webcall.room.internal.InqNotificationRoomHandler;
 import org.kurento.client.MediaElement;
@@ -28,8 +29,8 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
     private InqRoomManager internalManager;
     private RoomEventManager roomEventManager;
 
-    public InqNotificationRoomManager(UserNotificationService notificationService, KurentoClientProvider kcProvider) {
-        super(notificationService, kcProvider);
+    public InqNotificationRoomManager(UserNotificationService notificationService, InqKurentoClientProvider kcProvider) {
+        super(notificationService, (KurentoClientProvider) kcProvider);
         this.notificationRoomHandler = new InqNotificationRoomHandler(notificationService);
         this.roomEventManager = new RoomEventManager();
         this.internalManager = new InqRoomManager(notificationRoomHandler, kcProvider, roomEventManager);

@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.inq.webcall.room.InqNotificationRoomManager;
 import com.inq.webcall.room.InqRoomJsonRpcHandler;
+import com.inq.webcall.room.api.InqKurentoClientProvider;
 import org.kurento.commons.ConfigFileManager;
 import org.kurento.commons.PropertiesManager;
 import org.kurento.jsonrpc.JsonUtils;
@@ -112,7 +113,7 @@ public class WebCallApplication  extends KurentoRoomServerApp {
     @Bean
     @ConditionalOnMissingBean
     public InqNotificationRoomManager inqRoomManager() {
-        return new InqNotificationRoomManager(notificationService(), kmsManager());
+        return new InqNotificationRoomManager(notificationService(), (InqKurentoClientProvider) kmsManager());
     }
 
     @Bean

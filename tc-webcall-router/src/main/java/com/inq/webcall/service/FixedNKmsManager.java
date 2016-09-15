@@ -17,14 +17,24 @@
 package com.inq.webcall.service;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.inq.webcall.room.InqNotificationRoomManager;
+import com.inq.webcall.room.InqRoomManager;
+import com.inq.webcall.room.api.InqIKurentoClientSessionInfo;
+import com.inq.webcall.room.api.InqKurentoClientProvider;
+import com.inq.webcall.room.internal.InqRoom;
+import com.inq.webcall.room.kms.InqKms;
+import com.inq.webcall.room.kms.InqMaxWebRtcLoadManager;
 import org.kurento.client.KurentoClient;
 import org.kurento.client.KurentoConnectionListener;
 import org.kurento.jsonrpc.Session;
 import org.kurento.room.exception.RoomException;
 import org.kurento.room.internal.DefaultKurentoClientSessionInfo;
+import org.kurento.room.internal.Room;
 import org.kurento.room.kms.Kms;
 import org.kurento.room.kms.KmsManager;
 import org.kurento.room.kms.MaxWebRtcLoadManager;
@@ -40,11 +50,18 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Radu Tom Vlad (rvlad@naevatec.com)
  * @since 6.0.0
  */
-public class FixedNKmsManager extends KmsManager {
+public class FixedNKmsManager extends KmsManager implements InqKurentoClientProvider{
   private static final Logger log = LoggerFactory.getLogger(FixedNKmsManager.class);
 
   private String authRegex;
   private static Pattern authPattern = null;
+  private InqRoomManager inqRoomManager;
+
+  private final ConcurrentMap<InqKms, ConcurrentMap<String, InqRoom> > kmsFailOverMap = new ConcurrentHashMap<>();
+
+
+  //@Autowired
+  private InqNotificationRoomManager notificationRoomManager;
 
   @Autowired
   private JsonRpcNotificationService notificationService;
@@ -86,16 +103,35 @@ public class FixedNKmsManager extends KmsManager {
      */
   public FixedNKmsManager(List<String> kmsWsUri, int kmsLoadLimit) {
     for (String uri : kmsWsUri) {
-      Kms kms = new Kms(KurentoClient.create(uri, new KurentoConnectionListener() {
+      InqKms kms = new InqKms(KurentoClient.create(uri, new KurentoConnectionListener() {
 
         @Override
         public void reconnected(boolean arg0) {
-          log.debug("Kms uri={} has been reconnected", uri);
+          for(InqKms k: FixedNKmsManager.this.kmsFailOverMap.keySet()) {
+            if (k.getUri().equals(uri)) {
+              k.getLoadManager().setOn(true);
+              log.debug("Kms uri={} has been reconnected", uri);
+            }
+          }
         }
 
         @Override
         public void disconnected() {
-          log.debug("Kms uri={} has been disconnected", uri);
+          InqKms kms = null;
+          for(InqKms k: FixedNKmsManager.this.kmsFailOverMap.keySet()) {
+            if (k.getUri().equals(uri)) {
+              kms = k;
+              break;
+            }
+          }
+          if (null != kms) {
+            kms.getLoadManager().setOn(false);
+            for (InqRoom r : FixedNKmsManager.this.kmsFailOverMap.get(kms).values()) {
+              inqRoomManager.closeRoom(r.getName());
+            }
+            FixedNKmsManager.this.kmsFailOverMap.put(kms, new ConcurrentHashMap<>());
+            log.debug("Kms uri={} has been disconnected", uri);
+          }
         }
 
         @Override
@@ -108,7 +144,9 @@ public class FixedNKmsManager extends KmsManager {
           log.debug("Kms uri={} has been connected", uri);
         }
       }), uri);
-      kms.setLoadManager(new MaxWebRtcLoadManager(kmsLoadLimit));
+
+      kms.setLoadManager(new InqMaxWebRtcLoadManager(kmsLoadLimit));
+      this.kmsFailOverMap.put(kms, new ConcurrentHashMap<>());
       this.addKms(kms);
     }
   }
@@ -121,7 +159,7 @@ public class FixedNKmsManager extends KmsManager {
   }
 
   @Override
-  public synchronized Kms getKms(DefaultKurentoClientSessionInfo sessionInfo) {
+  public synchronized InqKms getKms(DefaultKurentoClientSessionInfo sessionInfo) {
     String userName = null;
     String participantId = sessionInfo.getParticipantId();
     Session session = notificationService.getSession(participantId);
@@ -141,12 +179,12 @@ public class FixedNKmsManager extends KmsManager {
       throw new RoomException(RoomException.Code.ROOM_CANNOT_BE_CREATED_ERROR_CODE,
           "User cannot create a new room");
     }
-    Kms kms = null;
+    InqKms kms = null;
 //    String type = "";
 //    boolean hq = isUserHQ(userName);
 // No special
 //    if (hq) {
-      kms = getLessLoadedKms();
+      kms = (InqKms) getLessLoadedKms();
 /*    } else {
       kms = getNextLessLoadedKms();
       if (!kms.allowMoreElements()) {
@@ -177,5 +215,20 @@ public class FixedNKmsManager extends KmsManager {
     }
     Matcher m = authPattern.matcher(userName);
     return m.matches();
+  }
+
+  @Override
+  public void addFailOver(InqIKurentoClientSessionInfo kcSessionInfo, InqRoom room) {
+    InqKms kms = getKms((DefaultKurentoClientSessionInfo) kcSessionInfo);
+    this.kmsFailOverMap.get(kms).put(room.getName(), room);
+  }
+  @Override
+  public void removeFailOver(InqIKurentoClientSessionInfo kcSessionInfo, InqRoom room) {
+    InqKms kms = getKms((DefaultKurentoClientSessionInfo) kcSessionInfo);
+    this.kmsFailOverMap.get(kms).remove(room.getName());
+  }
+
+  public void setInqRoomManager(InqRoomManager inqRoomManager) {
+    this.inqRoomManager = inqRoomManager;
   }
 }

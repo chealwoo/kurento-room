@@ -19,6 +19,7 @@ package com.inq.webcall.room;
 import com.inq.saml.TokenValidator;
 import com.inq.webcall.WebCallApplication;
 import com.inq.webcall.room.api.InqIKurentoClientSessionInfo;
+import com.inq.webcall.room.api.InqKurentoClientProvider;
 import com.inq.webcall.room.internal.InqParticipant;
 import com.inq.webcall.room.internal.InqRoom;
 import com.inq.webcall.util.log.InqEtlMgr;
@@ -58,7 +59,7 @@ public class InqRoomManager {
     private final Logger log = LoggerFactory.getLogger(InqRoomManager.class);
 
     private RoomHandler roomHandler;
-    private KurentoClientProvider kcProvider;
+    private InqKurentoClientProvider kcProvider;
 
     private final ConcurrentMap<String, InqRoom> rooms = new ConcurrentHashMap<>();
     private final ConcurrentMap<KurentoClient, ConcurrentMap<String, InqRoom> > kmsRooms = new ConcurrentHashMap<>();
@@ -74,16 +75,17 @@ public class InqRoomManager {
      * @param roomHandler the room handler implementation
      * @param kcProvider  enables the manager to obtain Kurento Client instances
      */
-    public InqRoomManager(RoomHandler roomHandler, KurentoClientProvider kcProvider) {
+    public InqRoomManager(RoomHandler roomHandler, InqKurentoClientProvider kcProvider) {
         super();
         this.roomHandler = roomHandler;
         this.kcProvider = kcProvider;
     }
 
-    public InqRoomManager(RoomHandler roomHandler, KurentoClientProvider kcProvider, RoomEventManager roomEventManager) {
+    public InqRoomManager(RoomHandler roomHandler, InqKurentoClientProvider kcProvider, RoomEventManager roomEventManager) {
         super();
         this.roomHandler = roomHandler;
         this.kcProvider = kcProvider;
+        kcProvider.setInqRoomManager(this);
         this.roomEventManager = roomEventManager;
     }
 
@@ -136,6 +138,7 @@ public class InqRoomManager {
                     + "' is trying to join room '" + roomName + "' but it is closing");
         }
 
+        kcProvider.addFailOver(kcSessionInfo, room);
         Set<UserParticipant> existingParticipants = getParticipants(roomName);
         // Auth Token may required to join room.
         if ( !WebCallApplication.SSO_AUTH_CHECK || ( TokenValidator.validateToken(userName, authToken) || authToken.equals(room.getAuthToken()) ) ) {
