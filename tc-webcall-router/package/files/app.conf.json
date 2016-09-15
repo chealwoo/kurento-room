@@ -16,7 +16,7 @@
    },
    "security": {
       "ssoAuthCheck": true,
-      "certificationPath": "/etc/kurento/saml.crt"
+      "certificationPath": "/etc/kurento/keys/saml.crt"
    },
    "demo": {
       //mario-wings.png or wizard.png
