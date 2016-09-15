@@ -21,6 +21,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.kurento.client.KurentoClient;
+import org.kurento.client.KurentoConnectionListener;
 import org.kurento.jsonrpc.Session;
 import org.kurento.room.exception.RoomException;
 import org.kurento.room.internal.DefaultKurentoClientSessionInfo;
@@ -50,13 +51,63 @@ public class FixedNKmsManager extends KmsManager {
 
   public FixedNKmsManager(List<String> kmsWsUri) {
     for (String uri : kmsWsUri) {
-      this.addKms(new Kms(KurentoClient.create(uri), uri));
+      this.addKms(new Kms(KurentoClient.create(uri, new KurentoConnectionListener() {
+
+        @Override
+        public void reconnected(boolean arg0) {
+          log.debug("Kms uri={} has been reconnected", uri);
+        }
+
+        @Override
+        public void disconnected() {
+          log.debug("Kms uri={} has been disconnected", uri);
+        }
+
+        @Override
+        public void connectionFailed() {
+          log.debug("Kms uri={} has been connectionFailed", uri);
+        }
+
+        @Override
+        public void connected() {
+          log.debug("Kms uri={} has been connected", uri);
+        }
+      }), uri));
     }
   }
 
+  /**
+   *
+   * Ref
+   * Adding listener - https://groups.google.com/forum/#!topic/kurento/4Fhj-0E5ITk
+   *
+   * @param kmsWsUri
+   * @param kmsLoadLimit
+     */
   public FixedNKmsManager(List<String> kmsWsUri, int kmsLoadLimit) {
     for (String uri : kmsWsUri) {
-      Kms kms = new Kms(KurentoClient.create(uri), uri);
+      Kms kms = new Kms(KurentoClient.create(uri, new KurentoConnectionListener() {
+
+        @Override
+        public void reconnected(boolean arg0) {
+          log.debug("Kms uri={} has been reconnected", uri);
+        }
+
+        @Override
+        public void disconnected() {
+          log.debug("Kms uri={} has been disconnected", uri);
+        }
+
+        @Override
+        public void connectionFailed() {
+          log.debug("Kms uri={} has been connectionFailed", uri);
+        }
+
+        @Override
+        public void connected() {
+          log.debug("Kms uri={} has been connected", uri);
+        }
+      }), uri);
       kms.setLoadManager(new MaxWebRtcLoadManager(kmsLoadLimit));
       this.addKms(kms);
     }
