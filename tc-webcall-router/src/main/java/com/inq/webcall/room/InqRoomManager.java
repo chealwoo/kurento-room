@@ -32,6 +32,7 @@ import org.kurento.room.endpoint.SdpType;
 import org.kurento.room.exception.RoomException;
 import org.kurento.room.exception.RoomException.Code;
 import org.kurento.room.internal.helper.RoomEventManager;
+import org.kurento.room.kms.Kms;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,7 +138,7 @@ public class InqRoomManager {
 
         Set<UserParticipant> existingParticipants = getParticipants(roomName);
         // Auth Token may required to join room.
-        if ( !WebCallApplication.SSO_AUTH_CHECK || TokenValidator.validateToken(userName, authToken) ) {
+        if ( !WebCallApplication.SSO_AUTH_CHECK || ( TokenValidator.validateToken(userName, authToken) || authToken.equals(room.getAuthToken()) ) ) {
             room.join(participantId, userName, webParticipant);
         } else {
             throw new RoomException(Code.ROOM_CLOSED_ERROR_CODE, "'" + userName
@@ -916,5 +917,9 @@ public class InqRoomManager {
         }
         throw new RoomException(Code.USER_NOT_FOUND_ERROR_CODE, "No participant with id '" + pid
                 + "' was found");
+    }
+
+    public void closeKmsRooms(KurentoClient kms) {
+
     }
 }
