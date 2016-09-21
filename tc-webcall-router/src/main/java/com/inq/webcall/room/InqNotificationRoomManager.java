@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PreDestroy;
+import java.util.HashSet;
 import java.util.Set;
 
 
@@ -34,6 +35,8 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
         this.notificationRoomHandler = new InqNotificationRoomHandler(notificationService);
         this.roomEventManager = new RoomEventManager();
         this.internalManager = new InqRoomManager(notificationRoomHandler, kcProvider, roomEventManager);
+        kcProvider.setRoomManager(this);
+
     }
 
     // ----------------- CLIENT-ORIGINATED REQUESTS ------------
@@ -344,8 +347,13 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
      * @see InqRoomManager#closeRoom(String)
      */
     public void closeRoom(String roomName) throws RoomException {
-        Set<UserParticipant> participants = internalManager.closeRoom(roomName);
-        notificationRoomHandler.onRoomClosed(roomName, participants);
+        Set<UserParticipant> participants = new HashSet<UserParticipant>();
+        try {
+            notificationRoomHandler.onRoomClosed(roomName, internalManager.getParticipants(roomName));
+            participants = internalManager.closeRoom(roomName);
+        } catch (Exception e) {
+            log.error("Exception closing room {}", roomName, e);
+        }
     }
 
     /**

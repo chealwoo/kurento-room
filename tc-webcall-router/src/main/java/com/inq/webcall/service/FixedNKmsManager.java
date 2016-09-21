@@ -17,6 +17,7 @@
 package com.inq.webcall.service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
@@ -60,8 +61,8 @@ public class FixedNKmsManager extends KmsManager implements InqKurentoClientProv
   private final ConcurrentMap<InqKms, ConcurrentMap<String, InqRoom> > kmsFailOverMap = new ConcurrentHashMap<>();
 
 
-  //@Autowired
-  private InqNotificationRoomManager notificationRoomManager;
+  // @Autowired
+  private InqNotificationRoomManager roomManager;
 
   @Autowired
   private JsonRpcNotificationService notificationService;
@@ -126,10 +127,18 @@ public class FixedNKmsManager extends KmsManager implements InqKurentoClientProv
           }
           if (null != kms) {
             kms.getLoadManager().setOn(false);
-            for (InqRoom r : FixedNKmsManager.this.kmsFailOverMap.get(kms).values()) {
-              inqRoomManager.closeRoom(r.getName());
-            }
+            ConcurrentMap<String, InqRoom> roomMap = FixedNKmsManager.this.kmsFailOverMap.get(kms);
             FixedNKmsManager.this.kmsFailOverMap.put(kms, new ConcurrentHashMap<>());
+            Set<String> names = roomMap.keySet();
+            for (String name : names) {
+              try {
+                log.info("removing room '{}' during failover", name);
+                roomMap.remove(name);
+                roomManager.closeRoom(name);
+              } catch (Exception e) {
+                log.error("Error while removing room '{}' during failover", name, e);
+              }
+            }
             log.debug("Kms uri={} has been disconnected", uri);
           }
         }
@@ -228,7 +237,13 @@ public class FixedNKmsManager extends KmsManager implements InqKurentoClientProv
     this.kmsFailOverMap.get(kms).remove(room.getName());
   }
 
+  /*
   public void setInqRoomManager(InqRoomManager inqRoomManager) {
     this.inqRoomManager = inqRoomManager;
+  }
+  */
+
+  public void setRoomManager(InqNotificationRoomManager roomManager) {
+    this.roomManager = roomManager;
   }
 }

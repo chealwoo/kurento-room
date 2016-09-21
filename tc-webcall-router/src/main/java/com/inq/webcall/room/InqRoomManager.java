@@ -24,6 +24,7 @@ import com.inq.webcall.room.internal.InqParticipant;
 import com.inq.webcall.room.internal.InqRoom;
 import com.inq.webcall.util.log.InqEtlMgr;
 import org.kurento.client.*;
+import org.kurento.jsonrpc.JsonRpcException;
 import org.kurento.room.api.KurentoClientProvider;
 import org.kurento.room.api.KurentoClientSessionInfo;
 import org.kurento.room.api.MutedMediaType;
@@ -85,7 +86,7 @@ public class InqRoomManager {
         super();
         this.roomHandler = roomHandler;
         this.kcProvider = kcProvider;
-        kcProvider.setInqRoomManager(this);
+       // kcProvider.setInqRoomManager(this);
         this.roomEventManager = roomEventManager;
     }
 
@@ -844,9 +845,15 @@ public class InqRoomManager {
                 room.leave(pid);
             } catch (RoomException e) {
                 log.warn("Error evicting participant with id '{}' from room '{}'", pid, roomName, e);
+            } catch (JsonRpcException e) {
+                log.warn("Error evicting participant with id '{}' from room '{}' KMS may not connected", pid, roomName, e);
             }
         }
-        room.close();
+        try {
+            room.close();
+        } catch (JsonRpcException e) {
+            log.error("Exception closing room {}", roomName, e);
+        }
         rooms.remove(roomName);
 
         roomEventManager.closeRoomEvent(roomName);

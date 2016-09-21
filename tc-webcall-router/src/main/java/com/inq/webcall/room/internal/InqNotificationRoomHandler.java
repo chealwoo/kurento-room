@@ -27,8 +27,10 @@ public class InqNotificationRoomHandler implements InqINotificationRoomHandler {
         JsonObject notifParams = new JsonObject();
         notifParams.addProperty(ProtocolElements.ROOMCLOSED_ROOM_PARAM, roomName);
         for (UserParticipant participant : participants) {
+//            notifService.sendNotification(participant.getParticipantId(),
+//                    ProtocolElements.ROOMCLOSED_METHOD, notifParams);
             notifService.sendNotification(participant.getParticipantId(),
-                    ProtocolElements.ROOMCLOSED_METHOD, notifParams);
+                    "room-closed", notifParams);
         }
     }
 

@@ -19,7 +19,7 @@ public class RoomEventManager {
 
     public void closeRoomEvent(String roomId) {
         RoomEvent roomEvent = roomEventMap.get(roomId);
-        roomEvent.closeRoomEvent();
+        if(roomEvent != null) { roomEvent.closeRoomEvent(); }
         roomEventMap.remove(roomId);
         savedRoomEventList.add(roomEvent);
     }

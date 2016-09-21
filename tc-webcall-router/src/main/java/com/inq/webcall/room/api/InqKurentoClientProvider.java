@@ -1,5 +1,6 @@
 package com.inq.webcall.room.api;
 
+import com.inq.webcall.room.InqNotificationRoomManager;
 import com.inq.webcall.room.InqRoomManager;
 import com.inq.webcall.room.internal.InqRoom;
 import org.kurento.client.KurentoClient;
@@ -13,6 +14,6 @@ public interface InqKurentoClientProvider extends KurentoClientProvider {
 
     void addFailOver(InqIKurentoClientSessionInfo kcSessionInfo, InqRoom room);
     void removeFailOver(InqIKurentoClientSessionInfo kcSessionInfo, InqRoom room);
-    void setInqRoomManager(InqRoomManager inqRoomManager) ;
+    void setRoomManager(InqNotificationRoomManager inqRoomManager) ;
 }
 

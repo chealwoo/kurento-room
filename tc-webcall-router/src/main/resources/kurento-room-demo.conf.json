@@ -1,9 +1,9 @@
 {
    "kms": {
-      "uris": ["ws://kms.inq.com:8888/kurento"]
+      "uris": ["ws://172.26.111.99:8888/kurento", "ws://172.26.111.66:8888/kurento"]
    },
    "app": {
-      "uri": "wss://kms.inq.com:8443/room"
+      "uri": "wss://kms-app.inq.com:8443/room"
    },
    "repository": {
       "uri": "http://kms-repo.inq.com:7676"
