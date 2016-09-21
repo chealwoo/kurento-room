@@ -347,10 +347,19 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
      * @see InqRoomManager#closeRoom(String)
      */
     public void closeRoom(String roomName) throws RoomException {
-        Set<UserParticipant> participants = new HashSet<UserParticipant>();
+        Set<UserParticipant> participants = internalManager.closeRoom(roomName);
+        notificationRoomHandler.onRoomClosed(roomName, participants);
+    }
+    /**
+     * @see InqRoomManager#closeRoomWithMediaError(String)
+     */
+    public void closeRoomWithMediaError(String roomName) throws RoomException {
+        Set<UserParticipant> participants = internalManager.getParticipants(roomName);
         try {
-            notificationRoomHandler.onRoomClosed(roomName, internalManager.getParticipants(roomName));
-            participants = internalManager.closeRoom(roomName);
+            for(UserParticipant p : participants) {
+                notificationRoomHandler.onMediaElementError(roomName, p.getParticipantId(), "Mediaserver closed ");
+            }
+            internalManager.closeRoomWithMediaError(roomName);
         } catch (Exception e) {
             log.error("Exception closing room {}", roomName, e);
         }

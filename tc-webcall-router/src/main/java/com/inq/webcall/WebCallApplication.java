@@ -13,7 +13,7 @@ import org.kurento.repository.RepositoryClient;
 import org.kurento.repository.RepositoryClientProvider;
 import org.kurento.room.KurentoRoomServerApp;
 import com.inq.webcall.room.rpc.InqJsonRpcUserControl;
-import com.inq.webcall.service.FixedNKmsManager;
+import com.inq.webcall.service.InqFixedNKmsManager;
 import org.kurento.room.kms.KmsManager;
 import org.kurento.room.rpc.JsonRpcUserControl;
 import org.slf4j.Logger;
@@ -76,7 +76,7 @@ public class WebCallApplication  extends KurentoRoomServerApp {
 
         log.info("Configuring Kurento Room Server to use the following kmss: " + kmsWsUris);
 
-        FixedNKmsManager fixedKmsManager = new FixedNKmsManager(kmsWsUris, DEMO_KMS_NODE_LIMIT);
+        InqFixedNKmsManager fixedKmsManager = new InqFixedNKmsManager(kmsWsUris, DEMO_KMS_NODE_LIMIT);
         fixedKmsManager.setAuthRegex(DEMO_AUTH_REGEX);
         log.debug("Authorization regex for new rooms: {}", DEMO_AUTH_REGEX);
         return fixedKmsManager;

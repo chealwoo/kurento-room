@@ -3,7 +3,7 @@ package com.inq.webcall.controller;
 import com.inq.webcall.WebCallApplication;
 import com.inq.webcall.room.InqNotificationRoomManager;
 import org.kurento.commons.PropertiesManager;
-import com.inq.webcall.service.FixedNKmsManager;
+import com.inq.webcall.service.InqFixedNKmsManager;
 import com.inq.webcall.service.KMSReport;
 import org.kurento.room.exception.RoomException;
 import org.kurento.room.kms.KmsManager;
@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -94,8 +92,8 @@ public class AppController {
     @RequestMapping("/getKmsReport")
     public Set<KMSReport> report() {
         List<KmsManager.KmsLoad> kmsloads = new ArrayList<>();
-        if(kmsManager instanceof FixedNKmsManager) {
-            kmsloads = ((FixedNKmsManager) kmsManager).getKmsLoads();
+        if(kmsManager instanceof InqFixedNKmsManager) {
+            kmsloads = ((InqFixedNKmsManager) kmsManager).getKmsLoads();
         }
 
         Set<KMSReport> kmsSet = new HashSet<>();

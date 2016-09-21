@@ -35,10 +35,8 @@ import org.kurento.client.KurentoConnectionListener;
 import org.kurento.jsonrpc.Session;
 import org.kurento.room.exception.RoomException;
 import org.kurento.room.internal.DefaultKurentoClientSessionInfo;
-import org.kurento.room.internal.Room;
 import org.kurento.room.kms.Kms;
 import org.kurento.room.kms.KmsManager;
-import org.kurento.room.kms.MaxWebRtcLoadManager;
 import org.kurento.room.rpc.JsonRpcNotificationService;
 import org.kurento.room.rpc.ParticipantSession;
 import org.slf4j.Logger;
@@ -51,8 +49,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author Radu Tom Vlad (rvlad@naevatec.com)
  * @since 6.0.0
  */
-public class FixedNKmsManager extends KmsManager implements InqKurentoClientProvider{
-  private static final Logger log = LoggerFactory.getLogger(FixedNKmsManager.class);
+public class InqFixedNKmsManager extends KmsManager implements InqKurentoClientProvider{
+  private static final Logger log = LoggerFactory.getLogger(InqFixedNKmsManager.class);
 
   private String authRegex;
   private static Pattern authPattern = null;
@@ -67,7 +65,7 @@ public class FixedNKmsManager extends KmsManager implements InqKurentoClientProv
   @Autowired
   private JsonRpcNotificationService notificationService;
 
-  public FixedNKmsManager(List<String> kmsWsUri) {
+  public InqFixedNKmsManager(List<String> kmsWsUri) {
     for (String uri : kmsWsUri) {
       this.addKms(new Kms(KurentoClient.create(uri, new KurentoConnectionListener() {
 
@@ -102,13 +100,13 @@ public class FixedNKmsManager extends KmsManager implements InqKurentoClientProv
    * @param kmsWsUri
    * @param kmsLoadLimit
      */
-  public FixedNKmsManager(List<String> kmsWsUri, int kmsLoadLimit) {
+  public InqFixedNKmsManager(List<String> kmsWsUri, int kmsLoadLimit) {
     for (String uri : kmsWsUri) {
       InqKms kms = new InqKms(KurentoClient.create(uri, new KurentoConnectionListener() {
 
         @Override
         public void reconnected(boolean arg0) {
-          for(InqKms k: FixedNKmsManager.this.kmsFailOverMap.keySet()) {
+          for(InqKms k: InqFixedNKmsManager.this.kmsFailOverMap.keySet()) {
             if (k.getUri().equals(uri)) {
               k.getLoadManager().setOn(true);
               log.debug("Kms uri={} has been reconnected", uri);
@@ -119,27 +117,29 @@ public class FixedNKmsManager extends KmsManager implements InqKurentoClientProv
         @Override
         public void disconnected() {
           InqKms kms = null;
-          for(InqKms k: FixedNKmsManager.this.kmsFailOverMap.keySet()) {
+          for(InqKms k: InqFixedNKmsManager.this.kmsFailOverMap.keySet()) {
             if (k.getUri().equals(uri)) {
               kms = k;
               break;
             }
           }
           if (null != kms) {
+            log.warn("Kms uri={} has been disconnected", uri);
             kms.getLoadManager().setOn(false);
-            ConcurrentMap<String, InqRoom> roomMap = FixedNKmsManager.this.kmsFailOverMap.get(kms);
-            FixedNKmsManager.this.kmsFailOverMap.put(kms, new ConcurrentHashMap<>());
+            ConcurrentMap<String, InqRoom> roomMap = InqFixedNKmsManager.this.kmsFailOverMap.get(kms);
+            InqFixedNKmsManager.this.kmsFailOverMap.put(kms, new ConcurrentHashMap<>());
             Set<String> names = roomMap.keySet();
+            int i =0;
             for (String name : names) {
               try {
-                log.info("removing room '{}' during failover", name);
+                log.info("KMS Disconnected; Removing room '{}' during failover {} / {}", name, i++, names.size());
                 roomMap.remove(name);
-                roomManager.closeRoom(name);
+                roomManager.closeRoomWithMediaError(name);
               } catch (Exception e) {
                 log.error("Error while removing room '{}' during failover", name, e);
               }
             }
-            log.debug("Kms uri={} has been disconnected", uri);
+            log.debug("Kms uri={} has been disconnected and cleaned up", uri);
           }
         }
 

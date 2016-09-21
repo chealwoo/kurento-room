@@ -814,8 +814,6 @@ public class InqRoomManager {
 
         log.warn("No room '{}' exists yet. Created one " + "using KurentoClient '{}'.", roomName,
                 kcName);
-
-
     }
 
     /**
@@ -860,6 +858,48 @@ public class InqRoomManager {
 
         log.warn("Room '{}' removed and closed", roomName);
         return participants;
+    }
+
+    /**
+     * Closes an existing room by releasing all resources that were allocated for the room. Once
+     * closed, the room can be reopened (will be empty and it will use another Media Pipeline).
+     * Existing participants will be evicted. <br/>
+     * <strong>Dev advice:</strong> The room event handler should send notifications to the existing
+     * participants in the room to inform that the room was forcibly closed.
+     *
+     * @param roomName name or identifier of the room
+     * @throws RoomException in case the room doesn't exist or has been already closed
+     */
+    public void closeRoomWithMediaError(String roomName) throws RoomException {
+        InqRoom room = rooms.get(roomName);
+        if (room == null) {
+            throw new RoomException(Code.ROOM_NOT_FOUND_ERROR_CODE, "Room '" + roomName + "' not found");
+        }
+        if (room.isClosed()) {
+            throw new RoomException(Code.ROOM_CLOSED_ERROR_CODE, "Room '" + roomName + "' already closed");
+        }
+
+        // copy the ids as they will be removed from the map
+        Set<String> pids = new HashSet<String>(room.getParticipantIds());
+        for (String pid : pids) {
+            try {
+                room.leave(pid);
+            } catch (RoomException e) {
+                log.warn("Error evicting participant with id '{}' from room '{}'", pid, roomName, e);
+            } catch (JsonRpcException e) {
+                log.warn("Error evicting participant with id '{}' from room '{}' KMS may not connected", pid, roomName, e);
+            }
+        }
+        try {
+            room.close();
+        } catch (JsonRpcException e) {
+            log.error("Exception closing room {}", roomName, e);
+        }
+        rooms.remove(roomName);
+
+        roomEventManager.closeRoomEvent(roomName);
+
+        log.debug("Room '{}' removed and closed because of KMS Media error", roomName);
     }
 
     /**
