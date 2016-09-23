@@ -103,7 +103,7 @@ public class InqPublisherEndpoint extends InqMediaEndpoint {
    *         generated previously by this endpoint)
    */
   public synchronized String publish(SdpType sdpType, String sdpString, boolean doLoopback,
-      MediaElement loopbackAlternativeSrc, MediaType loopbackConnectionType) {
+                                     MediaElement loopbackAlternativeSrc, MediaType loopbackConnectionType) {
     registerOnIceCandidateEventListener();
     if (doLoopback) {
       if (loopbackAlternativeSrc == null) {
@@ -127,13 +127,20 @@ public class InqPublisherEndpoint extends InqMediaEndpoint {
     }
     gatherCandidates();
 
+    /*
+     *  Start recording for individual
+     */
     if(getOwner().getRecorder() != null) {
       log.debug("Start recording participant {}", getOwner().getName());
       getOwner().startRecorder();
+    }
 
+    /*
+     * Start room recorder if not and add this endpoint into room recorder.
+     */
+      getOwner().startRoomRecorder();
       getOwner().createHubPort();
       getOwner().connectHubPort(getWebEndpoint());
-    }
 
     return sdpResponse;
   }

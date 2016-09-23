@@ -61,10 +61,16 @@ public class WebCallApplication  extends KurentoRoomServerApp {
     public static final String REPOSITORY_SERVER_URI = PropertiesManager.getProperty("repository.uri",
             DEFAULT_REPOSITORY_SERVER_URI);
 
-    private static final boolean DEFAULT_SSO_AUTH_CHECK = true;
+    // Using individual Recording
+    private static final boolean DEFAULT_PARTICIPANT_RECORDER_SWITCH = false;
+    public static final boolean PARTICIPANT_RECORDER_SWITCH = PropertiesManager.getProperty("repository.participant_record",
+            DEFAULT_PARTICIPANT_RECORDER_SWITCH);
 
+    // Start using SAML SSO
+    private static final boolean DEFAULT_SSO_AUTH_CHECK = true;
     public static final boolean SSO_AUTH_CHECK = PropertiesManager.getProperty("security.ssoAuthCheck",
             DEFAULT_SSO_AUTH_CHECK);
+
     public static final String SAML_TOKEN_PATH = PropertiesManager.getProperty("security.certificationPath",
             File.separator + "keys" + File.separator + "saml.crt");
 

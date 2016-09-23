@@ -14,8 +14,24 @@ cd tc-webcall-router/target
 unzip tc-webcall-router-x.x.x.zip
 
 
+## commands I use to release.
+```
+git pull
+git branch
+mvn clean package -am -pl tc-webcall-router -DskipTests
+cd tc-webcall-router/target/
+unzip tc-webcall-router-6.5.0.zip
+cd tc-webcall-router-6.5.0/bin
+chmod a+x *.sh
+sudo ./install.sh
+```
 
-git pull.
+## Configuarion
+cd /etc/kurento
+sudo vi tc-webcall-router.conf.json
+
+## log file path
+/var/log/kurento
 
 
 

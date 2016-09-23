@@ -88,13 +88,7 @@ public class InqParticipant {
 
         createRecorder(pipeline);
 
-     //   createHubPort();
-
         this.publisher = new InqPublisherEndpoint(web, this, name, pipeline);
-
-       // publisher.getWebEndpoint().connect(hubPort);
-
-      //  this.publisher.connect(recorder);
 
         for (InqParticipant other : room.getParticipants()) {
             if (!other.getName().equals(this.name)) {
@@ -171,6 +165,34 @@ public class InqParticipant {
         }
     }
 
+    /**
+     *
+     * @param webRtcEndpoint
+     */
+    public void disconnectRecorder(WebRtcEndpoint webRtcEndpoint) {
+        try {
+            if(null != this.recorder) {
+                log.info("Participant {} connect recorder {}", name, webRtcEndpoint.getName());
+                webRtcEndpoint.disconnect(this.recorder, new Continuation<Void>() {
+                    @Override
+                    public void onSuccess(Void result) throws Exception {
+                        log.debug("EP {}: Elements have been connected (source {} -> sink {})", getPublisher().getEndpointName(),
+                                webRtcEndpoint.getId(), recorder.getId());
+                    }
+
+                    @Override
+                    public void onError(Throwable cause) throws Exception {
+                        log.warn("EP {}: Failed to connect media elements (source {} -> sink {})",
+                                getPublisher().getEndpointName(),
+                                webRtcEndpoint.getId(), recorder.getId(), cause);
+                    }
+                });
+                webRtcEndpoint.disconnect(webRtcEndpoint);
+            }
+        } catch (Exception e) {
+            log.error("Fail to connect webRtcEndpoint to recorder in participant id={}; " + e.getMessage(), name, e);
+        }
+    }
 
     /**
      *
@@ -181,11 +203,9 @@ public class InqParticipant {
         try {
             if(!isRecording) {
                 log.info("Participant {} start recording recorder {}", name, recorder.getName());
-                this.recorder.record();
-                isRecording = true;
-
-                if (room.getParticipants().size() >= 2) {
-                    room.startRecorder();
+                if(WebCallApplication.PARTICIPANT_RECORDER_SWITCH) {
+                    this.recorder.record();
+                    isRecording = true;
                 }
             } else {
                 log.info("Participant {} already recording ", name);
@@ -193,6 +213,10 @@ public class InqParticipant {
         } catch (Exception e) {
             log.error("Fail to connect webRtcEndpoint to recorder in participant id={}; " + e.getMessage(), name, e);
         }
+    }
+
+    public void startRoomRecorder() {
+        room.startRecorder();
     }
 
     public void stopRecorder(WebRtcEndpoint webRtcEndpoint) {
@@ -210,7 +234,8 @@ public class InqParticipant {
     }
 
     /**
-     *
+     *  Create a hubport of room composite
+     *  used to add participant's video to room composite which is saved
      */
     public void createHubPort() {
         try {
@@ -221,6 +246,27 @@ public class InqParticipant {
         }
     }
 
+    /**
+     *  Remove hubport from room composite
+     */
+    public void removeHubPort() {
+        try {
+            log.debug("PARTICIPANT {}: Removing HubPort {}", name, hubPort.getId());
+            if(this.hubPort != null) {
+                this.hubPort.release();
+                this.hubPort = null;
+            }
+            log.debug("PARTICIPANT {}: HubPort is removed", name);
+        } catch (Exception e) {
+            log.error("Fail to remove hubPort of participant id={} " + e.getMessage(), name, e);
+        }
+    }
+
+    /**
+     * connect participant's rtcEndpoint to hubPort so participant's video can be added to room video.
+     *
+     * @param webRtcEndpoint
+     */
     public void connectHubPort(WebRtcEndpoint webRtcEndpoint) {
         try {
             webRtcEndpoint.connect(this.hubPort, new Continuation<Void>() {
@@ -233,6 +279,32 @@ public class InqParticipant {
                 @Override
                 public void onError(Throwable cause) throws Exception {
                     log.warn("PARTICIPANT {}: Failed to connect media elements (source {} -> sink {})",
+                            getPublisher().getEndpointName(),
+                            webRtcEndpoint.getId(), hubPort.getId(), cause);
+                }
+            });
+        } catch (Exception e) {
+            log.error("Fail to connect webRtcEndpoint.connect(hubPort) in participant id={} " + e.getMessage(), name, e);
+        }
+    }
+
+    /**
+     * This disconnects endpoint from hubPort and remove participant's video from room video.
+     *
+     * @param webRtcEndpoint
+     */
+    public void disconnectHubPort(WebRtcEndpoint webRtcEndpoint) {
+        try {
+            webRtcEndpoint.disconnect(this.hubPort, new Continuation<Void>() {
+                @Override
+                public void onSuccess(Void result) throws Exception {
+                    log.debug("PARTICIPANT {}: HubPort: Elements have been disconnected (EndPoint {} -> hubPort {})", getPublisher().getEndpointName(),
+                            webRtcEndpoint.getId(), hubPort.getId());
+                }
+
+                @Override
+                public void onError(Throwable cause) throws Exception {
+                    log.warn("PARTICIPANT {}: Failed to disconnect media elements (source {} -> sink {})",
                             getPublisher().getEndpointName(),
                             webRtcEndpoint.getId(), hubPort.getId(), cause);
                 }
@@ -492,6 +564,9 @@ public class InqParticipant {
         }
     }
 
+    /**
+     * close participant
+     */
     public void close() {
         log.debug("PARTICIPANT {}: Closing user", this.name);
         if (isClosed()) {
@@ -510,6 +585,14 @@ public class InqParticipant {
                         + "But the endpoint was never instantiated.", this.name, remoteParticipantName);
             }
         }
+        // disconnet recorder.
+        disconnectRecorder(publisher.getWebEndpoint());
+
+        // disconnect hubport and clean it up
+        disconnectHubPort(publisher.getWebEndpoint());
+        removeHubPort();
+
+        // release endpoint
         releasePublisherEndpoint();
     }
 

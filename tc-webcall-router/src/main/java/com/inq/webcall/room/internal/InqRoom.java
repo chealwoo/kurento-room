@@ -176,9 +176,6 @@ public class InqRoom {
             } catch (Exception e) {
                 log.error("Fail to create recorder of participant id={}; " + e.getMessage(), name, e);
             }
-        } else {
-            log.info("Stoping recorder");
-            recorder.stop();
         }
     }
 
@@ -187,7 +184,7 @@ public class InqRoom {
         try {
             if(!isRecording) {
                 createRecorder(pipeline);
-                log.info("Room composite Media will be recorded {}by KMS: id={} , url={}",
+                log.info("Room composite Media will be recorded {} by KMS: id={} , url={}",
                         (repositoryClient == null ? "locally " : ""), this.repoItem.getId(), this.repoItem.getUrl());
 
                 hubPort = new HubPort.Builder(composite).build();
@@ -209,10 +206,16 @@ public class InqRoom {
                 });
 
             } else {
-                log.info("Participant {} already recording ", name);
+                log.info("Room {} already recording ", name);
             }
         } catch (Exception e) {
             log.error("Fail to connect webRtcEndpoint to recorder in participant id={}; " + e.getMessage(), name, e);
+        }
+    }
+
+    public void stopRecorder(){
+        if(this.recorder != null) {
+            this.recorder.stop();
         }
     }
 
