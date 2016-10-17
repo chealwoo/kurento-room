@@ -109,6 +109,7 @@ public class InqRoom {
         for (InqParticipant p : participants.values()) {
             if (p.getName().equals(userName)) {
                 // TC change for recovery.
+                log.warn("User '{}' already exists in room '{}'", userName, name);
                 p.close();
                 break;
 //                throw new RoomException(Code.EXISTING_USER_IN_ROOM_ERROR_CODE, "User '" + userName

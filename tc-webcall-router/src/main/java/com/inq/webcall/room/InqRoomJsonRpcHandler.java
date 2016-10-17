@@ -41,6 +41,7 @@ public class InqRoomJsonRpcHandler extends DefaultJsonRpcHandler<JsonObject> {
 
   private static final String HANDLER_THREAD_NAME = "handler";
 
+  /* This class uses InqJsonRpcUserControl sub class */
   private JsonRpcUserControl userControl;
 
   private JsonRpcNotificationService notificationService;

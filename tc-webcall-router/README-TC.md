@@ -44,3 +44,15 @@ https://localhost:8443/getKmsReport
 
 ## Configuration
 /etc/kurento
+
+
+## TC Resource
+.inq.com
+
+webrtc-app1-test
+webrtc-app2-test
+
+webrtc-media1-test
+webrtc-media2-test
+
+http://confluence.touchcommerce.com/display/IT/WebRTC

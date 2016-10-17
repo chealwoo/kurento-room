@@ -27,6 +27,15 @@ import java.util.List;
 
 import static org.kurento.commons.PropertiesManager.getPropertyJson;
 
+/**
+ * TouchCommerce Kurento Room Application.
+ *
+ * This is Spring Boot application class.
+ * Application Configuration is read here.
+ * Default Beans are created here.
+ *
+ * All User Request are handled by InqRoomJsonRpcHandler. - Debug starts there.
+ */
 public class WebCallApplication  extends KurentoRoomServerApp {
 
     private static final Logger log = LoggerFactory.getLogger(WebCallApplication.class);
