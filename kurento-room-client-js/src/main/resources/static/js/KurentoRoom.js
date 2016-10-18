@@ -301,7 +301,37 @@ function Room(kurento, options) {
 	        delete participants[pid];
 	      }
 	    }
-    }
+    };
+
+
+    /*
+     * forced means the user was evicted, no need to send the 'leaveRoom' request
+     */
+    this.close = function (forced, jsonRpcClient) {
+        forced = !!forced;
+        console.log("Closing room (forced=" + forced + ")");
+
+        if (connected && !forced) {
+            kurento.sendRequest('closeRoom', {
+                user: options.user,
+                room: options.room
+            }, function(error, response) {
+                if (error) {
+                    console.error(error);
+                }
+                jsonRpcClient.close();
+            });
+        } else {
+            jsonRpcClient.close();
+        }
+        connected = false;
+        if (participants) {
+            for (var pid in participants) {
+                participants[pid].dispose();
+                delete participants[pid];
+            }
+        }
+    };
     
     this.disconnect = function (stream) {
     	var participant = stream.getParticipant();
@@ -852,7 +882,8 @@ function KurentoRoom(wsUri, callback) {
             participantEvicted: onParticipantEvicted,
             sendMessage: onNewMessage,
             iceCandidate: iceCandidateEvent,
-            mediaError: onMediaError
+            mediaError: onMediaError,
+              roomClosed: onRoomClosed
           }
         };
 
@@ -972,6 +1003,12 @@ function KurentoRoom(wsUri, callback) {
     };
 
     this.close = function (forced) {
+    	if (isRoomAvailable()) {
+    	      room.close(forced, jsonRpcClient);
+    	    }
+    };
+
+    this.leave = function (forced) {
     	if (isRoomAvailable()) {
     	      room.leave(forced, jsonRpcClient);
     	    }

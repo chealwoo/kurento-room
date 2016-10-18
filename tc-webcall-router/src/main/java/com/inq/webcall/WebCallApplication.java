@@ -134,7 +134,7 @@ public class WebCallApplication  extends KurentoRoomServerApp {
     @Bean
     @ConditionalOnMissingBean
     public InqRoomJsonRpcHandler inqRoomHandler() {
-        return new InqRoomJsonRpcHandler(userControl(), notificationService());
+        return new InqRoomJsonRpcHandler((InqJsonRpcUserControl) userControl(), notificationService());
     }
 
     @Override

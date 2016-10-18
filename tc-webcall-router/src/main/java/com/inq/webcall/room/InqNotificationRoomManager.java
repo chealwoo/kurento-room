@@ -427,4 +427,12 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
     public InqRoomManager getInqRoomManager() {
         return internalManager;
     }
+
+    public boolean checkRoomToken(String roomName, String authToken) {
+        if(null != authToken && null != roomName) {
+            return authToken.equals(internalManager.getRoomAuthToken(roomName));
+        } else {
+            return false;
+        }
+    }
 }

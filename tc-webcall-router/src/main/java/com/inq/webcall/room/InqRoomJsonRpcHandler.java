@@ -16,6 +16,8 @@
 package com.inq.webcall.room;
 
 import com.google.gson.JsonObject;
+import com.inq.webcall.room.internal.InqProtocolElements;
+import com.inq.webcall.room.rpc.InqJsonRpcUserControl;
 import org.kurento.jsonrpc.DefaultJsonRpcHandler;
 import org.kurento.jsonrpc.Session;
 import org.kurento.jsonrpc.Transaction;
@@ -42,12 +44,12 @@ public class InqRoomJsonRpcHandler extends DefaultJsonRpcHandler<JsonObject> {
   private static final String HANDLER_THREAD_NAME = "handler";
 
   /* This class uses InqJsonRpcUserControl sub class */
-  private JsonRpcUserControl userControl;
+  private InqJsonRpcUserControl userControl;
 
   private JsonRpcNotificationService notificationService;
 
   @Autowired
-  public InqRoomJsonRpcHandler(JsonRpcUserControl userControl,
+  public InqRoomJsonRpcHandler(InqJsonRpcUserControl userControl,
                                JsonRpcNotificationService notificationService) {
     this.userControl = userControl;
     this.notificationService = notificationService;
@@ -102,6 +104,9 @@ public class InqRoomJsonRpcHandler extends DefaultJsonRpcHandler<JsonObject> {
         break;
       case ProtocolElements.LEAVEROOM_METHOD :
         userControl.leaveRoom(transaction, request, participantRequest);
+        break;
+      case InqProtocolElements.CLOSEROOM_METHOD :
+        userControl.closeRoom(transaction, request, participantRequest);
         break;
       case ProtocolElements.SENDMESSAGE_ROOM_METHOD :
         userControl.sendMessage(transaction, request, participantRequest);

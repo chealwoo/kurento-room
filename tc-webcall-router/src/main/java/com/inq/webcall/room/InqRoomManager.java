@@ -972,4 +972,13 @@ public class InqRoomManager {
     public void closeKmsRooms(KurentoClient kms) {
 
     }
+
+    public String getRoomAuthToken(String roomName) {
+        InqRoom room = rooms.get(roomName);
+        if (null != room) {
+            return room.getAuthToken();
+        } else {
+            return null;
+        }
+    }
 }
