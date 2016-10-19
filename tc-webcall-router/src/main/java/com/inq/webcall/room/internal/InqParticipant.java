@@ -166,7 +166,7 @@ public class InqParticipant {
     }
 
     /**
-     *
+     *  Disconnect
      * @param webRtcEndpoint
      */
     public void disconnectRecorder(WebRtcEndpoint webRtcEndpoint) {
@@ -176,13 +176,13 @@ public class InqParticipant {
                 webRtcEndpoint.disconnect(this.recorder, new Continuation<Void>() {
                     @Override
                     public void onSuccess(Void result) throws Exception {
-                        log.debug("EP {}: Elements have been connected (source {} -> sink {})", getPublisher().getEndpointName(),
+                        log.debug("EP {}: Elements have been disconnect (source {} -> sink {})", getPublisher().getEndpointName(),
                                 webRtcEndpoint.getId(), recorder.getId());
                     }
 
                     @Override
                     public void onError(Throwable cause) throws Exception {
-                        log.warn("EP {}: Failed to connect media elements (source {} -> sink {})",
+                        log.warn("EP {}: Failed to disconnect media elements (source {} -> sink {})",
                                 getPublisher().getEndpointName(),
                                 webRtcEndpoint.getId(), recorder.getId(), cause);
                     }
@@ -190,7 +190,7 @@ public class InqParticipant {
                 webRtcEndpoint.disconnect(webRtcEndpoint);
             }
         } catch (Exception e) {
-            log.error("Fail to connect webRtcEndpoint to recorder in participant id={}; " + e.getMessage(), name, e);
+            log.error("Fail to disconnect webRtcEndpoint to recorder in participant id={}; " + e.getMessage(), name, e);
         }
     }
 
