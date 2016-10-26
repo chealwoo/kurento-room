@@ -423,6 +423,7 @@ public abstract class InqMediaEndpoint {
         owner.sendIceCandidate(endpointName, event.getCandidate());
       }
     });
+
   }
 
   /**

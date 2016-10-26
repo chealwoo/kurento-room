@@ -15,10 +15,12 @@
  */
 package com.inq.webcall.room.internal;
 
+import com.inq.monitor.roommonitor.RoomMonitor;
 import com.inq.webcall.WebCallApplication;
 import com.inq.webcall.room.endpoint.InqPublisherEndpoint;
 import com.inq.webcall.room.endpoint.InqSubscriberEndpoint;
 import org.kurento.client.*;
+import org.kurento.client.EventListener;
 import org.kurento.client.internal.server.KurentoServerException;
 import org.kurento.repository.RepositoryClient;
 import org.kurento.repository.RepositoryClientProvider;
@@ -418,6 +420,52 @@ public class InqParticipant {
         log.trace("USER {}: Publishing Sdp ({}) is {}", this.name, sdpType, sdpResponse);
         log.info("USER {}: Is now publishing video in room {}", this.name, this.room.getName());
 
+        // TODO Monitoring - should be event listener I think
+        // RoomMonitor.crunchWebRtcEndpoint(this.getPublisher().getWebEndpoint());
+        WebRtcEndpoint webRtcEndpoint = this.getPublisher().getWebEndpoint();
+
+        webRtcEndpoint.addMediaStateChangedListener(
+                new EventListener<MediaStateChangedEvent>() {
+                    @Override
+                    public void onEvent(MediaStateChangedEvent mediaStateChangedEvent) {
+                        try {
+                            Map<String, Stats> stats = webRtcEndpoint.getStats();
+                            for (Stats s : stats.values()) {
+                                log.debug("Status has been changed Id:{}, Timestamp:{}, Type:{}", s.getId(), s.getTimestamp(), s.getType());
+                                switch (s.getType()) {
+                                    case inboundrtp:
+                                        RTCInboundRTPStreamStats inboudStats = (RTCInboundRTPStreamStats) s;
+                                        log.debug("Jitter: {}", inboudStats.getJitter());
+                                        log.debug("FractionLost: {}", inboudStats.getFractionLost());
+                                        log.debug("BytesReceived: {}", inboudStats.getBytesReceived());
+                                        log.debug("PliCount: {}", inboudStats.getPliCount());
+                                        log.debug("PacketsLost: {}", inboudStats.getPacketsLost());
+                                        log.debug("NackCount: {}", inboudStats.getNackCount());
+                                        break;
+
+                                    case outboundrtp:
+                                        RTCOutboundRTPStreamStats outboundStats = (RTCOutboundRTPStreamStats) s;
+                                        log.debug("RoundTripTime: {}", outboundStats.getRoundTripTime());
+                                        log.debug("TargetBitrate: {}", outboundStats.getTargetBitrate());
+                                        log.debug("BytesSent: {}", outboundStats.getBytesSent());
+                                        log.debug("Total Number of Packet sent: {}", outboundStats.getPacketsSent());
+                                        log.debug("Total Number of Packet Loss Indication:  {}", outboundStats.getPliCount());
+                                        log.debug("NackCount: {}", outboundStats.getNackCount());
+                                        log.debug("CodecId: {}", outboundStats.getCodecId());
+                                        log.debug("SSrc: {}", outboundStats.getSsrc());
+                                        break;
+
+                                    default:
+                                        break;
+                                }
+                            }
+                        } catch (Throwable t) {
+                            // The WebRtcEndpoint may have been released. This does not need to
+                            // be a "severe" problem
+                            // TODO log t just in case.
+                        }
+                    }
+                });
         return sdpResponse;
     }
 

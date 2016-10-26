@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+    <head>
+        <title>Kurento Room Demo</title>
+        <meta name="author" content="Raquel Díaz González">
+        <!-- Disable content caching -->
+        <!-- <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="0" /> -->
+
+	<link rel="shortcut icon" href="img/kurento.png" type="image/png" />	
+        <!--css-->
+        <link type="text/css" rel="stylesheet" href="./css/googleapis-fonts.css">
+        <link type="text/css" rel="stylesheet" href="./css/jquery-ui.min.css">
+        <link type="text/css" rel="stylesheet" href="./css/room.css" />
+        <!--kurento-->
+        <script src="./js/adapter.js"></script>
+        <script src="./js/kurento-utils.js"></script>
+        <script src="./js/kurento-jsonrpc.js"></script>
+        <script src="./js/EventEmitter.js"></script>
+        <script src="./js/KurentoRoom.js"></script>
+        <script src="./angular/services/Participants.js"></script>
+        <!--jquery-->
+        <script src="./js/jquery-2.1.1.min.js"></script>
+        <script src="./js/jquery-ui.min.js"></script>
+        <!--angularjs-->
+        <script src="./js/angular.min.js"></script>
+        <script src="./angular-sp/app-sp.js"></script>
+        <script src="./angular/angular-fullscreen.js"></script>
+        <!--lumx-->
+        <link rel="stylesheet" href="./angular/lumX/dist/css/lumx.css">
+        <link rel="stylesheet" href="./angular/lumX/material-design-iconic-font/css/material-design-iconic-font.min.css">
+        <link rel="stylesheet" href="./angular/lumX/dist/_bourbon.scss">
+        <link rel="stylesheet" href="./angular/lumX/dist/_neat.scss">
+        <script src="./angular/lumX/dist/velocity.js"></script>
+        <script src="./angular/lumX/dist/moment-with-locales.min.js"></script>
+        <script src="./angular/lumX/dist/js/lumx.js"></script>
+        <script src="./angular/lumX/dist/scss/core/_core.scss"></script>
+        <script src="./angular/lumX/dist/scss/main/_lumx.scss"></script>
+    </head>
+
+    <body>
+
+    <div id="kurento_room_app" ng-app="kurento_room">
+        <div ng-controller="callController">
+
+            <div id="room" ng-show="showRoom" >
+                <div id="content" style="width: 200px; height: 200px;">
+                    <div id="main-video" style="width: 200px; height: 200px;">             <!--big videos-->         </div>
+                    <div id="participants">             <!--small videos-->         </div>
+                </div>
+            </div>
+</br>
+            <div id="room2" ng-show="showRoom" >
+                <div id="content2" style="width: 200px; height: 200px;">
+                    <div id="main-video2" style="width: 200px; height: 200px;">             <!--big videos-->         </div>
+                    <div id="participants2">             <!--small videos-->         </div>
+                </div>
+            </div>
+
+            <div class="join" ng-hide="showRoom">
+                <div id="join-title">Kurento Room</div>
+                <div class="card" id="join">
+                    <form role="form" ng-submit="register(room, room2)" accept-charset="UTF-8">
+                        <div class="card__content">
+                            <lx-text-field label="Username"><input type="text" id="name" ng-model="room.userName"
+                                                                   required></lx-text-field>
+                            <div class="grid">
+                                <div class="grid__col6">
+                                    <lx-text-field label="Room"><input type="text" id="roomName"
+                                                                       ng-model="room.roomName" ng-change="room2.roomName=room.roomName" required>
+                                    </lx-text-field>
+                                </div>
+                                <div class="grid__col6">
+                                    <lx-select ng-model="room2.roomName" placeholder="Choose an existing room"
+                                               choices="listRooms" floating-label>
+                                        <lx-select-selected> {{ $selected}}</lx-select-selected>
+                                        <lx-select-choices> {{ $choice}}</lx-select-choices>
+                                    </lx-select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card__actions">
+                            <div class="grid">
+                                <div class="grid__col6">
+                                    <button id="joinBtn" class="btn btn--l btn--green btn--raised" lx-ripple
+                                            type="submit">Join room!
+                                    </button>
+                                </div>
+                            </div>
+                            <br></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </body>
+
+</html>
