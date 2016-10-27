@@ -391,7 +391,7 @@ function Stream(kurento, local, room, options) {
     var elements = [];
     var participant = options.participant;
 
-    var recvVideo = options.recvVideo;
+    var recvVideo = videoOn;
     this.getRecvVideo = function () {
     	return recvVideo;
     }
@@ -511,17 +511,29 @@ function Stream(kurento, local, room, options) {
 
     this.init = function () {
         participant.addStream(that);
+        var myOption = {
+            mandatory: {
+                maxWidth: 640
+            },
+            optional: [
+                {maxFrameRate: 15},
+                {minFrameRate: 15}
+            ]
+        };
+
+        var myOption = videoOn === true ? {
+            mandatory: {
+                maxWidth: 640
+            },
+            optional: [
+                {maxFrameRate: 15},
+                {minFrameRate: 15}
+            ]
+        } : false;
+
         var constraints = {
             audio: true,
-            video: {
-                mandatory: {
-                    maxWidth: 640
-                },
-                optional: [
-                           {maxFrameRate: 15}, 
-                           {minFrameRate: 15}
-                           ]
-            }
+            video: myOption
         };
         
         navigator.getUserMedia(constraints, function (userStream) {

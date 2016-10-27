@@ -2,23 +2,43 @@
 
 <html lang="en">
 
-    <head>
-        <title>Kurento Room Demo</title>
-        <meta name="author" content="Raquel Díaz González">
-        <!-- Disable content caching -->
-        <!-- <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-        <meta http-equiv="Pragma" content="no-cache" />
-        <meta http-equiv="Expires" content="0" /> -->
-    </head>
+<head>
+    <title>Kurento Room Demo</title>
+    <meta name="author" content="Raquel Díaz González">
+    <!--jquery-->
+    <script src="./js/jquery-2.1.1.min.js"></script>
+    <script src="./js/jquery-ui.min.js"></script>
+    <!-- Disable content caching -->
+    <!-- <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" /> -->
+</head>
 
-    <body>
+<body>
 
-    <div id="iframe01">
-        <iframe title="test1" src="index-sp.html?roomName=t1&userName=u1" width="400px" height="200px"></iframe>
-    </div>
-    <div id="iframe02">
-        <iframe title="test2" src="index-sp.html?roomName=t1&userName=u2" width="400px" height="200px"></iframe>
-    </div>
-    </body>
+<div id="box-iframes">
+
+<div id="iframe01" style="width: 100%; height: 250px;">
+    <iframe title="test1" src="index-sp.html?roomName=t1&userName=u1" width="100%" height="200px"></iframe>
+</div>
+
+
+
+</div>
+
+<script>
+    $(document).ready(function () {
+        $.delay(1000);
+        $('<iframe>', {
+            src: 'index-sp.html?roomName=t1&userName=u2',
+            id: 'myFrame1-2',
+            frameborder: 1,
+            scrolling: 'yes',
+            width:"100%", height:"200px"
+        }).appendTo('#box-iframes');
+    });
+</script>
+
+</body>
 
 </html>

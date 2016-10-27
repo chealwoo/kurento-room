@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <title>Kurento Room Demo</title>
+    <meta name="author" content="Raquel Díaz González">
+    <!--jquery-->
+    <script src="./js/jquery-2.1.1.min.js"></script>
+    <script src="./js/jquery-ui.min.js"></script>
+    <!-- Disable content caching -->
+    <!-- <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" /> -->
+</head>
+
+<body>
+
+<div id="box-iframes">
+
+</div>
+
+<script>
+
+    /**
+     *
+     * @param name
+     * @returns {*}
+     */
+    $.urlParam = function (name) {
+        var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+        if (results == null) {
+            return null;
+        }
+        else {
+            return results[1] || 0;
+        }
+    };
+
+
+    $(document).ready(function () {
+        window.numOfRooms = $.urlParam("nor") || 3;
+        window.pfixRoomName = $.urlParam("rid") || "room";
+        window.pfixUserName = $.urlParam("uid") || "user";
+        window.userPerRoom = $.urlParam("nou") || 2;
+        window.videoOn = $.urlParam("vOn") || false;
+        window.myi = 1;
+        window.myj = 1;
+
+        window.setTimeout(addIframe, 5000);
+
+        function addIframe() {
+            $('<iframe>', {
+                src: 'index-sp.html?roomName=' + pfixRoomName + myi + '&userName=' + pfixUserName + myj + '&vOn=' + videoOn,
+                id: 'myFrame' + myi + '-' + myj,
+                frameborder: 1,
+                scrolling: 'yes',
+                width: "100%", height: "200px"
+            }).appendTo('#box-iframes');
+            $('<hr>').appendTo('#box-iframes');
+
+            myj++;
+            if(myj > window.userPerRoom) {
+                myj = 1; myi++;window.userPerRoom
+            }
+
+            if(myi <= window.numOfRooms && myj <= window.userPerRoom) {
+                window.setTimeout(addIframe, 5000);
+            }
+        }
+    });
+
+
+</script>
+
+</body>
+
+</html>

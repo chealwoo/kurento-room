@@ -81,6 +81,8 @@ public class InqParticipant {
     private volatile boolean streaming = false;
     private volatile boolean closed;
 
+    private InqWebRtcEndPointChecker inqWebRtcEndPointChecker = null;
+
     public InqParticipant(String id, String name, InqRoom room, MediaPipeline pipeline, boolean web) {
         this.web = web;
         this.id = id;
@@ -97,6 +99,13 @@ public class InqParticipant {
                 getNewOrExistingSubscriber(other.getName());
             }
         }
+
+        /*
+        Schedule Part.
+         */
+        Timer time = new Timer(); // Instantiate Timer Object
+        inqWebRtcEndPointChecker = new InqWebRtcEndPointChecker(this);
+        time.schedule(inqWebRtcEndPointChecker, 0, 5000); // Create Repetitively task for every 1 secs
     }
 
     /**
@@ -428,42 +437,7 @@ public class InqParticipant {
                 new EventListener<MediaStateChangedEvent>() {
                     @Override
                     public void onEvent(MediaStateChangedEvent mediaStateChangedEvent) {
-                        try {
-                            Map<String, Stats> stats = webRtcEndpoint.getStats();
-                            for (Stats s : stats.values()) {
-                                log.debug("Status has been changed Id:{}, Timestamp:{}, Type:{}", s.getId(), s.getTimestamp(), s.getType());
-                                switch (s.getType()) {
-                                    case inboundrtp:
-                                        RTCInboundRTPStreamStats inboudStats = (RTCInboundRTPStreamStats) s;
-                                        log.debug("Jitter: {}", inboudStats.getJitter());
-                                        log.debug("FractionLost: {}", inboudStats.getFractionLost());
-                                        log.debug("BytesReceived: {}", inboudStats.getBytesReceived());
-                                        log.debug("PliCount: {}", inboudStats.getPliCount());
-                                        log.debug("PacketsLost: {}", inboudStats.getPacketsLost());
-                                        log.debug("NackCount: {}", inboudStats.getNackCount());
-                                        break;
-
-                                    case outboundrtp:
-                                        RTCOutboundRTPStreamStats outboundStats = (RTCOutboundRTPStreamStats) s;
-                                        log.debug("RoundTripTime: {}", outboundStats.getRoundTripTime());
-                                        log.debug("TargetBitrate: {}", outboundStats.getTargetBitrate());
-                                        log.debug("BytesSent: {}", outboundStats.getBytesSent());
-                                        log.debug("Total Number of Packet sent: {}", outboundStats.getPacketsSent());
-                                        log.debug("Total Number of Packet Loss Indication:  {}", outboundStats.getPliCount());
-                                        log.debug("NackCount: {}", outboundStats.getNackCount());
-                                        log.debug("CodecId: {}", outboundStats.getCodecId());
-                                        log.debug("SSrc: {}", outboundStats.getSsrc());
-                                        break;
-
-                                    default:
-                                        break;
-                                }
-                            }
-                        } catch (Throwable t) {
-                            // The WebRtcEndpoint may have been released. This does not need to
-                            // be a "severe" problem
-                            // TODO log t just in case.
-                        }
+//                        RoomMonitor.crunchWebRtcEndpoint(webRtcEndpoint);
                     }
                 });
         return sdpResponse;

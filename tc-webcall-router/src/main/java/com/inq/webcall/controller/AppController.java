@@ -103,4 +103,9 @@ public class AppController {
         }
         return kmsSet;
     }
+
+    @RequestMapping("/submitStats")
+    public void submitStatus(@RequestParam("room") String room, @RequestParam("user") String user, @RequestParam("stats") String stats) {
+        log.warn("Stats has received for room '{}' and user '{}': stats: {}" , room, user, stats.substring(0,45));
+    }
 }
