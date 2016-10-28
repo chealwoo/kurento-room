@@ -186,6 +186,14 @@
             <artifactId>json</artifactId>
             <version>20160810</version>
         </dependency>
+
+
+<!-- Adding mongodb support -->
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+            <version>3.2.0</version>
+        </dependency>
     </dependencies>
 
     <profiles>
