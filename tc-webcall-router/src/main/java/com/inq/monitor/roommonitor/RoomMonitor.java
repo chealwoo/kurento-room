@@ -1,6 +1,7 @@
 package com.inq.monitor.roommonitor;
 
 import com.inq.webcall.room.InqNotificationRoomManager;
+import com.inq.webcall.room.internal.InqParticipant;
 import org.kurento.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,10 +13,12 @@ import java.util.Map;
  */
 public class RoomMonitor {
     private final static Logger log = LoggerFactory.getLogger(RoomMonitor.class);
-    
-    public static void crunchWebRtcEndpoint(WebRtcEndpoint webRtcEndpoint) {
+
+    public static void crunchWebRtcEndpoint(InqParticipant inqParticipant) {
         try {
+            WebRtcEndpoint webRtcEndpoint = inqParticipant.getPublisher().getWebEndpoint();
             Map<String, Stats> stats = webRtcEndpoint.getStats();
+            log.debug("Room: '{}', User: '{}', Endpoint: '{}' Information", inqParticipant.getRoom().getName(), inqParticipant.getName(), webRtcEndpoint.getId());
             for (Stats s : stats.values()) {
                 log.info("Status has been changed Id:{}, Timestamp:{}, Type:{}", s.getId(), s.getTimestamp(), s.getType());
                 switch (s.getType()) {
@@ -46,6 +49,7 @@ public class RoomMonitor {
             // The WebRtcEndpoint may have been released. This does not need to
             // be a "severe" problem
             // TODO log t just in case.
+            log.error("Error ", t);
         }
     }
 }

@@ -82,6 +82,7 @@ public class InqParticipant {
     private volatile boolean closed;
 
     private InqWebRtcEndPointChecker inqWebRtcEndPointChecker = null;
+    private Timer time;
 
     public InqParticipant(String id, String name, InqRoom room, MediaPipeline pipeline, boolean web) {
         this.web = web;
@@ -103,9 +104,13 @@ public class InqParticipant {
         /*
         Schedule Part.
          */
-        Timer time = new Timer(); // Instantiate Timer Object
+        time = new Timer(); // Instantiate Timer Object
         inqWebRtcEndPointChecker = new InqWebRtcEndPointChecker(this);
         time.schedule(inqWebRtcEndPointChecker, 0, 5000); // Create Repetitively task for every 1 secs
+    }
+
+    public Timer getTime() {
+        return time;
     }
 
     /**

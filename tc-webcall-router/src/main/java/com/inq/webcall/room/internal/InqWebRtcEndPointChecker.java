@@ -1,7 +1,21 @@
 package com.inq.webcall.room.internal;
 
-/**
- * Created by dlee on 10/27/2016.
- */
-public class InqWebRtcEndPointChecker {
+import com.inq.monitor.roommonitor.RoomMonitor;
+
+import java.util.TimerTask;
+
+
+public class InqWebRtcEndPointChecker extends TimerTask {
+    private InqParticipant inqParticipant = null;
+
+    public InqWebRtcEndPointChecker(InqParticipant inqParticipant) {
+        this.inqParticipant = inqParticipant;
+    }
+
+    public void run() {
+        if (inqParticipant.isClosed()) {
+            this.cancel();
+        }
+        RoomMonitor.crunchWebRtcEndpoint(inqParticipant);
+    }
 }
