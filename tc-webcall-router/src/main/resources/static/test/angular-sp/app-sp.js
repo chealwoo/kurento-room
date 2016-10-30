@@ -57,7 +57,7 @@ kurento_room.controller('callController', function ($scope, $window, ServicePart
 				room: $scope.roomName,
 				user: $scope.userName
 			});
-			
+
 			var myOption = videoOn === true ? {
 				mandatory : {
 					maxWidth : 320,
@@ -65,8 +65,6 @@ kurento_room.controller('callController', function ($scope, $window, ServicePart
 					minFrameRate : 10
 				} } : false;
 			
-			
-
 			var localStream = kurento.Stream(room, {
 				audio: true,
 				video : myOption,

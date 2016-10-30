@@ -379,6 +379,9 @@ public class InqRoom {
                     @Override
                     public void onSuccess(MediaPipeline result) throws Exception {
                         pipeline = result;
+                        // CL If you want to have status on
+                        // pipeline.setLatencyStats(true);
+
                         pipelineLatch.countDown();
                         log.debug("ROOM {}: Created MediaPipeline", name);
 

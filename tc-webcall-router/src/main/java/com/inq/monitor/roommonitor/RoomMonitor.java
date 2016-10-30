@@ -1,11 +1,15 @@
 package com.inq.monitor.roommonitor;
 
+import com.inq.webcall.dao.WebRTCStatDao;
 import com.inq.webcall.room.InqNotificationRoomManager;
 import com.inq.webcall.room.internal.InqParticipant;
+import org.bson.Document;
 import org.kurento.client.*;
+import org.kurento.client.internal.server.ProtocolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -17,39 +21,51 @@ public class RoomMonitor {
     public static void crunchWebRtcEndpoint(InqParticipant inqParticipant) {
         try {
             WebRtcEndpoint webRtcEndpoint = inqParticipant.getPublisher().getWebEndpoint();
-            Map<String, Stats> stats = webRtcEndpoint.getStats();
+            MediaType mediaType = MediaType.VIDEO;
+            Map<String, Stats> stats = webRtcEndpoint.getStats(mediaType);
             log.debug("Room: '{}', User: '{}', Endpoint: '{}' Information", inqParticipant.getRoom().getName(), inqParticipant.getName(), webRtcEndpoint.getId());
             for (Stats s : stats.values()) {
-                log.info("Status has been changed Id:{}, Timestamp:{}, Type:{}", s.getId(), s.getTimestamp(), s.getType());
+                Document document = new Document();
+                document.put("room", inqParticipant.getRoom().getName());
+                document.put("participant", inqParticipant.getName());
+                document.put("state-Id", s.getId());
+                document.put("state-timeStame", s.getTimestamp());
+                document.put("state-type", s.getType().name());
+
                 switch (s.getType()) {
                     case inboundrtp:
                         RTCInboundRTPStreamStats inboudStats = (RTCInboundRTPStreamStats) s;
-                        log.debug("Jitter: {}", inboudStats.getJitter());
-                        log.debug("FractionLost: {}", inboudStats.getFractionLost());
-                        log.debug("BytesReceived: {}", inboudStats.getBytesReceived());
-                        log.debug("PliCount: {}", inboudStats.getPliCount());
-                        log.debug("PacketsLost: {}", inboudStats.getPacketsLost());
-                        log.debug("NackCount: {}", inboudStats.getNackCount());
+                        document.put("state-Jitter", inboudStats.getJitter());
+                        document.put("state-FractionLost", inboudStats.getFractionLost());
+                        document.put("state-BytesReceived", inboudStats.getBytesReceived());
+                        document.put("state-PliCount", inboudStats.getPliCount());
+                        document.put("state-PacketsLost", inboudStats.getPacketsLost());
+                        document.put("state-NackCount", inboudStats.getNackCount());
                         break;
 
                     case outboundrtp:
                         RTCOutboundRTPStreamStats outboundStats = (RTCOutboundRTPStreamStats) s;
-                        log.debug("RoundTripTime: {}", outboundStats.getRoundTripTime());
-                        log.debug("TargetBitrate: {}", outboundStats.getTargetBitrate());
-                        log.debug("BytesSent: {}", outboundStats.getBytesSent());
-                        log.debug("PliCount: {}", outboundStats.getPliCount());
-                        log.debug("NackCount: {}", outboundStats.getNackCount());
+                        document.put("state-RoundTripTime", outboundStats.getRoundTripTime());
+                        document.put("state-TargetBitrate", outboundStats.getTargetBitrate());
+                        document.put("state-BytesSent", outboundStats.getBytesSent());
+                        document.put("state-PliCount", outboundStats.getPliCount());
+                        document.put("state-NackCount", outboundStats.getNackCount());
                         break;
 
                     default:
                         break;
                 }
+                WebRTCStatDao.getInstance().saveWebRTCStat(document);
             }
+        } catch (ProtocolException e) {
+
+            log.error("Error ", e);
         } catch (Throwable t) {
             // The WebRtcEndpoint may have been released. This does not need to
             // be a "severe" problem
             // TODO log t just in case.
             log.error("Error ", t);
         }
+
     }
 }

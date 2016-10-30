@@ -1,8 +1,11 @@
 package com.inq.monitor.kmsmonitor;
 
+/**
+ * https://github.com/lulop-k/kms-monitoring-java
+ */
 public class ExampleWithMain {
 	
-	final static String DEFAULT_KMS_WS_URI = "ws://localhost:8888/kurento";
+	final static String DEFAULT_KMS_WS_URI = "ws://kms.inq.com:8888/kurento";
 	
 	public static void main(String[] args) throws InterruptedException {
 		KmsMonitor kmsMonitor = new KmsMonitor(System.getProperty("kms.ws.uri", DEFAULT_KMS_WS_URI));

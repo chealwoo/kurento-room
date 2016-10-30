@@ -40,7 +40,7 @@ public class WebCallApplication  extends KurentoRoomServerApp {
 
     private static final Logger log = LoggerFactory.getLogger(WebCallApplication.class);
 
-    public final static String KROOMDEMO_CFG_FILENAME = "kurento-room-demo.conf.json";
+    public final static String KROOMDEMO_CFG_FILENAME = "tc-webcall-router.conf.json";
 
     private static JsonObject DEFAULT_HAT_COORDS = new JsonObject();
 
@@ -66,9 +66,16 @@ public class WebCallApplication  extends KurentoRoomServerApp {
             DEFAULT_HAT_COORDS.toString(), JsonObject.class);
 
     private static final String DEFAULT_REPOSITORY_SERVER_URI = "http://kms-repo.inq.com:7676";
-
     public static final String REPOSITORY_SERVER_URI = PropertiesManager.getProperty("repository.uri",
             DEFAULT_REPOSITORY_SERVER_URI);
+
+    // Mongodb configuration
+    private static final String DEFAULT_MONGOD_SERVER_URI = "mongod.inq.com";
+    public static final String MONGOD_SERVER_URI = PropertiesManager.getProperty("mongod.uri",
+            DEFAULT_MONGOD_SERVER_URI);
+    private static final String DEFAULT_MONGOD_DB_NAME = "kmslog";
+    public static final String MONGOD_DB_NAME = PropertiesManager.getProperty("mongod.dbname",
+            DEFAULT_MONGOD_DB_NAME);
 
     // Using individual Recording
     private static final boolean DEFAULT_PARTICIPANT_RECORDER_SWITCH = false;
