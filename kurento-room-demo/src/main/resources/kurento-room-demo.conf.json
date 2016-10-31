@@ -1,9 +1,9 @@
 {
    "kms": {
-      "uris": ["ws://172.26.111.99:8888/kurento"]
+      "uris": ["ws://kms.inq.com:8888/kurento"]
    },
    "app": {
-      "uri": "https://172.26.111.99:8443/"
+      "uri": "https://kms.inq.com:8443/"
    },
    "kurento": {
       "client": {

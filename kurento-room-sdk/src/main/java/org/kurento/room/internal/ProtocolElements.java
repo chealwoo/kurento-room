@@ -35,6 +35,7 @@ public class ProtocolElements {
   public static final String JOINROOM_METHOD = "joinRoom";
   public static final String JOINROOM_USER_PARAM = "user";
   public static final String JOINROOM_ROOM_PARAM = "room";
+  public static final String JOINROOM_DATACHANNELS_PARAM = "dataChannels";
   public static final String JOINROOM_TOKEN_PARAM = "authToken";
   public static final String JOINROOM_PEERID_PARAM = "id";
   public static final String CREATEROOM_APPID_PARAM = "appId";

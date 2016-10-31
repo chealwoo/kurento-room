@@ -108,8 +108,8 @@ public class InqRoomManager {
      * @return set of existing peers of type {@link UserParticipant}, can be empty if first
      * @throws RoomException on error while joining (like the room is not found or is closing)
      */
-    public Set<UserParticipant> joinRoom(String userName, String roomName, boolean webParticipant,
-                                         InqIKurentoClientSessionInfo kcSessionInfo, String participantId, String authToken) throws RoomException {
+    public Set<UserParticipant> joinRoom(String userName, String roomName, boolean dataChannels,
+                                         boolean webParticipant, InqIKurentoClientSessionInfo kcSessionInfo, String participantId, String authToken) throws RoomException {
         log.debug("Request [JOIN_ROOM] user={}, room={}, web={} " + "kcSessionInfo.room={} ({})",
                 userName, roomName, webParticipant, kcSessionInfo != null
                         ? kcSessionInfo.getRoomName()
@@ -143,7 +143,7 @@ public class InqRoomManager {
         Set<UserParticipant> existingParticipants = getParticipants(roomName);
         // Auth Token may required to join room.
         if ( !WebCallApplication.SSO_AUTH_CHECK || ( TokenValidator.validateToken(userName, authToken) || authToken.equals(room.getAuthToken()) ) ) {
-            room.join(participantId, userName, webParticipant);
+            room.join(participantId, userName, dataChannels, webParticipant);
         } else {
             throw new RoomException(Code.ROOM_CLOSED_ERROR_CODE, "'" + userName
                     + "' is trying to join room '" + roomName + "' without valid token");

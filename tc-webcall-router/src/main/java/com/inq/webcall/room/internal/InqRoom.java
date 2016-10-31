@@ -98,7 +98,7 @@ public class InqRoom {
         return this.pipeline;
     }
 
-    public void join(String participantId, String userName, boolean webParticipant)
+    public void join(String participantId, String userName, boolean dataChannels, boolean webParticipant)
             throws RoomException {
 
         checkClosed();
@@ -120,7 +120,7 @@ public class InqRoom {
         createPipeline();
 
         participants.put(participantId, new InqParticipant(participantId, userName, this, getPipeline(),
-                webParticipant));
+               dataChannels, webParticipant));
 
         log.info("ROOM {}: Added participant {}", name, userName);
 
@@ -380,7 +380,7 @@ public class InqRoom {
                     public void onSuccess(MediaPipeline result) throws Exception {
                         pipeline = result;
                         // CL If you want to have status on
-                        // pipeline.setLatencyStats(true);
+                        pipeline.setLatencyStats(true);
 
                         pipelineLatch.countDown();
                         log.debug("ROOM {}: Created MediaPipeline", name);

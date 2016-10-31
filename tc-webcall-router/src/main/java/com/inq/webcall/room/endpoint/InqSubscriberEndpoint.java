@@ -42,7 +42,7 @@ public class InqSubscriberEndpoint extends InqMediaEndpoint {
 
   public InqSubscriberEndpoint(boolean web, InqParticipant owner, String endpointName,
                                MediaPipeline pipeline) {
-    super(web, owner, endpointName, pipeline, log);
+    super(web, false, owner, endpointName, pipeline, log);
   }
 
   public synchronized String subscribe(String sdpOffer, InqPublisherEndpoint publisher) {

@@ -53,7 +53,7 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
      *
      * @see InqRoomManager#joinRoom(String, String, boolean, InqIKurentoClientSessionInfo, String, String)
      */
-    public void joinRoom(String userName, String roomName, boolean webParticipant,
+    public void joinRoom(String userName, String roomName, boolean dataChannels, boolean webParticipant,
                          ParticipantRequest request, String authToken) {
         Set<UserParticipant> existingParticipants = null;
 
@@ -63,7 +63,7 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
         try {
             kcSessionInfo = new InqKurentoClientSessionInfo(
                     request.getParticipantId(), roomName);
-            existingParticipants = internalManager.joinRoom(userName, roomName, webParticipant,
+            existingParticipants = internalManager.joinRoom(userName, roomName, dataChannels, webParticipant,
                     kcSessionInfo, request.getParticipantId(), authToken);
         } catch (RoomException e) {
             log.warn("PARTICIPANT {}: Error joining/creating room {}", userName, roomName, e);

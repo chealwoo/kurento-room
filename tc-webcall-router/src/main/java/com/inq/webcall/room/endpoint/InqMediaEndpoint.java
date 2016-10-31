@@ -48,6 +48,7 @@ public abstract class InqMediaEndpoint {
   private static Logger log;
 
   private boolean web = false;
+  private boolean dataChannels = false;
 
   private WebRtcEndpoint webEndpoint = null;
 
@@ -70,14 +71,15 @@ public abstract class InqMediaEndpoint {
    * @param endpointName
    * @param pipeline
    */
-  public InqMediaEndpoint(boolean web, InqParticipant owner, String endpointName, MediaPipeline pipeline,
-                          Logger log) {
+  public InqMediaEndpoint(boolean web, boolean dataChannels, InqParticipant owner, String endpointName,
+                          MediaPipeline pipeline, Logger log) {
     if (log == null) {
       InqMediaEndpoint.log = LoggerFactory.getLogger(InqMediaEndpoint.class);
     } else {
       InqMediaEndpoint.log = log;
     }
     this.web = web;
+    this.dataChannels = dataChannels;
     this.owner = owner;
     this.setEndpointName(endpointName);
     this.setMediaPipeline(pipeline);
@@ -232,7 +234,11 @@ public abstract class InqMediaEndpoint {
   protected void internalEndpointInitialization(final CountDownLatch endpointLatch) {
     if (this.isWeb()) {
       log.debug("internalEndpointInitialization");
-      new WebRtcEndpoint.Builder(pipeline).buildAsync(new Continuation<WebRtcEndpoint>() {
+      WebRtcEndpoint.Builder builder = new WebRtcEndpoint.Builder(pipeline);
+      if (this.dataChannels) {
+        builder.useDataChannels();
+      }
+      builder.buildAsync(new Continuation<WebRtcEndpoint>() {
         @Override
         public void onSuccess(WebRtcEndpoint result) throws Exception {
           log.debug("onSuccess ");

@@ -50,9 +50,9 @@ public class InqPublisherEndpoint extends InqMediaEndpoint {
 
   private Map<String, ListenerSubscription> elementsErrorSubscriptions = new HashMap<String, ListenerSubscription>();
 
-  public InqPublisherEndpoint(boolean web, InqParticipant owner, String endpointName,
-                              MediaPipeline pipeline) {
-    super(web, owner, endpointName, pipeline, log);
+  public InqPublisherEndpoint(boolean web, boolean dataChannels, InqParticipant owner,
+                              String endpointName, MediaPipeline pipeline) {
+    super(web, dataChannels, owner, endpointName, pipeline, log);
   }
 
   @Override

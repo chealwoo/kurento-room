@@ -58,10 +58,10 @@ public class InqParticipant {
     public static final String RECORDING_EXT = ".webm";
     public final static SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-S");
 
-    private boolean web = false;
-
     private String id;
     private String name;
+    private boolean web = false;
+    private boolean dataChannels = false;
 
     private final InqRoom room;
 
@@ -84,16 +84,17 @@ public class InqParticipant {
     private InqWebRtcEndPointChecker inqWebRtcEndPointChecker = null;
     private Timer time;
 
-    public InqParticipant(String id, String name, InqRoom room, MediaPipeline pipeline, boolean web) {
-        this.web = web;
+    public InqParticipant(String id, String name, InqRoom room, MediaPipeline pipeline, boolean dataChannels, boolean web) {
         this.id = id;
         this.name = name;
+        this.web = web;
+        this.dataChannels = dataChannels;
         this.pipeline = pipeline;
         this.room = room;
 
         createRecorder(pipeline);
 
-        this.publisher = new InqPublisherEndpoint(web, this, name, pipeline);
+        this.publisher = new InqPublisherEndpoint(web, dataChannels, this, name, pipeline);
 
         for (InqParticipant other : room.getParticipants()) {
             if (!other.getName().equals(this.name)) {
@@ -104,9 +105,9 @@ public class InqParticipant {
         /*
         Schedule Part.
          */
-        time = new Timer(); // Instantiate Timer Object
-        inqWebRtcEndPointChecker = new InqWebRtcEndPointChecker(this);
-        time.schedule(inqWebRtcEndPointChecker, 0, 5000); // Create Repetitively task for every 1 secs
+//        time = new Timer(); // Instantiate Timer Object
+//        inqWebRtcEndPointChecker = new InqWebRtcEndPointChecker(this);
+//        time.schedule(inqWebRtcEndPointChecker, 0, 5000); // Create Repetitively task for every 1 secs
     }
 
     public Timer getTime() {
@@ -452,7 +453,7 @@ public class InqParticipant {
         log.debug("PARTICIPANT {}: unpublishing media stream from room {}", this.name,
                 this.room.getName());
         releasePublisherEndpoint();
-        this.publisher = new InqPublisherEndpoint(web, this, name, pipeline);
+        this.publisher = new InqPublisherEndpoint(web, dataChannels, this, name, pipeline);
         log.debug("PARTICIPANT {}: released publisher endpoint and left it "
                 + "initialized (ready for future streaming)", this.name);
     }

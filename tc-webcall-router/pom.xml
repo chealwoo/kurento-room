@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.kurento</groupId>
         <artifactId>kurento-room</artifactId>
-        <version>6.5.0</version>
+        <version>6.6.0</version>
     </parent>
     <artifactId>tc-webcall-router</artifactId>
     <packaging>jar</packaging>
@@ -23,6 +23,102 @@
         <start-class>com.inq.webcall.WebCallApplication</start-class>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.kurento</groupId>
+            <artifactId>kurento-room-server</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.kurento</groupId>
+            <artifactId>kurento-room-client-js</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.kurento</groupId>
+            <artifactId>kurento-room-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>webjars-locator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bower</groupId>
+            <artifactId>jquery</artifactId>
+            <version>2.2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>jquery-ui</artifactId>
+            <version>1.11.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bower</groupId>
+            <artifactId>angular</artifactId>
+            <version>1.5.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bower</groupId>
+            <artifactId>angular-route</artifactId>
+            <version>1.5.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bower</groupId>
+            <artifactId>angular-fullscreen</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bower</groupId>
+            <artifactId>material-design-iconic-font</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars.bower</groupId>
+            <artifactId>lumx</artifactId>
+            <version>0.2.50</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.kurento</groupId>
+            <artifactId>kurento-repository-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+        <!--        <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                </dependency>-->
+        <!-- https://mvnrepository.com/artifact/org.json/json-->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20160810</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+            <version>3.2.0</version>
+        </dependency>
+
+    </dependencies>
+
     <build>
         <!-- Filtering resources (${label}) -->
         <resources>
@@ -35,13 +131,6 @@
                 <filtering>true</filtering>
                 <includes>
                     <include>banner.txt</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>.</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>bower.json</include>
                 </includes>
             </resource>
         </resources>
@@ -68,23 +157,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>exec-bower-install</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>bower</executable>
-                            <workingDirectory>${project.build.directory}/classes</workingDirectory>
-                            <arguments>
-                                <argument>install</argument>
-                                <argument>--allow-root</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
                 <configuration>
                     <mainClass>${start-class}</mainClass>
                 </configuration>
@@ -125,76 +197,47 @@
             </plugin>
         </plugins>
     </build>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.kurento</groupId>
-            <artifactId>kurento-room-server</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-logging</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.commons</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.kurento</groupId>
-            <artifactId>kurento-room-client-js</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.kurento</groupId>
-            <artifactId>kurento-room-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-log4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.kurento</groupId>
-            <artifactId>kurento-repository-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-logging</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.commons</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-                <dependency>
-                    <groupId>com.h2database</groupId>
-                    <artifactId>h2</artifactId>
-                </dependency>
-        <!--        <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                </dependency>-->
-        <!-- https://mvnrepository.com/artifact/org.json/json -->
+    <!--
+          <dependency>
+              <groupId>org.kurento</groupId>
+              <artifactId>kurento-repository-client</artifactId>
+          </dependency>
+          <dependency>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-starter-data-jpa</artifactId>
+              <exclusions>
+                  <exclusion>
+                      <groupId>org.springframework.boot</groupId>
+                      <artifactId>spring-boot-starter-logging</artifactId>
+                  </exclusion>
+                  <exclusion>
+                      <groupId>org.apache.commons</groupId>
+                      <artifactId>commons-logging</artifactId>
+                  </exclusion>
+              </exclusions>
+          </dependency>
+                  <dependency>
+                      <groupId>com.h2database</groupId>
+                      <artifactId>h2</artifa                  </dependency>-->
+          <!--        <dependency>
+                  <groupId>mysql</groupId>
+                  <artifactId>mysql-connector-java</artifactId>
+                  </dependency>-->
+        <!-- https://mvnrepository.com/artifact/org.json/json
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20160810</version>
-        </dependency>
+        </dependency>-->
 
 
-<!-- Adding mongodb support -->
+<!-- Adding mongodb support
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
             <version>3.2.0</version>
         </dependency>
-    </dependencies>
+    </dependencies>-->
 
     <profiles>
         <profile>
