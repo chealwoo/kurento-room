@@ -29,14 +29,35 @@ public class WebRTCStatDao implements IWebRTCStatDao {
         return webRTCStatDao;
     }
 
-    @Override
-    public void saveWebRTCStat(Document document) {
-        MongoCollection<Document> roomlog = db.getCollection("roomlog");
+    public void saveRoomStat(Document document) {
+        MongoCollection<Document> roomlog = db.getCollection("RoomStat");
+        roomlog.insertOne(document);
+    }
+    public void saveParticipantStat(Document document) {
+        MongoCollection<Document> roomlog = db.getCollection("ParticipantStat");
         roomlog.insertOne(document);
     }
 
-    public void findRoomWebRTCStat(String roomName){
-        MongoCollection<Document> roomlog = db.getCollection("roomlog");
+    public void saveWebRTCEndpointStat(Document document) {
+        MongoCollection<Document> roomlog = db.getCollection("WebRTCEndpointStat");
+        roomlog.insertOne(document);
+    }
+
+    public void findWebRTCEndpointStat(String roomName){
+        MongoCollection<Document> roomlog = db.getCollection("WebRTCEndpointStat");
+
+        BasicDBObject searchQuery = new BasicDBObject();
+        searchQuery.put("room", roomName);
+
+        FindIterable<Document> cursor = roomlog.find(searchQuery);
+
+        for (Document d: cursor) {
+            System.out.println(d);
+        }
+    }
+
+    public void findParticipantStat(String roomName){
+        MongoCollection<Document> roomlog = db.getCollection("ParticipantStat");
 
         BasicDBObject searchQuery = new BasicDBObject();
         searchQuery.put("room", roomName);
@@ -50,6 +71,8 @@ public class WebRTCStatDao implements IWebRTCStatDao {
 
     // just for testing
     public static void main(String[] args) {
-        WebRTCStatDao.getInstance().findRoomWebRTCStat("test3");
+        String room = "test3";
+        WebRTCStatDao.getInstance().findParticipantStat(room);
+        WebRTCStatDao.getInstance().findWebRTCEndpointStat(room);
     }
 }

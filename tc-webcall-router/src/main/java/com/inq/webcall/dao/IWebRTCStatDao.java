@@ -7,5 +7,5 @@ import org.bson.Document;
  */
 public interface IWebRTCStatDao {
 
-    void saveWebRTCStat(Document document);
+
 }

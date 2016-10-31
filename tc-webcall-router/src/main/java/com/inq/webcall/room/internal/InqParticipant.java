@@ -102,12 +102,13 @@ public class InqParticipant {
             }
         }
 
+  //      RoomMonitor.crunchWebRtcEndpointItself(this);
         /*
         Schedule Part.
          */
-//        time = new Timer(); // Instantiate Timer Object
-//        inqWebRtcEndPointChecker = new InqWebRtcEndPointChecker(this);
-//        time.schedule(inqWebRtcEndPointChecker, 0, 5000); // Create Repetitively task for every 1 secs
+        time = new Timer(); // Instantiate Timer Object
+        inqWebRtcEndPointChecker = new InqWebRtcEndPointChecker(this);
+        time.schedule(inqWebRtcEndPointChecker, 0, 5000); // Create Repetitively task for every 1 secs
     }
 
     public Timer getTime() {
@@ -215,6 +216,11 @@ public class InqParticipant {
      *
      * @param webRtcEndpoint
      */
+        /*
+    NOTE that adding recorder can cause the following error
+    2016-10-30 19:54:31,461 WARN  [AbstractJsonRpcClientWebSocket-reqResEventExec-e2-t39] com.inq.webcall.room.internal.InqRoom (onEvent(413)) - ROOM test1: Pipeline error encountered: UNEXPECTED_PIPELINE_ERROR: failed to transfer data: Couldn't connect to server -> gstcurlbasesink.c(401): gst_curl_base_sink_render (): /GstPipeline:pipeline41/GstCurlHttpSink:curlhttpsink27(errCode=10)
+     */
+//    private boolean isRecording = true;
     private boolean isRecording = false;
     public void startRecorder() {
         try {

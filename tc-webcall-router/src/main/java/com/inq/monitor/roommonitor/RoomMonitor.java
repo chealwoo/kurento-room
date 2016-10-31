@@ -18,6 +18,21 @@ import java.util.Map;
 public class RoomMonitor {
     private final static Logger log = LoggerFactory.getLogger(RoomMonitor.class);
 
+    public static void crunchWebRtcEndpointItself(InqParticipant inqParticipant) {
+        WebRtcEndpoint webRtcEndpoint = inqParticipant.getPublisher().getWebEndpoint();
+        Document document = new Document();
+        document.put("room", inqParticipant.getRoom().getName());
+        document.put("participant", inqParticipant.getName());
+        document.put("CreationTime", webRtcEndpoint.getCreationTime());
+        document.put("Id", webRtcEndpoint.getId());
+        document.put("LocalSessionDescriptor", webRtcEndpoint.getLocalSessionDescriptor());
+        document.put("MaxAudioRecvBandwidth", webRtcEndpoint.getMaxAudioRecvBandwidth());
+        document.put("MaxOutputBitrate", webRtcEndpoint.getMaxOutputBitrate());
+        document.put("TurnUrl", webRtcEndpoint.getTurnUrl());
+        document.put("StunServerAddress", webRtcEndpoint.getStunServerAddress());
+        WebRTCStatDao.getInstance().saveParticipantStat(document);
+    }
+
     public static void crunchWebRtcEndpoint(InqParticipant inqParticipant) {
         try {
             WebRtcEndpoint webRtcEndpoint = inqParticipant.getPublisher().getWebEndpoint();
@@ -41,6 +56,7 @@ public class RoomMonitor {
                         document.put("state-PliCount", inboudStats.getPliCount());
                         document.put("state-PacketsLost", inboudStats.getPacketsLost());
                         document.put("state-NackCount", inboudStats.getNackCount());
+
                         break;
 
                     case outboundrtp:
@@ -55,7 +71,7 @@ public class RoomMonitor {
                     default:
                         break;
                 }
-                WebRTCStatDao.getInstance().saveWebRTCStat(document);
+                WebRTCStatDao.getInstance().saveWebRTCEndpointStat(document);
             }
         } catch (ProtocolException e) {
 
