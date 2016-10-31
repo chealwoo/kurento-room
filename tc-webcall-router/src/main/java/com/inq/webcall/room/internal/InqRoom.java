@@ -180,6 +180,10 @@ public class InqRoom {
         }
     }
 
+    /*
+    NOTE that adding recorder can cause the following error
+    2016-10-30 19:54:31,461 WARN  [AbstractJsonRpcClientWebSocket-reqResEventExec-e2-t39] com.inq.webcall.room.internal.InqRoom (onEvent(413)) - ROOM test1: Pipeline error encountered: UNEXPECTED_PIPELINE_ERROR: failed to transfer data: Couldn't connect to server -> gstcurlbasesink.c(401): gst_curl_base_sink_render (): /GstPipeline:pipeline41/GstCurlHttpSink:curlhttpsink27(errCode=10)
+     */
     private boolean isRecording = false;
     public void startRecorder() {
         try {
@@ -380,7 +384,7 @@ public class InqRoom {
                     public void onSuccess(MediaPipeline result) throws Exception {
                         pipeline = result;
                         // CL If you want to have status on
-                        pipeline.setLatencyStats(true);
+                        // pipeline.setLatencyStats(true);
 
                         pipelineLatch.countDown();
                         log.debug("ROOM {}: Created MediaPipeline", name);

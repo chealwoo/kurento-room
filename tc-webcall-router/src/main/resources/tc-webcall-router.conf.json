@@ -5,9 +5,6 @@
    "app": {
       "uri": "wss://kms-app.inq.com:8443/room"
    },
-   "repository": {
-      "uri": "http://kms-repo.inq.com:7676"
-   },
    "mongodb": {
       "uri": "mongod.inq.com",
       "dbname": "kmslog"

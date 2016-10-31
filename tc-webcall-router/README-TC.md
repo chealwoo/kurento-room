@@ -56,3 +56,8 @@ webrtc-media1-test
 webrtc-media2-test
 
 http://confluence.touchcommerce.com/display/IT/WebRTC
+
+
+   "repository": {
+      "uri": "http://kms-repo.inq.com:7676"
+   },
