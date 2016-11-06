@@ -6,8 +6,19 @@
     <title>Kurento Room Demo</title>
     <meta name="author" content="Raquel Díaz González">
     <!--jquery-->
-    <script src="./js/jquery-2.1.1.min.js"></script>
-    <script src="./js/jquery-ui.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="./css/googleapis-fonts.css">
+    <link type="text/css" rel="stylesheet" href="./css/jquery-ui.min.css">
+    <link type="text/css" rel="stylesheet" href="./css/room.css"/>
+
+    <!--jquery-->
+    <script src="/webjars/jquery/dist/jquery.min.js"></script>
+    <script src="/webjars/jquery-ui/jquery-ui.min.js"></script>
+
+    <!-- Bower JavaScript dependencies -->
+
+    <script src="/webjars/velocity/velocity.js"></script>
+    <script src="/webjars/moment/min/moment-with-locales.min.js"></script>
+    <script src="/webjars/lumx/dist/js/lumx.min.js"></script>
     <!-- Disable content caching -->
     <!-- <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
@@ -16,28 +27,48 @@
 
 <body>
 
-<div id="box-iframes">
-
-<div id="iframe01" style="width: 100%; height: 250px;">
-    <iframe title="test1" src="index-sp.html?roomName=t1&userName=u1" width="100%" height="200px"></iframe>
+<div class="join" ng-hide="showRoom">
+    <div id="join-title">Kurento Room</div>
+    <div class="card" id="join">
+        <form role="form" accept-charset="UTF-8">
+            <div class="card__content">
+                <lx-text-field label="Number Of Rooms"><input type="text" id="nor" required>
+                </lx-text-field>
+                <lx-text-field label="Room id Prefix"><input type="text" id="rid" required>
+                </lx-text-field>
+                <lx-text-field label="User id Prefix"><input type="text" id="uid" required>
+                </lx-text-field>
+                <lx-select ng-model="room2.roomName" placeholder="Choose an existing room"
+                           choices="listRooms" floating-label>
+                    <lx-select-selected> {{ $selected}}</lx-select-selected>
+                    <lx-select-choices> {{ $choice}}</lx-select-choices>
+                </lx-select>
+            </div>
+            <div class="card__actions">
+                <div class="grid">
+                    <div class="grid__col6">
+                        <button id="joinBtn" class="btn btn--l btn--green btn--raised" lx-ripple
+                                type="submit">Join room!
+                        </button>
+                    </div>
+                </div>
+                <br></div>
+        </form>
+    </div>
 </div>
 
-
-
-</div>
 
 <script>
     $(document).ready(function () {
-        $.delay(1000);
-        $('<iframe>', {
-            src: 'index-sp.html?roomName=t1&userName=u2',
-            id: 'myFrame1-2',
-            frameborder: 1,
-            scrolling: 'yes',
-            width:"100%", height:"200px"
-        }).appendTo('#box-iframes');
+// https://localhost:8443/test/test-parent.html?nor=3&rid=r1&uid=u2&nou=2&vOn=true
     });
 </script>
+
+<script src="./angular/lumX/dist/velocity.js"></script>
+<script src="./angular/lumX/dist/moment-with-locales.min.js"></script>
+<script src="./angular/lumX/dist/js/lumx.js"></script>
+<script src="./angular/lumX/dist/scss/core/_core.scss"></script>
+<script src="./angular/lumX/dist/scss/main/_lumx.scss"></script>
 
 </body>
 
