@@ -112,7 +112,6 @@ public class RoomMonitor {
         document.put("Id", webRtcEndpoint.getId());
         document.put("LocalSessionDescriptor", webRtcEndpoint.getLocalSessionDescriptor());
         document.put("MaxAudioRecvBandwidth", webRtcEndpoint.getMaxAudioRecvBandwidth());
-//        document.put("MaxOutputBitrate", webRtcEndpoint.getMaxOutputBitrate());
         document.put("TurnUrl", webRtcEndpoint.getTurnUrl());
         document.put("StunServerAddress", webRtcEndpoint.getStunServerAddress());
     }
@@ -121,7 +120,6 @@ public class RoomMonitor {
         document.put("Id", webRtcEndpoint.getId());
         document.put("RemoteSessionDescriptor", webRtcEndpoint.getRemoteSessionDescriptor());
         document.put("MaxAudioRecvBandwidth", webRtcEndpoint.getMaxAudioRecvBandwidth());
-//        document.put("MaxOutputBitrate", webRtcEndpoint.getMaxOutputBitrate());
         document.put("TurnUrl", webRtcEndpoint.getTurnUrl());
         document.put("StunServerAddress", webRtcEndpoint.getStunServerAddress());
     }

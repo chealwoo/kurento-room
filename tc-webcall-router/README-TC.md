@@ -16,8 +16,10 @@ unzip tc-webcall-router-x.x.x.zip
 
 ## commands I use to release.
 ```
+ps aux | grep tc-webcall
 git pull
 git branch
+git checkout -b TCDEV-6.6.0 origin/TCDEV-6.6.0
 mvn clean package -am -pl tc-webcall-router -DskipTests
 cd tc-webcall-router/target/
 unzip tc-webcall-router-6.5.0.zip
