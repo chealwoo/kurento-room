@@ -244,6 +244,10 @@ public abstract class InqMediaEndpoint {
           log.debug("onSuccess ");
           webEndpoint = result;
 
+          // Start InqParticipant's endpoint status checker
+          owner.startWebRtcEndPointChecker();
+
+          // Start InqParticipant's Recorder
           owner.connectRecorder(webEndpoint);
 //          owner.connectHubPort(webEndpoint);
 //            for(InqParticipant part: participants.values()) {

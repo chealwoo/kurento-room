@@ -12,67 +12,39 @@ import org.slf4j.LoggerFactory;
 import java.util.Date;
 import java.util.Map;
 
-/**
- * Created by dlee on 10/25/2016.
- */
 public class RoomMonitor {
     private final static Logger log = LoggerFactory.getLogger(RoomMonitor.class);
-
-    public static void crunchWebRtcEndpointItself(InqParticipant inqParticipant) {
-        WebRtcEndpoint webRtcEndpoint = inqParticipant.getPublisher().getWebEndpoint();
-        Document document = new Document();
-        document.put("room", inqParticipant.getRoom().getName());
-        document.put("participant", inqParticipant.getName());
-        document.put("CreationTime", webRtcEndpoint.getCreationTime());
-        document.put("Id", webRtcEndpoint.getId());
-        document.put("LocalSessionDescriptor", webRtcEndpoint.getLocalSessionDescriptor());
-        document.put("MaxAudioRecvBandwidth", webRtcEndpoint.getMaxAudioRecvBandwidth());
-        document.put("MaxOutputBitrate", webRtcEndpoint.getMaxOutputBitrate());
-        document.put("TurnUrl", webRtcEndpoint.getTurnUrl());
-        document.put("StunServerAddress", webRtcEndpoint.getStunServerAddress());
-        WebRTCStatDao.getInstance().saveParticipantStat(document);
-    }
 
     public static void crunchWebRtcEndpoint(InqParticipant inqParticipant) {
         try {
             WebRtcEndpoint webRtcEndpoint = inqParticipant.getPublisher().getWebEndpoint();
-            MediaType mediaType = MediaType.VIDEO;
-            Map<String, Stats> stats = webRtcEndpoint.getStats(mediaType);
-            log.debug("Room: '{}', User: '{}', Endpoint: '{}' Information", inqParticipant.getRoom().getName(), inqParticipant.getName(), webRtcEndpoint.getId());
-            for (Stats s : stats.values()) {
+            for (MediaType mediaType : MediaType.values()) {
                 Document document = new Document();
-                document.put("room", inqParticipant.getRoom().getName());
-                document.put("participant", inqParticipant.getName());
-                document.put("state-Id", s.getId());
-                document.put("state-timeStame", s.getTimestamp());
-                document.put("state-type", s.getType().name());
+                addRoomParticipantInfo(inqParticipant, document);
+                addWebRtcEndpointInfo(webRtcEndpoint, document);
+                Map<String, Stats> stats = webRtcEndpoint.getStats(mediaType);
+                log.debug("Room: '{}', User: '{}', Endpoint: '{}' Information", inqParticipant.getRoom().getName(), inqParticipant.getName(), webRtcEndpoint.getId());
+                for (Stats s : stats.values()) {
+                    addStatsInfo(s, document);
 
-                switch (s.getType()) {
-                    case inboundrtp:
-                        RTCInboundRTPStreamStats inboudStats = (RTCInboundRTPStreamStats) s;
-                        document.put("state-Jitter", inboudStats.getJitter());
-                        document.put("state-FractionLost", inboudStats.getFractionLost());
-                        document.put("state-BytesReceived", inboudStats.getBytesReceived());
-                        document.put("state-PliCount", inboudStats.getPliCount());
-                        document.put("state-PacketsLost", inboudStats.getPacketsLost());
-                        document.put("state-NackCount", inboudStats.getNackCount());
+                    switch (s.getType()) {
+                        case inboundrtp:
+                            RTCInboundRTPStreamStats inboudStats = (RTCInboundRTPStreamStats) s;
+                            addRTCInboundRTPStreamStatsInfo(inboudStats, document);
+                            break;
 
-                        break;
+                        case outboundrtp:
+                            RTCOutboundRTPStreamStats outboundStats = (RTCOutboundRTPStreamStats) s;
+                            addRTCOutboundRTPStreamStatsInfo(outboundStats, document);
+                            break;
 
-                    case outboundrtp:
-                        RTCOutboundRTPStreamStats outboundStats = (RTCOutboundRTPStreamStats) s;
-                        document.put("state-RoundTripTime", outboundStats.getRoundTripTime());
-                        document.put("state-TargetBitrate", outboundStats.getTargetBitrate());
-                        document.put("state-BytesSent", outboundStats.getBytesSent());
-                        document.put("state-PliCount", outboundStats.getPliCount());
-                        document.put("state-NackCount", outboundStats.getNackCount());
-                        break;
-
-                    default:
-                        break;
+                        default:
+                            break;
+                    }
+                    WebRTCStatDao.getInstance().saveWebRTCEndpointStat(document);
                 }
-                WebRTCStatDao.getInstance().saveWebRTCEndpointStat(document);
             }
+
         } catch (ProtocolException e) {
 
             log.error("Error ", e);
@@ -82,6 +54,47 @@ public class RoomMonitor {
             // TODO log t just in case.
             log.error("Error ", t);
         }
+    }
 
+    public static void addRoomParticipantInfo(InqParticipant inqParticipant, Document document) {
+        document.put("room", inqParticipant.getRoom().getName());
+        document.put("participant", inqParticipant.getName());
+        document.put("location", "Server");
+    }
+
+    public static void addWebRtcEndpointInfo(WebRtcEndpoint webRtcEndpoint, Document document) {
+        document.put("CreationTime", webRtcEndpoint.getCreationTime());
+        document.put("Id", webRtcEndpoint.getId());
+        document.put("LocalSessionDescriptor", webRtcEndpoint.getLocalSessionDescriptor());
+        document.put("MaxAudioRecvBandwidth", webRtcEndpoint.getMaxAudioRecvBandwidth());
+        document.put("MaxOutputBitrate", webRtcEndpoint.getMaxOutputBitrate());
+        document.put("TurnUrl", webRtcEndpoint.getTurnUrl());
+        document.put("StunServerAddress", webRtcEndpoint.getStunServerAddress());
+    }
+
+    public static void addStatsInfo(Stats s, Document document) {
+        document.put("stats-timestamp", s.getTimestamp());
+        document.put("stats-type", s.getType());
+        document.put("stats-id", s.getId());
+    }
+
+    public static void addRTCInboundRTPStreamStatsInfo(RTCInboundRTPStreamStats inboudStats, Document document) {
+        document.put("inboudStats-Ssrc", inboudStats.getSsrc());
+        document.put("inboudStats-Jitter", inboudStats.getJitter());
+        document.put("inboudStats-FractionLost", inboudStats.getFractionLost());
+        document.put("inboudStats-BytesReceived", inboudStats.getBytesReceived());
+        document.put("inboudStats-PliCount", inboudStats.getPliCount());
+        document.put("inboudStats-NackCount", inboudStats.getPacketsReceived());
+        document.put("inboudStats-PacketsLost", inboudStats.getPacketsLost());
+        document.put("inboudStats-NackCount", inboudStats.getNackCount());
+    }
+
+    public static void addRTCOutboundRTPStreamStatsInfo(RTCOutboundRTPStreamStats outboundStats, Document document) {
+        document.put("outboundStats-Ssrc", outboundStats.getSsrc());
+        document.put("outboundStats-RoundTripTime", outboundStats.getRoundTripTime());
+        document.put("outboundStats-TargetBitrate", outboundStats.getTargetBitrate());
+        document.put("outboundStats-BytesSent", outboundStats.getBytesSent());
+        document.put("outboundStats-PliCount", outboundStats.getPliCount());
+        document.put("outboundStats-NackCount", outboundStats.getNackCount());
     }
 }

@@ -1,6 +1,7 @@
 package com.inq.webcall.controller;
 
 import com.inq.webcall.WebCallApplication;
+import com.inq.webcall.dao.WebRTCStatDao;
 import com.inq.webcall.room.InqNotificationRoomManager;
 import org.kurento.commons.PropertiesManager;
 import com.inq.webcall.service.InqFixedNKmsManager;
@@ -105,7 +106,9 @@ public class AppController {
     }
 
     @RequestMapping("/submitStats")
-    public void submitStatus(@RequestParam("room") String room, @RequestParam("user") String user, @RequestParam("stats") String stats) {
-        log.warn("Stats has received for room '{}' and user '{}': stats: {}" , room, user, stats.substring(0,45));
+    public void submitStatus(@RequestParam("stats") String stats) {
+        log.warn("Stats has received for : stats: {}" , stats.substring(0,45));
+        // Save it to Mongodb
+        WebRTCStatDao.getInstance().saveWebRTCEndpointStat(stats);
     }
 }

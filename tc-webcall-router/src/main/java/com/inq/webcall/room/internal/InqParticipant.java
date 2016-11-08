@@ -106,9 +106,25 @@ public class InqParticipant {
         /*
         Schedule Part.
          */
+
+    }
+
+    /**
+     *  Start RoomMonitor schedule
+     */
+    public void startWebRtcEndPointChecker() {
         time = new Timer(); // Instantiate Timer Object
         inqWebRtcEndPointChecker = new InqWebRtcEndPointChecker(this);
         time.schedule(inqWebRtcEndPointChecker, 0, 5000); // Create Repetitively task for every 1 secs
+    }
+
+    /**
+     *  Stop RoomMonitor schedule
+     */
+    public void stopWebRtcEndPointChecker() {
+        if(null != time) {
+            time.cancel();
+        }
     }
 
     public Timer getTime() {
