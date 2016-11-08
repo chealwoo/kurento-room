@@ -83,6 +83,8 @@ public class InqParticipant {
 
     private InqWebRtcEndPointChecker inqWebRtcEndPointChecker = null;
     private Timer time;
+    private InqWebRtcEndPointStatChecker inqWebRtcEndPointStatChecker = null;
+    private Timer subtime;
 
     public InqParticipant(String id, String name, InqRoom room, MediaPipeline pipeline, boolean dataChannels, boolean web) {
         this.id = id;
@@ -122,6 +124,18 @@ public class InqParticipant {
      *  Stop RoomMonitor schedule
      */
     public void stopWebRtcEndPointChecker() {
+        if(null != time) {
+            time.cancel();
+        }
+    }
+
+    public void startWebRtcEndPointStatChecker(InqParticipant subscriber, WebRtcEndpoint webRtcEndpoint) {
+        subtime = new Timer(); // Instantiate Timer Object
+        inqWebRtcEndPointStatChecker = new InqWebRtcEndPointStatChecker(this, subscriber, webRtcEndpoint);
+        subtime.schedule(inqWebRtcEndPointStatChecker, 0, 5000); // Create Repetitively task for every 1 secs
+    }
+
+    public void stopWebRtcEndPointStatChecker() {
         if(null != time) {
             time.cancel();
         }
@@ -523,6 +537,11 @@ public class InqParticipant {
             if (subscriber.getEndpoint() == null) {
                 throw new RoomException(Code.MEDIA_ENDPOINT_ERROR_CODE,
                         "Unable to create subscriber endpoint");
+            }
+
+            SdpEndpoint endpoint = subscriber.getEndpoint();
+            if( endpoint instanceof WebRtcEndpoint ) {
+                startWebRtcEndPointStatChecker(sender, (WebRtcEndpoint) endpoint);
             }
         } catch (RoomException e) {
             this.subscribers.remove(senderName);

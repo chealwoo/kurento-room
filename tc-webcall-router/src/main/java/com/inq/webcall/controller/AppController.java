@@ -12,19 +12,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Created by dlee on 6/28/2016.
- */
 @RestController
 public class AppController {
 
@@ -105,6 +99,7 @@ public class AppController {
         return kmsSet;
     }
 
+    @CrossOrigin(origins = "*", methods = RequestMethod.POST)
     @RequestMapping("/submitStats")
     public void submitStatus(@RequestParam("stats") String stats) {
         log.warn("Stats has received for : stats: {}" , stats.substring(0,45));

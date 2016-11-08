@@ -15,13 +15,55 @@ import java.util.Map;
 public class RoomMonitor {
     private final static Logger log = LoggerFactory.getLogger(RoomMonitor.class);
 
+    public static void crunchWebRtcEndpoint(InqParticipant inqParticipant, InqParticipant subscriber, WebRtcEndpoint webRtcEndPoint) {
+        try {
+            for (MediaType mediaType : MediaType.values()) {
+                Document document = new Document();
+                addRoomParticipantInfo(inqParticipant, document);
+                addSubscriberInfo(subscriber, document);
+
+                addRemoteWebRtcEndpointInfo(webRtcEndPoint, document);
+                Map<String, Stats> stats = webRtcEndPoint.getStats(mediaType);
+                log.debug("Room: '{}', User: '{}', Endpoint: '{}' Information", inqParticipant.getRoom().getName(), inqParticipant.getName(), webRtcEndPoint.getId());
+                for (Stats s : stats.values()) {
+                    addStatsInfo(s, document);
+
+                    switch (s.getType()) {
+                        case inboundrtp:
+                            RTCInboundRTPStreamStats inboudStats = (RTCInboundRTPStreamStats) s;
+                            addRTCInboundRTPStreamStatsInfo(inboudStats, document);
+                            break;
+
+                        case outboundrtp:
+                            RTCOutboundRTPStreamStats outboundStats = (RTCOutboundRTPStreamStats) s;
+                            addRTCOutboundRTPStreamStatsInfo(outboundStats, document);
+                            break;
+
+                        default:
+                            break;
+                    }
+                    WebRTCStatDao.getInstance().saveWebRTCEndpointStat(document);
+                }
+            }
+
+        } catch (ProtocolException e) {
+
+            log.error("Error ", e);
+        } catch (Throwable t) {
+            // The WebRtcEndpoint may have been released. This does not need to
+            // be a "severe" problem
+            // TODO log t just in case.
+            log.error("Error ", t);
+        }
+    }
+
     public static void crunchWebRtcEndpoint(InqParticipant inqParticipant) {
         try {
             WebRtcEndpoint webRtcEndpoint = inqParticipant.getPublisher().getWebEndpoint();
             for (MediaType mediaType : MediaType.values()) {
                 Document document = new Document();
                 addRoomParticipantInfo(inqParticipant, document);
-                addWebRtcEndpointInfo(webRtcEndpoint, document);
+                addLocalWebRtcEndpointInfo(webRtcEndpoint, document);
                 Map<String, Stats> stats = webRtcEndpoint.getStats(mediaType);
                 log.debug("Room: '{}', User: '{}', Endpoint: '{}' Information", inqParticipant.getRoom().getName(), inqParticipant.getName(), webRtcEndpoint.getId());
                 for (Stats s : stats.values()) {
@@ -61,20 +103,32 @@ public class RoomMonitor {
         document.put("participant", inqParticipant.getName());
         document.put("location", "Server");
     }
+    public static void addSubscriberInfo(InqParticipant subscriber, Document document) {
+        document.put("subscriber", subscriber.getName());
+    }
 
-    public static void addWebRtcEndpointInfo(WebRtcEndpoint webRtcEndpoint, Document document) {
+    public static void addLocalWebRtcEndpointInfo(WebRtcEndpoint webRtcEndpoint, Document document) {
         document.put("CreationTime", webRtcEndpoint.getCreationTime());
         document.put("Id", webRtcEndpoint.getId());
         document.put("LocalSessionDescriptor", webRtcEndpoint.getLocalSessionDescriptor());
         document.put("MaxAudioRecvBandwidth", webRtcEndpoint.getMaxAudioRecvBandwidth());
-        document.put("MaxOutputBitrate", webRtcEndpoint.getMaxOutputBitrate());
+//        document.put("MaxOutputBitrate", webRtcEndpoint.getMaxOutputBitrate());
+        document.put("TurnUrl", webRtcEndpoint.getTurnUrl());
+        document.put("StunServerAddress", webRtcEndpoint.getStunServerAddress());
+    }
+    public static void addRemoteWebRtcEndpointInfo(WebRtcEndpoint webRtcEndpoint, Document document) {
+        document.put("CreationTime", webRtcEndpoint.getCreationTime());
+        document.put("Id", webRtcEndpoint.getId());
+        document.put("RemoteSessionDescriptor", webRtcEndpoint.getRemoteSessionDescriptor());
+        document.put("MaxAudioRecvBandwidth", webRtcEndpoint.getMaxAudioRecvBandwidth());
+//        document.put("MaxOutputBitrate", webRtcEndpoint.getMaxOutputBitrate());
         document.put("TurnUrl", webRtcEndpoint.getTurnUrl());
         document.put("StunServerAddress", webRtcEndpoint.getStunServerAddress());
     }
 
     public static void addStatsInfo(Stats s, Document document) {
         document.put("stats-timestamp", s.getTimestamp());
-        document.put("stats-type", s.getType());
+        document.put("stats-type", s.getType().name());
         document.put("stats-id", s.getId());
     }
 

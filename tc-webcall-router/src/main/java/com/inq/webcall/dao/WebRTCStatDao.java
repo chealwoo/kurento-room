@@ -44,7 +44,7 @@ public class WebRTCStatDao implements IWebRTCStatDao {
     }
 
     /**
-     *
+     *  This is from client side.
      * @param str
      */
     public void saveWebRTCEndpointStat(String str) {
@@ -82,7 +82,7 @@ public class WebRTCStatDao implements IWebRTCStatDao {
 
     // just for testing
     public static void main(String[] args) {
-        String room = "test3";
+        String room = "qroom1";
         WebRTCStatDao.getInstance().findParticipantStat(room);
         WebRTCStatDao.getInstance().findWebRTCEndpointStat(room);
     }
