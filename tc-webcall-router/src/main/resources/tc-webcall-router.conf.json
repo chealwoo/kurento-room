@@ -6,7 +6,7 @@
       "uri": "wss://kms-app.inq.com:8443/room"
    },
    "mongodb": {
-      "uri": "mongod.inq.com",
+      "uris": [ "mongo-pri.inq.com", "mongo-sec.inq.com" ],
       "dbname": "kmslog"
    },
    "kurento": {

@@ -1,14 +1,23 @@
 package com.inq.webcall.dao;
 
+import com.google.gson.JsonArray;
 import com.inq.webcall.WebCallApplication;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
+import com.mongodb.ServerAddress;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
+import org.kurento.jsonrpc.JsonUtils;
+import org.kurento.room.KurentoRoomServerApp;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+
+import static org.kurento.commons.PropertiesManager.getPropertyJson;
 
 
 public class WebRTCStatDao implements IWebRTCStatDao {
@@ -18,7 +27,22 @@ public class WebRTCStatDao implements IWebRTCStatDao {
     private static WebRTCStatDao webRTCStatDao;
 
     public WebRTCStatDao() {
-        this.mongo = new MongoClient(WebCallApplication.MONGOD_SERVER_URI, 27017);
+        JsonArray mongodUris = getPropertyJson(WebCallApplication.MONGOD_SERVER_URIS_PROPERTY,
+                WebCallApplication.DEFAULT_MONGOD_SERVER_URIS, JsonArray.class);
+        List<String> mongodUrisList = JsonUtils.toStringList(mongodUris);
+        List<ServerAddress> mongoSrvAddrList = new LinkedList<>();
+
+        for (String s: mongodUrisList) {
+            String[] output =s.split(":");
+            if(output.length == 2) {
+                mongoSrvAddrList.add(new ServerAddress(output[0], Integer.valueOf(output[1])));
+            } else {
+                mongoSrvAddrList.add(new ServerAddress(output[0], 27017));
+            }
+        }
+
+        this.mongo = new MongoClient(mongoSrvAddrList);
+
         db = mongo.getDatabase(WebCallApplication.MONGOD_DB_NAME);
     }
 

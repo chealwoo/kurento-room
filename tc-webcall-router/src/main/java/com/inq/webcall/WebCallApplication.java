@@ -70,11 +70,10 @@ public class WebCallApplication  extends KurentoRoomServerApp {
             DEFAULT_REPOSITORY_SERVER_URI);
 
     // Mongodb configuration
-    private static final String DEFAULT_MONGOD_SERVER_URI = "mongod.inq.com";
-    public static final String MONGOD_SERVER_URI = PropertiesManager.getProperty("mongod.uri",
-            DEFAULT_MONGOD_SERVER_URI);
-    private static final String DEFAULT_MONGOD_DB_NAME = "kmslog";
-    public static final String MONGOD_DB_NAME = PropertiesManager.getProperty("mongod.dbname",
+    public static final String MONGOD_SERVER_URIS_PROPERTY = "mongodb.uris";
+    public static final String DEFAULT_MONGOD_SERVER_URIS = "[ \"mongod.inq.com\" ]";
+    public static final String DEFAULT_MONGOD_DB_NAME = "kmslog";
+    public static final String MONGOD_DB_NAME = PropertiesManager.getProperty("mongodb.dbname",
             DEFAULT_MONGOD_DB_NAME);
 
     // Using individual Recording
