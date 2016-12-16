@@ -5,7 +5,8 @@ import com.inq.webcall.dao.WebRTCStatDao;
 import com.inq.webcall.room.InqNotificationRoomManager;
 import org.bson.Document;
 import org.hyperic.sigar.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -14,10 +15,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class SystemMonitor {
 
+    private static final Logger log = LoggerFactory.getLogger(SystemMonitor.class);
 
-
-
-//    @Autowired
+    //    @Autowired
     public static InqNotificationRoomManager roomManager;
 
     private static Sigar sigar = new Sigar();
@@ -38,9 +38,9 @@ public class SystemMonitor {
         }
 
         String memTotal = "" + mem.getFree() / 1024 / 1024;
-        String memUsed = "" +  mem.getUsed() / 1024 / 1024;
+        String memUsed = "" + mem.getUsed() / 1024 / 1024;
 
-        System.out.print(String.format( "%s\t%s", memTotal, memUsed));
+        System.out.print(String.format("%s\t%s", memTotal, memUsed));
 
 /*        System.out.println("Actual total free system memory: "
                 + mem.getActualFree() / 1024 / 1024 + " MB");
@@ -74,7 +74,7 @@ public class SystemMonitor {
         }
 
         String memTotal = "" + mem.getFree() / 1024 / 1024;
-        String memUsed = "" +  mem.getUsed() / 1024 / 1024;
+        String memUsed = "" + mem.getUsed() / 1024 / 1024;
 
 //        System.out.print(String.format( "%s\t%s", memTotal, memUsed));
 
@@ -96,7 +96,7 @@ public class SystemMonitor {
         }
 
         String memTotal = "" + mem.getFree() / 1024 / 1024;
-        String memUsed = "" +  mem.getUsed() / 1024 / 1024;
+        String memUsed = "" + mem.getUsed() / 1024 / 1024;
 
 //        System.out.print(String.format( "%s\t%s", memTotal, memUsed));
         document.put("cpuUsage", cputimer.getCpuUsage());
@@ -116,9 +116,9 @@ public class SystemMonitor {
         try {
             NetworkData.getMetricThread(sigar, document);
         } catch (SigarException e) {
-            e.printStackTrace();
+            log.error("Error", e);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.error("Error", e);
         }
 
         WebRTCStatDao.getInstance().saveSystemStat(document);
@@ -128,7 +128,7 @@ public class SystemMonitor {
 
         // getInformationsAboutMemory();
         getSystemStatistics();
-        NetworkData.getMetricThread(sigar);
+//        NetworkData.getMetricThread(sigar);
     }
 }
 

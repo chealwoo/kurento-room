@@ -8,14 +8,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * http://stackoverflow.com/questions/11034753/sigar-network-speed
  */
 public class NetworkData {
+    private static final Logger log = LoggerFactory.getLogger(SystemMonitor.class);
+
     static Map<String, Long> rxCurrentMap = new HashMap<String, Long>();
     static Map<String, List<Long>> rxChangeMap = new HashMap<String, List<Long>>();
     static Map<String, Long> txCurrentMap = new HashMap<String, Long>();
     static Map<String, List<Long>> txChangeMap = new HashMap<String, List<Long>>();
+
     private static Sigar sigar;
 
     /**
