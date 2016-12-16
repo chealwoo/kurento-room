@@ -6,17 +6,12 @@
       "uri": "wss://kms-app.inq.com:8443/room"
    },
    "mongodb": {
-      "uris": [ "mongo-pri.inq.com" ],
+      "uris": [ "mongo-pri.inq.com", "mongo-sec.inq.com" ],
       "dbname": "kmslog"
    },
    "kurento": {
       "client": {
          "requestTimeout": 20000
-      }
-   },
-   "ltt": {
-      "room": {
-         "prefix": "ltttest001"
       }
    },
    "security": {
