@@ -18,6 +18,7 @@ package com.inq.webcall.room;
 
 import com.inq.saml.TokenValidator;
 import com.inq.webcall.WebCallApplication;
+import com.inq.webcall.dao.RoomDao;
 import com.inq.webcall.room.api.InqIKurentoClientSessionInfo;
 import com.inq.webcall.room.api.InqKurentoClientProvider;
 import com.inq.webcall.room.internal.InqParticipant;
@@ -240,6 +241,9 @@ public class InqRoomManager {
 
         String sdpResponse = participant.publishToRoom(sdpType, sdp, doLoopback,
                 loopbackAlternativeSrc, loopbackConnectionType);
+
+        RoomDao.saveRoomEventSDPAccepted(room.getName(), sdpResponse, "publish", name);
+
         if (sdpResponse == null) {
             throw new RoomException(Code.MEDIA_SDP_ERROR_CODE,
                     "Error generating SDP response for publishing user " + name);
@@ -359,6 +363,9 @@ public class InqRoomManager {
         }
 
         String sdpAnswer = participant.receiveMediaFrom(senderParticipant, sdpOffer);
+
+        RoomDao.saveRoomEventSDPAccepted(room.getName(), sdpAnswer, "subscribe", name);
+
         if (sdpAnswer == null) {
             throw new RoomException(Code.MEDIA_SDP_ERROR_CODE,
                     "Unable to generate SDP answer when subscribing '" + name + "' to '" + remoteName + "'");
@@ -812,7 +819,8 @@ public class InqRoomManager {
         kcSessionInfo.setRoomCreated(true);
         kcSessionInfo.setAuthToken(room.getAuthToken());
 
-        log.warn("No room '{}' exists yet. Created one " + "using KurentoClient '{}'.", roomName,
+        RoomDao.saveRoomEvent(room.getName(), "created");
+        log.warn("No room '{}' exists yet. Created one using KurentoClient '{}'.", roomName,
                 kcName);
     }
 
@@ -849,6 +857,7 @@ public class InqRoomManager {
         }
         try {
             room.close();
+            RoomDao.saveRoomEvent(roomName, "close");
         } catch (JsonRpcException e) {
             log.error("Exception closing room {}", roomName, e);
         }

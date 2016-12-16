@@ -287,6 +287,13 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
     }
 
     /**
+     *
+     */
+    public int getRoomCnt() {
+        return internalManager.getRooms().size();
+    }
+
+    /**
      * @see InqRoomManager#getParticipants(String)
      */
     public Set<UserParticipant> getParticipants(String roomName) throws RoomException {

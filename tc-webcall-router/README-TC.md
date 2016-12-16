@@ -70,7 +70,15 @@ http://confluence.touchcommerce.com/display/IT/WebRTC
 Start Chrome    
 google-chrome --use-fake-device-for-media-stream --use-file-for-fake-video-capture=/home/dlee/Downloads/garden_sif.y4m --use-file-for-fake-video-capture=/home/dlee/Downloads/kennedy_moon.wav
 
+https://10.22.111.87:8443?roomname=test1&username=uer1
 
+"C:\Program Files (x86)\Google\Chrome\Application\Chrome.exe" --use-fake-device-for-media-stream --use-file-for-fake-video-capture="D:\temp\garden_sif.y4m" --use-file-for-fake-audio-capture="D:\temp\kennedy_moon.wav" "https://10.22.111.87:8443?roomname=test1&username=uer1"
+
+"C:\Program Files (x86)\Google\Chrome\Application\Chrome.exe --use-fake-device-for-media-stream --use-file-for-fake-video-capture=D:\temp\garden_sif.y4m --use-file-for-fake-video-capture=D:\temp\kennedy_moon.wav  https://10.22.111.87:8443?roomname=test1&username=uer1"
+"C:\Program Files (x86)\Google\Chrome\Application\Chrome.exe" --use-fake-device-for-media-stream --use-file-for-fake-video-capture="D:\temp\garden_sif.y4m" --use-file-for-fake-audio-capture="D:\temp\kennedy_moon.wav" https://10.22.111.87:8443?roomname=test1&username=uer1"
+"C:\Program Files (x86)\Google\Chrome\Application\Chrome.exe" --use-fake-device-for-media-stream --use-file-for-fake-video-capture="D:\temp\garden_sif.y4m" --use-file-for-fake-audio-capture="D:\temp\kennedy_moon.wav" "https://10.22.111.87:8443?roomname=test1&username=uer1"
+
+"C:\Program Files (x86)\Google\Chrome\Application\Chrome.exe"
 
 # Setup Kurento on a Ubuntu 
 ------------------------------------------------------------------------   

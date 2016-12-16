@@ -54,11 +54,17 @@ public class WebRTCStatDao implements IWebRTCStatDao {
     }
 
     public void saveRoomStat(Document document) {
-        MongoCollection<Document> roomlog = db.getCollection("RoomStat");
+        MongoCollection<Document> roomlog = db.getCollection("Room");
         roomlog.insertOne(document);
     }
+
     public void saveParticipantStat(Document document) {
         MongoCollection<Document> roomlog = db.getCollection("ParticipantStat");
+        roomlog.insertOne(document);
+    }
+
+    public void saveWebRTCEndpoint(Document document) {
+        MongoCollection<Document> roomlog = db.getCollection("WebRTCEndpoint");
         roomlog.insertOne(document);
     }
 
@@ -72,7 +78,7 @@ public class WebRTCStatDao implements IWebRTCStatDao {
      * @param str
      */
     public void saveWebRTCEndpointStat(String str) {
-        MongoCollection<Document> roomlog = db.getCollection("WebRTCEndpointStat");
+        MongoCollection<Document> roomlog = db.getCollection("WebRTCEndpointStatClient");
         Document document = new Document();
         document.put("Stats", str);
         roomlog.insertOne(document);

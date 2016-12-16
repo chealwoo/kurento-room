@@ -17,15 +17,26 @@ public class RoomMonitor {
 
     public static void crunchWebRtcEndpoint(InqParticipant inqParticipant, InqParticipant subscriber, WebRtcEndpoint webRtcEndPoint) {
         try {
-            for (MediaType mediaType : MediaType.values()) {
-                Document document = new Document();
-                addRoomParticipantInfo(inqParticipant, document);
-                addSubscriberInfo(subscriber, document);
+            // Save room status
+            Document documentRoom = new Document();
+            documentRoom.put("room", inqParticipant.getRoom().getName());
+            documentRoom.put("LocalSessionDescriptor", webRtcEndPoint.getLocalSessionDescriptor());
+            documentRoom.put("timestamp", webRtcEndPoint.getLocalSessionDescriptor());
+            WebRTCStatDao.getInstance().saveRoomStat(documentRoom);
 
-                addRemoteWebRtcEndpointInfo(webRtcEndPoint, document);
+            for (MediaType mediaType : MediaType.values()) {
+                Document documentEndPoint = new Document();
+
+                addRoomParticipantInfo(inqParticipant, documentEndPoint);
+                addSubscriberInfo(subscriber, documentEndPoint);
+                addRemoteWebRtcEndpointInfo(webRtcEndPoint, documentEndPoint);
+                WebRTCStatDao.getInstance().saveWebRTCEndpoint(documentEndPoint);
+
                 Map<String, Stats> stats = webRtcEndPoint.getStats(mediaType);
                 log.debug("Room: '{}', User: '{}', Endpoint: '{}' Information", inqParticipant.getRoom().getName(), inqParticipant.getName(), webRtcEndPoint.getId());
                 for (Stats s : stats.values()) {
+                    Document document = new Document();
+                    document.put("WebEndpointId", webRtcEndPoint.getId());
                     addStatsInfo(s, document);
 
                     switch (s.getType()) {
@@ -49,6 +60,7 @@ public class RoomMonitor {
         } catch (ProtocolException e) {
 
             log.error("Error ", e);
+
         } catch (Throwable t) {
             // The WebRtcEndpoint may have been released. This does not need to
             // be a "severe" problem
@@ -61,12 +73,16 @@ public class RoomMonitor {
         try {
             WebRtcEndpoint webRtcEndpoint = inqParticipant.getPublisher().getWebEndpoint();
             for (MediaType mediaType : MediaType.values()) {
-                Document document = new Document();
-                addRoomParticipantInfo(inqParticipant, document);
-                addLocalWebRtcEndpointInfo(webRtcEndpoint, document);
+                Document documentEndPoint = new Document();
+                addRoomParticipantInfo(inqParticipant, documentEndPoint);
+                addLocalWebRtcEndpointInfo(webRtcEndpoint, documentEndPoint);
+                WebRTCStatDao.getInstance().saveWebRTCEndpoint(documentEndPoint);
+
                 Map<String, Stats> stats = webRtcEndpoint.getStats(mediaType);
                 log.debug("Room: '{}', User: '{}', Endpoint: '{}' Information", inqParticipant.getRoom().getName(), inqParticipant.getName(), webRtcEndpoint.getId());
                 for (Stats s : stats.values()) {
+                    Document document = new Document();
+                    document.put("WebEndpointId", webRtcEndpoint.getId());
                     addStatsInfo(s, document);
 
                     switch (s.getType()) {
@@ -83,7 +99,14 @@ public class RoomMonitor {
                         default:
                             break;
                     }
-                    WebRTCStatDao.getInstance().saveWebRTCEndpointStat(document);
+                    try {
+                        WebRTCStatDao.getInstance().saveWebRTCEndpointStat(document);
+                    } catch (Throwable t) {
+                        // The WebRtcEndpoint may have been released. This does not need to
+                        // be a "severe" problem
+                        // TODO log t just in case.
+                        log.error("Error ", t);
+                    }
                 }
             }
 
@@ -101,8 +124,8 @@ public class RoomMonitor {
     public static void addRoomParticipantInfo(InqParticipant inqParticipant, Document document) {
         document.put("room", inqParticipant.getRoom().getName());
         document.put("participant", inqParticipant.getName());
-        document.put("location", "Server");
     }
+
     public static void addSubscriberInfo(InqParticipant subscriber, Document document) {
         document.put("subscriber", subscriber.getName());
     }
@@ -110,15 +133,14 @@ public class RoomMonitor {
     public static void addLocalWebRtcEndpointInfo(WebRtcEndpoint webRtcEndpoint, Document document) {
         document.put("CreationTime", webRtcEndpoint.getCreationTime());
         document.put("Id", webRtcEndpoint.getId());
-        document.put("LocalSessionDescriptor", webRtcEndpoint.getLocalSessionDescriptor());
         document.put("MaxAudioRecvBandwidth", webRtcEndpoint.getMaxAudioRecvBandwidth());
         document.put("TurnUrl", webRtcEndpoint.getTurnUrl());
         document.put("StunServerAddress", webRtcEndpoint.getStunServerAddress());
     }
+
     public static void addRemoteWebRtcEndpointInfo(WebRtcEndpoint webRtcEndpoint, Document document) {
         document.put("CreationTime", webRtcEndpoint.getCreationTime());
         document.put("Id", webRtcEndpoint.getId());
-        document.put("RemoteSessionDescriptor", webRtcEndpoint.getRemoteSessionDescriptor());
         document.put("MaxAudioRecvBandwidth", webRtcEndpoint.getMaxAudioRecvBandwidth());
         document.put("TurnUrl", webRtcEndpoint.getTurnUrl());
         document.put("StunServerAddress", webRtcEndpoint.getStunServerAddress());
@@ -131,22 +153,32 @@ public class RoomMonitor {
     }
 
     public static void addRTCInboundRTPStreamStatsInfo(RTCInboundRTPStreamStats inboudStats, Document document) {
-        document.put("inboudStats-Ssrc", inboudStats.getSsrc());
-        document.put("inboudStats-Jitter", inboudStats.getJitter());
-        document.put("inboudStats-FractionLost", inboudStats.getFractionLost());
-        document.put("inboudStats-BytesReceived", inboudStats.getBytesReceived());
-        document.put("inboudStats-PliCount", inboudStats.getPliCount());
-        document.put("inboudStats-NackCount", inboudStats.getPacketsReceived());
-        document.put("inboudStats-PacketsLost", inboudStats.getPacketsLost());
-        document.put("inboudStats-NackCount", inboudStats.getNackCount());
+        document.put("Ssrc", inboudStats.getSsrc());
+        document.put("Type", inboudStats.getType().name());
+        document.put("BytesReceived", inboudStats.getBytesReceived());
+        document.put("PacketsReceived", inboudStats.getPacketsReceived());
+        document.put("PacketsLost", inboudStats.getPacketsLost());
+        document.put("FractionLost", inboudStats.getFractionLost());
+        document.put("Jitter", inboudStats.getJitter());
+        document.put("PliCount", inboudStats.getPliCount());
+        document.put("NackCount", inboudStats.getNackCount());
+        document.put("FirCount", inboudStats.getFirCount());
+        document.put("SliCount", inboudStats.getSliCount());
+        document.put("Remb", inboudStats.getRemb());
     }
 
     public static void addRTCOutboundRTPStreamStatsInfo(RTCOutboundRTPStreamStats outboundStats, Document document) {
-        document.put("outboundStats-Ssrc", outboundStats.getSsrc());
-        document.put("outboundStats-RoundTripTime", outboundStats.getRoundTripTime());
-        document.put("outboundStats-TargetBitrate", outboundStats.getTargetBitrate());
-        document.put("outboundStats-BytesSent", outboundStats.getBytesSent());
-        document.put("outboundStats-PliCount", outboundStats.getPliCount());
-        document.put("outboundStats-NackCount", outboundStats.getNackCount());
+        document.put("Ssrc", outboundStats.getSsrc());
+        document.put("Type", outboundStats.getType().name());
+        document.put("RoundTripTime", outboundStats.getRoundTripTime());
+        document.put("TargetBitrate", outboundStats.getTargetBitrate());
+        document.put("BytesSent", outboundStats.getBytesSent());
+        document.put("PacketsSent", outboundStats.getPacketsSent());
+        document.put("PacketsLost", outboundStats.getPacketsLost());
+        document.put("FractionLost", outboundStats.getFractionLost());
+        document.put("PliCount", outboundStats.getPliCount());
+        document.put("NackCount", outboundStats.getNackCount());
+        document.put("SliCount", outboundStats.getSliCount());
+        document.put("FirCount", outboundStats.getFirCount());
     }
 }
