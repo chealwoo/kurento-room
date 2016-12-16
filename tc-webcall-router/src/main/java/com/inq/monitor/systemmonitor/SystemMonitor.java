@@ -1,19 +1,29 @@
 package com.inq.monitor.systemmonitor;
 
-import java.io.*;
-import java.util.*;
-import java.text.*;
-import java.lang.*;
-
-
+import com.inq.webcall.controller.LttController;
+import com.inq.webcall.dao.WebRTCStatDao;
+import com.inq.webcall.room.InqNotificationRoomManager;
+import org.bson.Document;
 import org.hyperic.sigar.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * http://stackoverflow.com/questions/12214114/how-to-include-sigar-api-in-java-project
  */
+@Service
 public class SystemMonitor {
 
+
+
+
+//    @Autowired
+    public static InqNotificationRoomManager roomManager;
+
     private static Sigar sigar = new Sigar();
+
+    public SystemMonitor() {
+    }
 
     public static void getInformationsAboutMemory() {
         System.out.println("**************************************");
@@ -27,7 +37,12 @@ public class SystemMonitor {
             se.printStackTrace();
         }
 
-        System.out.println("Actual total free system memory: "
+        String memTotal = "" + mem.getFree() / 1024 / 1024;
+        String memUsed = "" +  mem.getUsed() / 1024 / 1024;
+
+        System.out.print(String.format( "%s\t%s", memTotal, memUsed));
+
+/*        System.out.println("Actual total free system memory: "
                 + mem.getActualFree() / 1024 / 1024 + " MB");
         System.out.println("Actual total used system memory: "
                 + mem.getActualUsed() / 1024 / 1024 + " MB");
@@ -40,7 +55,7 @@ public class SystemMonitor {
         System.out.println("Total used system memory.......: " + mem.getUsed()
                 / 1024 / 1024 + " MB");
 
-        System.out.println("\n**************************************\n");
+        System.out.println("\n**************************************\n");*/
     }
 
     /*
@@ -58,14 +73,60 @@ public class SystemMonitor {
             se.printStackTrace();
         }
 
-        System.out.print(mem.getUsedPercent() + "\t");
+        String memTotal = "" + mem.getFree() / 1024 / 1024;
+        String memUsed = "" +  mem.getUsed() / 1024 / 1024;
+
+//        System.out.print(String.format( "%s\t%s", memTotal, memUsed));
+
         System.out.print(cputimer.getCpuUsage() + "\t");
+        System.out.print(mem.getUsedPercent() + "\t");
         System.out.print(filesystemusage.getUsePercent() + "\n");
+    }
+
+    public static void getSystemStatistics(Document document) {
+        Mem mem = null;
+        CpuTimer cputimer = null;
+        FileSystemUsage filesystemusage = null;
+        try {
+            mem = sigar.getMem();
+            cputimer = new CpuTimer(sigar);
+            filesystemusage = sigar.getFileSystemUsage("C:");
+        } catch (SigarException se) {
+            se.printStackTrace();
+        }
+
+        String memTotal = "" + mem.getFree() / 1024 / 1024;
+        String memUsed = "" +  mem.getUsed() / 1024 / 1024;
+
+//        System.out.print(String.format( "%s\t%s", memTotal, memUsed));
+        document.put("cpuUsage", cputimer.getCpuUsage());
+        document.put("memUsage", mem.getUsedPercent());
+        System.out.print(cputimer.getCpuUsage() + "\t");
+        System.out.print(mem.getUsedPercent() + "\t");
+        System.out.print(filesystemusage.getUsePercent() + "\n");
+    }
+
+    public void saveSystem() {
+        Document document = new Document();
+
+        document.put("lttName", LttController.LTT_ROOM_NAME_PREFIX);
+        document.put("timestamp", System.currentTimeMillis());
+        document.put("roomCnt", roomManager != null ? roomManager.getRoomCnt() : 0);
+        getSystemStatistics(document);
+        try {
+            NetworkData.getMetricThread(sigar, document);
+        } catch (SigarException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        WebRTCStatDao.getInstance().saveSystemStat(document);
     }
 
     public static void main(String[] args) throws Exception {
 
-        getInformationsAboutMemory();
+        // getInformationsAboutMemory();
         getSystemStatistics();
         NetworkData.getMetricThread(sigar);
     }

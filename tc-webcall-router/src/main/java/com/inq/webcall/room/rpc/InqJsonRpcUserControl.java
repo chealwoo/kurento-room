@@ -19,6 +19,7 @@ package com.inq.webcall.room.rpc;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
+import com.inq.monitor.systemmonitor.SystemMonitor;
 import com.inq.saml.TokenValidator;
 import com.inq.webcall.WebCallApplication;
 import com.inq.webcall.room.InqNotificationRoomManager;
@@ -61,6 +62,9 @@ public class InqJsonRpcUserControl extends JsonRpcUserControl {
     public InqJsonRpcUserControl(InqNotificationRoomManager roomManager) {
         super(roomManager);
         this.roomManager = roomManager;
+
+        // TODO
+        SystemMonitor.roomManager = roomManager;
     }
 
     public void joinRoom(Transaction transaction, Request<JsonObject> request,

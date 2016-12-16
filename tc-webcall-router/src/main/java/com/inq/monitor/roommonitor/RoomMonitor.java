@@ -33,7 +33,7 @@ public class RoomMonitor {
                 WebRTCStatDao.getInstance().saveWebRTCEndpoint(documentEndPoint);
 
                 Map<String, Stats> stats = webRtcEndPoint.getStats(mediaType);
-                log.debug("Room: '{}', User: '{}', Endpoint: '{}' Information", inqParticipant.getRoom().getName(), inqParticipant.getName(), webRtcEndPoint.getId());
+                log.trace("Room: '{}', User: '{}', Endpoint: '{}' Information", inqParticipant.getRoom().getName(), inqParticipant.getName(), webRtcEndPoint.getId());
                 for (Stats s : stats.values()) {
                     Document document = new Document();
                     document.put("WebEndpointId", webRtcEndPoint.getId());
@@ -79,7 +79,7 @@ public class RoomMonitor {
                 WebRTCStatDao.getInstance().saveWebRTCEndpoint(documentEndPoint);
 
                 Map<String, Stats> stats = webRtcEndpoint.getStats(mediaType);
-                log.debug("Room: '{}', User: '{}', Endpoint: '{}' Information", inqParticipant.getRoom().getName(), inqParticipant.getName(), webRtcEndpoint.getId());
+                log.trace("Room: '{}', User: '{}', Endpoint: '{}' Information", inqParticipant.getRoom().getName(), inqParticipant.getName(), webRtcEndpoint.getId());
                 for (Stats s : stats.values()) {
                     Document document = new Document();
                     document.put("WebEndpointId", webRtcEndpoint.getId());
@@ -117,7 +117,7 @@ public class RoomMonitor {
             // The WebRtcEndpoint may have been released. This does not need to
             // be a "severe" problem
             // TODO log t just in case.
-            log.error("Error ", t);
+            log.warn("Error ", t);
         }
     }
 

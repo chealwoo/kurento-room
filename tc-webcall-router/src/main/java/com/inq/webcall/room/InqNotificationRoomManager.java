@@ -1,5 +1,6 @@
 package com.inq.webcall.room;
 
+import com.inq.monitor.systemmonitor.SystemMonitor;
 import com.inq.webcall.room.api.InqIKurentoClientSessionInfo;
 import com.inq.webcall.room.api.InqKurentoClientProvider;
 import com.inq.webcall.room.internal.InqKurentoClientSessionInfo;
@@ -37,6 +38,8 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
         this.internalManager = new InqRoomManager(notificationRoomHandler, kcProvider, roomEventManager);
         kcProvider.setRoomManager(this);
 
+        // TODO
+        SystemMonitor.roomManager = this;
     }
 
     // ----------------- CLIENT-ORIGINATED REQUESTS ------------

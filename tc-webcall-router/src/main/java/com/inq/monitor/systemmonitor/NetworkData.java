@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
+import org.bson.Document;
 /**
  * http://stackoverflow.com/questions/11034753/sigar-network-speed
  */
@@ -63,11 +63,18 @@ public class NetworkData {
         Long[] m = getMetric(sigar);
         long totalrx = m[0];
         long totaltx = m[1];
-        System.out.print("totalrx(download): ");
-        System.out.println("\t" + Sigar.formatSize(totalrx));
+         System.out.print("totalrx(download): ");
+        System.out.print(Sigar.formatSize(totalrx) + "\t");
         System.out.print("totaltx(upload): ");
-        System.out.println("\t" + Sigar.formatSize(totaltx));
+        System.out.print(Sigar.formatSize(totaltx) + "\t");
         System.out.println("-----------------------------------");
+    }
+    public static void getMetricThread(Sigar sigar, Document document) throws SigarException, InterruptedException {
+        Long[] m = getMetric(sigar);
+        long totalrx = m[0];
+        long totaltx = m[1];
+        document.put("netDownload",totalrx);
+        document.put("netUpload",totaltx);
     }
 
     public static Long[] getMetric(Sigar sigar) throws SigarException {

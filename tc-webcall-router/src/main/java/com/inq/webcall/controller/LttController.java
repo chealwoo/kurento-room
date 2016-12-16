@@ -26,9 +26,9 @@ public class LttController {
 
     private static final Logger log = LoggerFactory.getLogger(LttController.class);
 
-    private final static String LTT_ROOM_NAME_PREFIX = PropertiesManager.getProperty(
+    public final static String LTT_ROOM_NAME_PREFIX = PropertiesManager.getProperty(
             "ltt.room.prefix", "ltt01room");
-    private final static String LTT_USER_NAME_PREFIX = PropertiesManager.getProperty(
+    public final static String LTT_USER_NAME_PREFIX = PropertiesManager.getProperty(
             "ltt.user.prefix", "lttuser");
     private static int roomNum = 0;
     private static int userNum = 0;

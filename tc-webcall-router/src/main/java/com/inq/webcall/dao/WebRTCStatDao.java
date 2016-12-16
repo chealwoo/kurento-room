@@ -1,6 +1,8 @@
 package com.inq.webcall.dao;
 
 import com.google.gson.JsonArray;
+import com.inq.monitor.systemmonitor.SystemMonitor;
+import com.inq.monitor.systemmonitor.SystemMonitorChecker;
 import com.inq.webcall.WebCallApplication;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
@@ -12,10 +14,7 @@ import org.bson.Document;
 import org.kurento.jsonrpc.JsonUtils;
 import org.kurento.room.KurentoRoomServerApp;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import static org.kurento.commons.PropertiesManager.getPropertyJson;
 
@@ -26,7 +25,7 @@ public class WebRTCStatDao implements IWebRTCStatDao {
     private MongoDatabase db;
     private static WebRTCStatDao webRTCStatDao;
 
-    public WebRTCStatDao() {
+    private WebRTCStatDao() {
         JsonArray mongodUris = getPropertyJson(WebCallApplication.MONGOD_SERVER_URIS_PROPERTY,
                 WebCallApplication.DEFAULT_MONGOD_SERVER_URIS, JsonArray.class);
         List<String> mongodUrisList = JsonUtils.toStringList(mongodUris);
@@ -44,7 +43,16 @@ public class WebRTCStatDao implements IWebRTCStatDao {
         this.mongo = new MongoClient(mongoSrvAddrList);
 
         db = mongo.getDatabase(WebCallApplication.MONGOD_DB_NAME);
+
+        startWebRtcEndPointChecker();
     }
+
+    public void startWebRtcEndPointChecker() {
+        Timer time = new Timer(); // Instantiate Timer Object
+        SystemMonitorChecker systemMonitorChecker = new SystemMonitorChecker(new SystemMonitor());
+        time.schedule(systemMonitorChecker, 0, 5000); // Create Repetitively task for every 1 secs
+    }
+
 
     public static WebRTCStatDao getInstance() {
         if (webRTCStatDao == null) {
@@ -70,6 +78,11 @@ public class WebRTCStatDao implements IWebRTCStatDao {
 
     public void saveWebRTCEndpointStat(Document document) {
         MongoCollection<Document> roomlog = db.getCollection("WebRTCEndpointStat");
+        roomlog.insertOne(document);
+    }
+
+    public void saveSystemStat(Document document) {
+        MongoCollection<Document> roomlog = db.getCollection("apSysStat");
         roomlog.insertOne(document);
     }
 
