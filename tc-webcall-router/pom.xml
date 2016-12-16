@@ -117,6 +117,13 @@
             <version>3.2.0</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.fusesource/sigar -->
+        <dependency>
+            <groupId>org.fusesource</groupId>
+            <artifactId>sigar</artifactId>
+            <version>1.6.4</version>
+        </dependency>
+
     </dependencies>
 
     <build>
