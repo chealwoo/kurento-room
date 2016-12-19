@@ -1,7 +1,6 @@
-package com.inq.monitor.roommonitor;
+package com.inq.webcall.monitor.roommonitor;
 
 import com.inq.webcall.dao.WebRTCStatDao;
-import com.inq.webcall.room.InqNotificationRoomManager;
 import com.inq.webcall.room.internal.InqParticipant;
 import org.bson.Document;
 import org.kurento.client.*;
@@ -9,7 +8,6 @@ import org.kurento.client.internal.server.ProtocolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
 import java.util.Map;
 
 public class RoomMonitor {

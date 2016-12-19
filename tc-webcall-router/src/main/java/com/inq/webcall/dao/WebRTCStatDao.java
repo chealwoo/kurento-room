@@ -1,8 +1,8 @@
 package com.inq.webcall.dao;
 
 import com.google.gson.JsonArray;
-import com.inq.monitor.systemmonitor.SystemMonitor;
-import com.inq.monitor.systemmonitor.SystemMonitorChecker;
+import com.inq.webcall.monitor.systemmonitor.SystemMonitor;
+import com.inq.webcall.monitor.systemmonitor.SystemMonitorChecker;
 import com.inq.webcall.WebCallApplication;
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
@@ -12,7 +12,6 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.kurento.jsonrpc.JsonUtils;
-import org.kurento.room.KurentoRoomServerApp;
 
 import java.util.*;
 
@@ -31,9 +30,9 @@ public class WebRTCStatDao implements IWebRTCStatDao {
         List<String> mongodUrisList = JsonUtils.toStringList(mongodUris);
         List<ServerAddress> mongoSrvAddrList = new LinkedList<>();
 
-        for (String s: mongodUrisList) {
-            String[] output =s.split(":");
-            if(output.length == 2) {
+        for (String s : mongodUrisList) {
+            String[] output = s.split(":");
+            if (output.length == 2) {
                 mongoSrvAddrList.add(new ServerAddress(output[0], Integer.valueOf(output[1])));
             } else {
                 mongoSrvAddrList.add(new ServerAddress(output[0], 27017));
@@ -62,63 +61,64 @@ public class WebRTCStatDao implements IWebRTCStatDao {
     }
 
     public void saveRoomStat(Document document) {
-        MongoCollection<Document> roomlog = db.getCollection("Room");
+        MongoCollection<Document> roomlog = db.getCollection(IMongoDBService.TBL_ROOM);
         roomlog.insertOne(document);
     }
 
     public void saveParticipantStat(Document document) {
-        MongoCollection<Document> roomlog = db.getCollection("ParticipantStat");
+        MongoCollection<Document> roomlog = db.getCollection(IMongoDBService.TBL_PARTICIPANT);
         roomlog.insertOne(document);
     }
 
     public void saveWebRTCEndpoint(Document document) {
-        MongoCollection<Document> roomlog = db.getCollection("WebRTCEndpoint");
+        MongoCollection<Document> roomlog = db.getCollection(IMongoDBService.TBL_WEBRTCENDPOINT);
         roomlog.insertOne(document);
     }
 
     public void saveWebRTCEndpointStat(Document document) {
-        MongoCollection<Document> roomlog = db.getCollection("WebRTCEndpointStat");
+        MongoCollection<Document> roomlog = db.getCollection(IMongoDBService.TBL_WEBRTCENDPOINT_STAT);
         roomlog.insertOne(document);
     }
 
     public void saveSystemStat(Document document) {
-        MongoCollection<Document> roomlog = db.getCollection("apSysStat");
+        MongoCollection<Document> roomlog = db.getCollection(IMongoDBService.TBL_APPLICATION_SERVER_STAT);
         roomlog.insertOne(document);
     }
 
     /**
-     *  This is from client side.
+     * This is from client side.
+     *
      * @param str
      */
     public void saveWebRTCEndpointStat(String str) {
-        MongoCollection<Document> roomlog = db.getCollection("WebRTCEndpointStatClient");
+        MongoCollection<Document> roomlog = db.getCollection(IMongoDBService.TBL_CLIENT_WEBRTCENDPOINT_STAT);
         Document document = new Document();
         document.put("Stats", str);
         roomlog.insertOne(document);
     }
 
-    public void findWebRTCEndpointStat(String roomName){
-        MongoCollection<Document> roomlog = db.getCollection("WebRTCEndpointStat");
+    public void findWebRTCEndpointStat(String roomName) {
+        MongoCollection<Document> roomlog = db.getCollection(IMongoDBService.TBL_WEBRTCENDPOINT_STAT);
 
         BasicDBObject searchQuery = new BasicDBObject();
         searchQuery.put("room", roomName);
 
         FindIterable<Document> cursor = roomlog.find(searchQuery);
 
-        for (Document d: cursor) {
+        for (Document d : cursor) {
             System.out.println(d);
         }
     }
 
-    public void findParticipantStat(String roomName){
-        MongoCollection<Document> roomlog = db.getCollection("ParticipantStat");
+    public void findParticipantStat(String roomName) {
+        MongoCollection<Document> roomlog = db.getCollection(IMongoDBService.TBL_PARTICIPANT);
 
         BasicDBObject searchQuery = new BasicDBObject();
         searchQuery.put("room", roomName);
 
         FindIterable<Document> cursor = roomlog.find(searchQuery);
 
-        for (Document d: cursor) {
+        for (Document d : cursor) {
             System.out.println(d);
         }
     }

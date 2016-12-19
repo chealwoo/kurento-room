@@ -1,4 +1,4 @@
-package com.inq.monitor.kmsmonitor;
+package com.inq.webcall.monitor.kmsmonitor;
 
 /**
  * https://github.com/lulop-k/kms-monitoring-java

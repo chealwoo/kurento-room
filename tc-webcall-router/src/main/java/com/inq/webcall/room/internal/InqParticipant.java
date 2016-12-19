@@ -15,7 +15,6 @@
  */
 package com.inq.webcall.room.internal;
 
-import com.inq.monitor.roommonitor.RoomMonitor;
 import com.inq.webcall.WebCallApplication;
 import com.inq.webcall.room.endpoint.InqPublisherEndpoint;
 import com.inq.webcall.room.endpoint.InqSubscriberEndpoint;

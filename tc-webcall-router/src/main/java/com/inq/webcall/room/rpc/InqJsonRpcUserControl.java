@@ -19,15 +19,13 @@ package com.inq.webcall.room.rpc;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-import com.inq.monitor.systemmonitor.SystemMonitor;
-import com.inq.saml.TokenValidator;
+import com.inq.webcall.monitor.systemmonitor.SystemMonitor;
 import com.inq.webcall.WebCallApplication;
 import com.inq.webcall.room.InqNotificationRoomManager;
 import org.kurento.client.FaceOverlayFilter;
 import org.kurento.client.MediaElement;
 import org.kurento.jsonrpc.Transaction;
 import org.kurento.jsonrpc.message.Request;
-import org.kurento.room.NotificationRoomManager;
 import org.kurento.room.api.pojo.ParticipantRequest;
 import org.kurento.room.api.pojo.UserParticipant;
 import org.kurento.room.internal.ProtocolElements;

@@ -1,6 +1,6 @@
 package com.inq.webcall.room;
 
-import com.inq.monitor.systemmonitor.SystemMonitor;
+import com.inq.webcall.monitor.systemmonitor.SystemMonitor;
 import com.inq.webcall.room.api.InqIKurentoClientSessionInfo;
 import com.inq.webcall.room.api.InqKurentoClientProvider;
 import com.inq.webcall.room.internal.InqKurentoClientSessionInfo;
@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PreDestroy;
-import java.util.HashSet;
 import java.util.Set;
 
 

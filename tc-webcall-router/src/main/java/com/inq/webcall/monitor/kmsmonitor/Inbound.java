@@ -1,4 +1,4 @@
-package com.inq.monitor.kmsmonitor;
+package com.inq.webcall.monitor.kmsmonitor;
 
 /**
  * This class provides statistics for inbound (incoming to a specific KMS

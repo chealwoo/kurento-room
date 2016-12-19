@@ -1,7 +1,4 @@
-package com.inq.monitor.systemmonitor;
-
-import com.inq.monitor.roommonitor.RoomMonitor;
-import com.inq.webcall.room.internal.InqParticipant;
+package com.inq.webcall.monitor.systemmonitor;
 
 import java.util.TimerTask;
 

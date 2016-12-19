@@ -1,4 +1,4 @@
-package com.inq.monitor.systemmonitor;
+package com.inq.webcall.monitor.systemmonitor;
 
 import org.hyperic.sigar.*;
 

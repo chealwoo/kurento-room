@@ -1,4 +1,4 @@
-package com.inq.monitor.systemmonitor;
+package com.inq.webcall.monitor.systemmonitor;
 
 import com.inq.webcall.controller.LttController;
 import com.inq.webcall.dao.WebRTCStatDao;

@@ -1,6 +1,6 @@
 package com.inq.webcall.room.internal;
 
-import com.inq.monitor.roommonitor.RoomMonitor;
+import com.inq.webcall.monitor.roommonitor.RoomMonitor;
 
 import java.util.TimerTask;
 

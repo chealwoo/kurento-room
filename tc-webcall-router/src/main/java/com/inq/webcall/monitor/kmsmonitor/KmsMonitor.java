@@ -1,4 +1,4 @@
-package com.inq.monitor.kmsmonitor;
+package com.inq.webcall.monitor.kmsmonitor;
 
 import java.util.List;
 import java.util.Map;
