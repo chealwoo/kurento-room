@@ -115,7 +115,9 @@ public class NetworkData {
             for (Long l : entry.getValue()) {
                 average += l;
             }
-            total += average / entry.getValue().size();
+            if(entry.getValue().size() != 0) {
+                total += average / entry.getValue().size();
+            }
         }
         return total;
     }

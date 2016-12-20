@@ -1,6 +1,6 @@
 package com.inq.webcall.room.internal;
 
-import com.inq.webcall.monitor.roommonitor.RoomMonitor;
+import com.inq.webcall.monitor.roommonitor.WebCallEndpointMonitor;
 import org.kurento.client.WebRtcEndpoint;
 
 import java.util.TimerTask;
@@ -21,6 +21,6 @@ public class InqWebRtcEndPointStatChecker extends TimerTask {
         if (inqParticipant.isClosed()) {
             this.cancel();
         }
-        RoomMonitor.crunchWebRtcEndpoint(inqParticipant, subscriber, webRtcEndPoint);
+        WebCallEndpointMonitor.crunchWebRtcEndpoint(inqParticipant, subscriber, webRtcEndPoint);
     }
 }

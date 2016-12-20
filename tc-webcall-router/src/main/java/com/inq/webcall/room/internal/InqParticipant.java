@@ -103,7 +103,7 @@ public class InqParticipant {
             }
         }
 
-  //      RoomMonitor.crunchWebRtcEndpointItself(this);
+  //      WebCallEndpointMonitor.crunchWebRtcEndpointItself(this);
         /*
         Schedule Part.
          */
@@ -111,7 +111,7 @@ public class InqParticipant {
     }
 
     /**
-     *  Start RoomMonitor schedule
+     *  Start WebCallEndpointMonitor schedule
      */
     public void startWebRtcEndPointChecker() {
         time = new Timer(); // Instantiate Timer Object
@@ -120,7 +120,7 @@ public class InqParticipant {
     }
 
     /**
-     *  Stop RoomMonitor schedule
+     *  Stop WebCallEndpointMonitor schedule
      */
     public void stopWebRtcEndPointChecker() {
         if(null != time) {
@@ -471,14 +471,14 @@ public class InqParticipant {
         log.info("USER {}: Is now publishing video in room {}", this.name, this.room.getName());
 
         // TODO Monitoring - should be event listener I think
-        // RoomMonitor.crunchWebRtcEndpoint(this.getPublisher().getWebEndpoint());
+        // WebCallEndpointMonitor.crunchWebRtcEndpoint(this.getPublisher().getWebEndpoint());
         WebRtcEndpoint webRtcEndpoint = this.getPublisher().getWebEndpoint();
 
         webRtcEndpoint.addMediaStateChangedListener(
                 new EventListener<MediaStateChangedEvent>() {
                     @Override
                     public void onEvent(MediaStateChangedEvent mediaStateChangedEvent) {
-//                        RoomMonitor.crunchWebRtcEndpoint(webRtcEndpoint);
+//                        WebCallEndpointMonitor.crunchWebRtcEndpoint(webRtcEndpoint);
                     }
                 });
         return sdpResponse;

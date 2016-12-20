@@ -1,6 +1,6 @@
 package com.inq.webcall.room.internal;
 
-import com.inq.webcall.monitor.roommonitor.RoomMonitor;
+import com.inq.webcall.monitor.roommonitor.WebCallEndpointMonitor;
 
 import java.util.TimerTask;
 
@@ -16,6 +16,6 @@ public class InqWebRtcEndPointChecker extends TimerTask {
         if (inqParticipant.isClosed()) {
             this.cancel();
         }
-        RoomMonitor.crunchWebRtcEndpoint(inqParticipant);
+        WebCallEndpointMonitor.crunchWebRtcEndpoint(inqParticipant);
     }
 }

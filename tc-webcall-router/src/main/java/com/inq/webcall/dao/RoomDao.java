@@ -2,11 +2,15 @@ package com.inq.webcall.dao;
 
 import org.bson.Document;
 
-/**
- * Created by dlee on 10/28/2016.
- */
 public class RoomDao {
 
+
+
+    /*
+     *
+     * @see InqRoomManager.publishMedia
+     * @see InqRoomManager.subscribe
+     */
     public static void saveRoomEventSDPAccepted(String roomName, String sdp, String type, String pName) {
         Document documentRoom = new Document();
         documentRoom.put("room", roomName);
@@ -17,6 +21,10 @@ public class RoomDao {
         WebRTCStatDao.getInstance().saveRoomStat(documentRoom);
     }
 
+    /*
+        @see InqRoomManager.createRoom
+        @see InqRoomManager.closeRoom
+     */
     public static void saveRoomEvent(String roomName, String event) {
         Document documentRoom = new Document();
         documentRoom.put("room", roomName);

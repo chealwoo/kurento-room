@@ -10,17 +10,17 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-public class RoomMonitor {
-    private final static Logger log = LoggerFactory.getLogger(RoomMonitor.class);
+public class WebCallEndpointMonitor {
+    private final static Logger log = LoggerFactory.getLogger(WebCallEndpointMonitor.class);
 
     public static void crunchWebRtcEndpoint(InqParticipant inqParticipant, InqParticipant subscriber, WebRtcEndpoint webRtcEndPoint) {
         try {
             // Save room status
-            Document documentRoom = new Document();
+/*            Document documentRoom = new Document();
             documentRoom.put("room", inqParticipant.getRoom().getName());
             documentRoom.put("LocalSessionDescriptor", webRtcEndPoint.getLocalSessionDescriptor());
             documentRoom.put("timestamp", webRtcEndPoint.getLocalSessionDescriptor());
-            WebRTCStatDao.getInstance().saveRoomStat(documentRoom);
+            WebRTCStatDao.getInstance().saveRoomStat(documentRoom);*/
 
             for (MediaType mediaType : MediaType.values()) {
                 Document documentEndPoint = new Document();
@@ -34,6 +34,8 @@ public class RoomMonitor {
                 log.trace("Room: '{}', User: '{}', Endpoint: '{}' Information", inqParticipant.getRoom().getName(), inqParticipant.getName(), webRtcEndPoint.getId());
                 for (Stats s : stats.values()) {
                     Document document = new Document();
+                    document.put("room", inqParticipant.getRoom().getName());
+                    document.put("participant", inqParticipant.getName());
                     document.put("WebEndpointId", webRtcEndPoint.getId());
                     addStatsInfo(s, document);
 
@@ -80,6 +82,8 @@ public class RoomMonitor {
                 log.trace("Room: '{}', User: '{}', Endpoint: '{}' Information", inqParticipant.getRoom().getName(), inqParticipant.getName(), webRtcEndpoint.getId());
                 for (Stats s : stats.values()) {
                     Document document = new Document();
+                    document.put("room", inqParticipant.getRoom().getName());
+                    document.put("participant", inqParticipant.getName());
                     document.put("WebEndpointId", webRtcEndpoint.getId());
                     addStatsInfo(s, document);
 
