@@ -10,7 +10,7 @@ public interface IMongoDBService {
     String TBL_WEBRTCENDPOINT = "WebRTCEndpoint";
     String TBL_WEBRTCENDPOINT_STAT = "WebRTCEndpointStat";
 
-    String TBL_SYSTEM_STAT =  "SystemStat";
+    String TBL_APP_SRV_SYSTEM_STAT =  "AppSrvSystemStat";
     String TBL_KMS_STAT =  "KmsStat";
 
     String TBL_CLIENT_WEBRTCENDPOINT_STAT  = "WebRTCEndpointStatClient";

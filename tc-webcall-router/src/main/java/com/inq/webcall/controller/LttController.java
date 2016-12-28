@@ -66,7 +66,7 @@ public class LttController {
         }
 
         String roomName = LTT_ROOM_NAME_PREFIX + roomNum;
-        String userName = LTT_ROOM_NAME_PREFIX + userNum;
+        String userName = LTT_ROOM_NAME_PREFIX + roomNum + "_" + userNum;
 
         log.trace("Start ltt test for room {}, user {}", roomName, userName);
         response.sendRedirect("/index.html?roomname=" + roomName + "&username=" + userName);

@@ -39,7 +39,7 @@ public class MongoDBService implements IMongoDBService {
         this.mongo = new MongoClient(mongoSrvAddrList);
         db = mongo.getDatabase(WebCallApplication.MONGOD_DB_NAME);
 
-        // startWebRtcEndPointChecker();
+        startWebRtcEndPointChecker();
     }
 
     public void startWebRtcEndPointChecker() {

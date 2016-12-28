@@ -121,7 +121,7 @@ public class SystemMonitor {
             log.error("Error", e);
         }
 
-        WebRTCStatDao.getInstance().saveSystemStat(document);
+        WebRTCStatDao.getInstance().saveAppSrvSystemStat(document);
     }
 
     public static void main(String[] args) throws Exception {

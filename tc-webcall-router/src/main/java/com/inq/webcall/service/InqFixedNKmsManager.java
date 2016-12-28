@@ -109,7 +109,7 @@ public class InqFixedNKmsManager extends KmsManager implements InqKurentoClientP
                         try {
                             while (this.connected) {
                                 kmsMonitorService.saveKmsStat();
-                                Thread.sleep(3000);
+                                Thread.sleep(10000);
                             }
                         } catch (InterruptedException e) {
                             e.printStackTrace();

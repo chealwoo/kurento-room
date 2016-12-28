@@ -86,7 +86,8 @@ public class JsonRpcUserControl {
       ParticipantRequest participantRequest) {
 
     String senderName = getStringParam(request, ProtocolElements.RECEIVEVIDEO_SENDER_PARAM);
-    senderName = senderName.substring(0, senderName.indexOf("_"));
+//    senderName = senderName.substring(0, senderName.indexOf("_"));
+    senderName = senderName.substring(0, senderName.lastIndexOf("_"));
 
     String sdpOffer = getStringParam(request, ProtocolElements.RECEIVEVIDEO_SDPOFFER_PARAM);
 
@@ -97,7 +98,8 @@ public class JsonRpcUserControl {
       ParticipantRequest participantRequest) {
 
     String senderName = getStringParam(request, ProtocolElements.UNSUBSCRIBEFROMVIDEO_SENDER_PARAM);
-    senderName = senderName.substring(0, senderName.indexOf("_"));
+//    senderName = senderName.substring(0, senderName.indexOf("_"));
+    senderName = senderName.substring(0, senderName.lastIndexOf("_"));
 
     roomManager.unsubscribe(senderName, participantRequest);
   }
