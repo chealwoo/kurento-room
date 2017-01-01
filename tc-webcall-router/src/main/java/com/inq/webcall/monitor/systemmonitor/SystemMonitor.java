@@ -40,7 +40,7 @@ public class SystemMonitor {
         String memTotal = "" + mem.getFree() / 1024 / 1024;
         String memUsed = "" + mem.getUsed() / 1024 / 1024;
 
-        System.out.print(String.format("%s\t%s", memTotal, memUsed));
+        log.trace(String.format("%s\t%s", memTotal, memUsed));
 
 /*        System.out.println("Actual total free system memory: "
                 + mem.getActualFree() / 1024 / 1024 + " MB");
@@ -78,9 +78,9 @@ public class SystemMonitor {
 
 //        System.out.print(String.format( "%s\t%s", memTotal, memUsed));
 
-        System.out.print(cputimer.getCpuUsage() + "\t");
-        System.out.print(mem.getUsedPercent() + "\t");
-        System.out.print(filesystemusage.getUsePercent() + "\n");
+//        System.out.print(cputimer.getCpuUsage() + "\t");
+//        System.out.print(mem.getUsedPercent() + "\t");
+//        System.out.print(filesystemusage.getUsePercent() + "\n");
     }
 
     public static void getSystemStatistics(Document document) {
@@ -101,9 +101,9 @@ public class SystemMonitor {
 //        System.out.print(String.format( "%s\t%s", memTotal, memUsed));
         document.put("cpuUsage", cputimer.getCpuUsage());
         document.put("memUsage", mem.getUsedPercent());
-        System.out.print(cputimer.getCpuUsage() + "\t");
-        System.out.print(mem.getUsedPercent() + "\t");
-        System.out.print(filesystemusage.getUsePercent() + "\n");
+//        log.trace(String.format());
+
+//        System.out.print(filesystemusage.getUsePercent() + "\n");
     }
 
     public void saveSystem() {
