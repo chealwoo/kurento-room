@@ -51,6 +51,7 @@ kurento_room.controller('loginController', function ($scope, $http, ServiceParti
         $scope.userName = room.userName;
         $scope.roomName = room.roomName;
 
+        // var wsUri = 'wss://webrtc-media1-test.inq.com:8433/kurento';
         var wsUri = 'wss://' + location.host + '/room';
 
         //show loopback stream from server

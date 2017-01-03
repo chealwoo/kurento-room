@@ -3,7 +3,10 @@ TC Data Event
 http://confluence.touchcommerce.com/display/dev/TouchCommerce+Data+Events#TouchCommerceDataEvents-call.connected
 
 
-## Compile with the following command
+### LTT test
+ltttest: https://localhost:8443/startlttchat
+
+### Compile with the following command
 ```
 $ cd kurento-room
 $ mvn clean package -am -pl tc-webcall-router -DskipTests
@@ -28,27 +31,22 @@ chmod a+x *.sh
 sudo ./install.sh
 ```
 
-## Configuarion
+### Configuarion
 cd /etc/kurento
 sudo vi tc-webcall-router.conf.json
 
-## log file path
+### log file path
 /var/log/kurento
 
 
 
-## Start WebCall
+### Start a test WebCall
 https://localhost:8443
 
-## Restful services
+### Restful services
 https://localhost:8443/getKmsReport
 
-
-## Configuration
-/etc/kurento
-
-
-## TC Resource
+### TC Resource
 .inq.com
 
 webrtc-app1-test
@@ -65,7 +63,7 @@ http://confluence.touchcommerce.com/display/IT/WebRTC
    },
    
 
-# Load Test
+## Load Test
 ------------------------------------------------------------------------   
 Start Chrome    
 google-chrome --use-fake-device-for-media-stream --use-file-for-fake-video-capture=/home/dlee/Downloads/garden_sif.y4m --use-file-for-fake-video-capture=/home/dlee/Downloads/kennedy_moon.wav
@@ -80,11 +78,9 @@ https://10.22.111.87:8443?roomname=test1&username=uer1
 
 "C:\Program Files (x86)\Google\Chrome\Application\Chrome.exe"
 
-# Setup Kurento on a Ubuntu 
+
+# Setup Kurento Repository Server on a Ubuntu 
 ------------------------------------------------------------------------   
-
-
-
 sudo add-apt-repository ppa:webupd8team/java
 sudo apt-get update
 sudo apt-get install oracle-java7-installer
@@ -101,14 +97,11 @@ mvn clean package -DskipTests -Pdefault -am -pl kurento-repository/kurento-repos
 cd kurento-repository/kurento-repository-server/target
 unzip kurento-repository-server-x.y.z.zip
 
-
 vi config/kurento-repo.conf.json
 
 vi config/kurento-repo-log4j.properties
 
 sudo ./bin/install.sh
-
-
 
 $ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
 $ echo "deb http://repo.mongodb.org/apt/ubuntu \
@@ -117,7 +110,23 @@ $ echo "deb http://repo.mongodb.org/apt/ubuntu \
 $ sudo apt-get update
 $ sudo apt-get install -y mongodb-org
 
-
 /etc/mongod.conf
 
 	68:f7:28:1b:3f:03
+	
+	
+### git questions
+------------------------------------------------------------------------  
+. show current commit.
+```
+> git rev-parse HEAD
+643293bbed133b590e274ba73f65e9cfe23d2096
+> git log --pretty=format:'%h' -n 1
+643293b
+```
+. show remote 
+```
+> git remote -v
+origin  https://github.com/chealwoo/kurento-room.git (fetch)
+origin  https://github.com/chealwoo/kurento-room.git (push)
+```

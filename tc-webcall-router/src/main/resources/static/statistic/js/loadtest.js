@@ -82,13 +82,13 @@ window.addEventListener('load', function() {
     }
 
     webRtcPeer = kurentoUtils.WebRtcPeer.WebRtcPeerSendrecv(options, function(error) {
-      if (error) return onError(error)
+      if (error) return onError(error);
 
       this.generateOffer(onOffer)
     });
 
     function onOffer(error, sdpOffer) {
-      if (error) return onError(error)
+      if (error) return onError(error);
 
       kurentoClient(args.ws_uri, function(error, kurentoClient) {
         if (error) return onError(error);
@@ -101,14 +101,14 @@ window.addEventListener('load', function() {
           //Activate the ability to gather end-to-end latency stats
           pipeline.setLatencyStats(true, function(error){
             if (error) return onError(error);
-          })
+          });
 
           pipeline.create("WebRtcEndpoint", function(error, webRtc) {
             if (error) return onError(error);
 
             webRtcEndpoint = webRtc;
 
-            setIceCandidateCallbacks(webRtcPeer, webRtc, onError)
+            setIceCandidateCallbacks(webRtcPeer, webRtc, onError);
 
             webRtc.processOffer(sdpOffer, function(error, sdpAnswer) {
               if (error) return onError(error);
@@ -125,7 +125,7 @@ window.addEventListener('load', function() {
 
               webRtcEndpoint.on('MediaStateChanged', function(event) {
                 if (event.newState == "CONNECTED") {
-                  console.log("MediaState is CONNECTED ... printing stats...")
+                  console.log("MediaState is CONNECTED ... printing stats...");
                   activateStatsTimeout();
                 }
               });
