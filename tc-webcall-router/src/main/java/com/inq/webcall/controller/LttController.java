@@ -69,7 +69,7 @@ public class LttController {
         String userName = LTT_ROOM_NAME_PREFIX + roomNum + "_" + userNum;
 
         log.trace("Start ltt test for room {}, user {}", roomName, userName);
-        response.sendRedirect("/index.html?roomname=" + roomName + "&username=" + userName);
+        response.sendRedirect("/webcallindex.html?roomname=" + roomName + "&username=" + userName);
     }
 
     @CrossOrigin(origins = "*")
