@@ -10,87 +10,26 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
+ *
  * http://stackoverflow.com/questions/12214114/how-to-include-sigar-api-in-java-project
+ * http://stackoverflow.com/questions/28039533/how-to-find-total-cpu-utilisation-in-java-using-sigar
  */
 @Service
 public class SystemMonitor {
-
     private static final Logger log = LoggerFactory.getLogger(SystemMonitor.class);
 
     //    @Autowired
     public static InqNotificationRoomManager roomManager;
-
     private static Sigar sigar = new Sigar();
 
-    public SystemMonitor() {
-    }
-
-    public static void getInformationsAboutMemory() {
-        System.out.println("**************************************");
-        System.out.println("*** Informations about the Memory: ***");
-        System.out.println("**************************************\n");
-
-        Mem mem = null;
-        try {
-            mem = sigar.getMem();
-        } catch (SigarException se) {
-            se.printStackTrace();
-        }
-
-        String memTotal = "" + mem.getFree() / 1024 / 1024;
-        String memUsed = "" + mem.getUsed() / 1024 / 1024;
-
-        log.trace(String.format("%s\t%s", memTotal, memUsed));
-
-/*        System.out.println("Actual total free system memory: "
-                + mem.getActualFree() / 1024 / 1024 + " MB");
-        System.out.println("Actual total used system memory: "
-                + mem.getActualUsed() / 1024 / 1024 + " MB");
-        System.out.println("Total free system memory ......: " + mem.getFree()
-                / 1024 / 1024 + " MB");
-        System.out.println("System Random Access Memory....: " + mem.getRam()
-                + " MB");
-        System.out.println("Total system memory............: " + mem.getTotal()
-                / 1024 / 1024 + " MB");
-        System.out.println("Total used system memory.......: " + mem.getUsed()
-                / 1024 / 1024 + " MB");
-
-        System.out.println("\n**************************************\n");*/
-    }
-
-    /*
-    http://stackoverflow.com/questions/28039533/how-to-find-total-cpu-utilisation-in-java-using-sigar
-     */
-    public static void getSystemStatistics() {
-        Mem mem = null;
-        CpuTimer cputimer = null;
-        FileSystemUsage filesystemusage = null;
-        try {
-            mem = sigar.getMem();
-            cputimer = new CpuTimer(sigar);
-            filesystemusage = sigar.getFileSystemUsage("C:");
-        } catch (SigarException se) {
-            se.printStackTrace();
-        }
-
-        String memTotal = "" + mem.getFree() / 1024 / 1024;
-        String memUsed = "" + mem.getUsed() / 1024 / 1024;
-
-//        System.out.print(String.format( "%s\t%s", memTotal, memUsed));
-
-//        System.out.print(cputimer.getCpuUsage() + "\t");
-//        System.out.print(mem.getUsedPercent() + "\t");
-//        System.out.print(filesystemusage.getUsePercent() + "\n");
-    }
+    public SystemMonitor() {}
 
     public static void getSystemStatistics(Document document) {
         Mem mem = null;
         CpuTimer cputimer = null;
-        FileSystemUsage filesystemusage = null;
         try {
             mem = sigar.getMem();
             cputimer = new CpuTimer(sigar);
-            filesystemusage = sigar.getFileSystemUsage("C:");
         } catch (SigarException se) {
             se.printStackTrace();
         }
@@ -98,12 +37,11 @@ public class SystemMonitor {
         String memTotal = "" + mem.getFree() / 1024 / 1024;
         String memUsed = "" + mem.getUsed() / 1024 / 1024;
 
-//        System.out.print(String.format( "%s\t%s", memTotal, memUsed));
+        if(log.isTraceEnabled()){
+            log.trace(String.format( "%s\t%s", memTotal, memUsed));
+        }
         document.put("cpuUsage", cputimer.getCpuUsage());
         document.put("memUsage", mem.getUsedPercent());
-//        log.trace(String.format());
-
-//        System.out.print(filesystemusage.getUsePercent() + "\n");
     }
 
     public void saveSystem() {
@@ -122,13 +60,6 @@ public class SystemMonitor {
         }
 
         WebRTCStatDao.getInstance().saveAppSrvSystemStat(document);
-    }
-
-    public static void main(String[] args) throws Exception {
-
-        // getInformationsAboutMemory();
-        getSystemStatistics();
-//        NetworkData.getMetricThread(sigar);
     }
 }
 

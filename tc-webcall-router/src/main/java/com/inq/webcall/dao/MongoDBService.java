@@ -39,10 +39,11 @@ public class MongoDBService implements IMongoDBService {
         this.mongo = new MongoClient(mongoSrvAddrList);
         db = mongo.getDatabase(WebCallApplication.MONGOD_DB_NAME);
 
-        startWebRtcEndPointChecker();
+//        @see tc-System-Monitor
+//        startSystemMonitorChecker();
     }
 
-    public void startWebRtcEndPointChecker() {
+    public void startSystemMonitorChecker() {
         Timer time = new Timer(); // Instantiate Timer Object
         SystemMonitorChecker systemMonitorChecker = new SystemMonitorChecker(new SystemMonitor());
         time.schedule(systemMonitorChecker, 0, 1000); // Create Repetitively task for every 1 secs

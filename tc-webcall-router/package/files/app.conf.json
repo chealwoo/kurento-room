@@ -1,12 +1,12 @@
 {
    "kms": {
-      "uris": ["ws://172.26.111.99:8888/kurento", "ws://172.26.111.66:8888/kurento"]
+      "uris": ["ws://webrtc-media1-test.inq.com:8888/kurento", "ws://webrtc-media2-test.inq.com:8888/kurento"]
    },
    "app": {
-      "uri": "wss://kms.inq.com:8443/room"
+      "uri": "wss://webrtc-app1-test.inq.com:8443/room"
    },
    "repository": {
-      "uri": "http://kms.inq.com:7676"
+      "uri": "http://webrtc-media1-test.inq.com:7676"
    },
    "kurento": {
       "client": {

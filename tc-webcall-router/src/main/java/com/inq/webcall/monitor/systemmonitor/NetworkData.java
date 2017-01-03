@@ -35,46 +35,12 @@ public class NetworkData {
         Thread.sleep(1000);
     }
 
-    public static void main(String[] args) throws SigarException,
-            InterruptedException {
-        new NetworkData(new Sigar());
-        NetworkData.newMetricThread();
-    }
-
     public static String networkInfo() throws SigarException {
         String info = sigar.getNetInfo().toString();
         info += "\n" + sigar.getNetInterfaceConfig().toString();
         return info;
     }
 
-    public static String getDefaultGateway() throws SigarException {
-        return sigar.getNetInfo().getDefaultGateway();
-    }
-
-    public static void newMetricThread() throws SigarException, InterruptedException {
-        while (true) {
-            Long[] m = getMetric(sigar);
-            long totalrx = m[0];
-            long totaltx = m[1];
-            System.out.print("totalrx(download): ");
-            System.out.println("\t" + Sigar.formatSize(totalrx));
-            System.out.print("totaltx(upload): ");
-            System.out.println("\t" + Sigar.formatSize(totaltx));
-            System.out.println("-----------------------------------");
-            Thread.sleep(1000);
-        }
-    }
-
-    public static void getMetricThread(Sigar sigar) throws SigarException, InterruptedException {
-        Long[] m = getMetric(sigar);
-        long totalrx = m[0];
-        long totaltx = m[1];
-         System.out.print("totalrx(download): ");
-        System.out.print(Sigar.formatSize(totalrx) + "\t");
-        System.out.print("totaltx(upload): ");
-        System.out.print(Sigar.formatSize(totaltx) + "\t");
-        System.out.println("-----------------------------------");
-    }
     public static void getMetricThread(Sigar sigar, Document document) throws SigarException, InterruptedException {
         Long[] m = getMetric(sigar);
         long totalrx = m[0];
@@ -85,7 +51,6 @@ public class NetworkData {
 
     public static Long[] getMetric(Sigar sigar) throws SigarException {
         for (String ni : sigar.getNetInterfaceList()) {
-            // System.out.println(ni);
             NetInterfaceStat netStat = sigar.getNetInterfaceStat(ni);
             NetInterfaceConfig ifConfig = sigar.getNetInterfaceConfig(ni);
             String hwaddr = null;
@@ -136,5 +101,4 @@ public class NetworkData {
         }
         currentMap.put(ni, current);
     }
-
 }

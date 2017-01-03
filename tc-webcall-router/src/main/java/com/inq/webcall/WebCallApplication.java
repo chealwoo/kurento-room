@@ -19,7 +19,10 @@ import org.kurento.room.rpc.JsonRpcUserControl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
+import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 
 import java.io.File;
@@ -36,6 +39,7 @@ import static org.kurento.commons.PropertiesManager.getPropertyJson;
  *
  * All User Request are handled by InqRoomJsonRpcHandler. - Debug starts there.
  */
+@SpringBootApplication(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
 public class WebCallApplication  extends KurentoRoomServerApp {
 
     private static final Logger log = LoggerFactory.getLogger(WebCallApplication.class);
