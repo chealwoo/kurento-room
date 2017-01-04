@@ -59,14 +59,13 @@ public class LttController {
     @CrossOrigin(origins = "*")
     @RequestMapping("/startlttchat")
     public void startlttchat(HttpServletResponse response) throws IOException {
-        userNum++;
-        if(userNum > 2) {
+        if(userNum >= 2) {
             roomNum++;
             userNum = 0;
         }
 
         String roomName = LTT_ROOM_NAME_PREFIX + roomNum;
-        String userName = LTT_ROOM_NAME_PREFIX + roomNum + "_" + userNum;
+        String userName = LTT_ROOM_NAME_PREFIX + roomNum + "_" + userNum++;
 
         log.trace("Start ltt test for room {}, user {}", roomName, userName);
         response.sendRedirect("/webcallindex.html?roomname=" + roomName + "&username=" + userName);
