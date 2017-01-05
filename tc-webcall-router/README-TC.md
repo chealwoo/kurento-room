@@ -6,15 +6,23 @@ http://confluence.touchcommerce.com/display/dev/TouchCommerce+Data+Events#TouchC
 ### LTT test
 ltttest: https://localhost:8443/startlttchat
 
-### Compile with the following command
+
+### Compile and Install
 ```
 $ cd kurento-room
 $ mvn clean package -am -pl tc-webcall-router -DskipTests
-```
-
-### install
+#-- install
 cd tc-webcall-router/target
 unzip tc-webcall-router-x.x.x.zip
+cd tc-webcall-router-x.x.x/bin
+chmod a+x *.sh
+sudo ./install.sh
+#-- disable SSO security
+sudo vi /etc/kurento/tc-webcall-router.conf.json
+#-- restart
+sudo service tc-webcall-router restart | start
+```
+
 
 
 ## commands I use to release.
