@@ -6,6 +6,8 @@ package com.inq.webcall.dao;
 public interface IMongoDBService {
 
     String TBL_ROOM = "Room";
+    String TBL_ROOM_ERROR = "RoomError";
+
     String TBL_PARTICIPANT = "ParticipantStat";
     String TBL_WEBRTCENDPOINT = "WebRTCEndpoint";
     String TBL_WEBRTCENDPOINT_STAT = "WebRTCEndpointStat";

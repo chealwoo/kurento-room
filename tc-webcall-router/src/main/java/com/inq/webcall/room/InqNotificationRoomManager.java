@@ -1,5 +1,6 @@
 package com.inq.webcall.room;
 
+import com.inq.webcall.dao.RoomErrorDao;
 import com.inq.webcall.monitor.systemmonitor.SystemMonitor;
 import com.inq.webcall.room.api.InqIKurentoClientSessionInfo;
 import com.inq.webcall.room.api.InqKurentoClientProvider;
@@ -44,7 +45,7 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
     // ----------------- CLIENT-ORIGINATED REQUESTS ------------
 
     /**
-     * Calls {@link InqRoomManager#joinRoom(String, String, boolean, InqIKurentoClientSessionInfo, String, String)}
+     * Calls {@link InqRoomManager joinRoom}
      * with a {@link DefaultKurentoClientSessionInfo} bean as implementation of the
      * {@link KurentoClientSessionInfo}.
      *
@@ -53,7 +54,7 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
      *          request id (optional identifier of the request at the communications level, included
      *          when responding back to the client)
      *
-     * @see InqRoomManager#joinRoom(String, String, boolean, InqIKurentoClientSessionInfo, String, String)
+     * @see InqRoomManager joinRoom
      */
     public void joinRoom(String userName, String roomName, boolean dataChannels, boolean webParticipant,
                          ParticipantRequest request, String authToken) {
@@ -129,6 +130,7 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
         } catch (RoomException e) {
             log.warn("PARTICIPANT {}: Error publishing media", userName, e);
             notificationRoomHandler.onPublishMedia(request, null, null, null, e);
+            RoomErrorDao.saveRoomError(internalManager.getRoomName(pid), userName, "onPublishMedia", e);
         }
         if (sdpAnswer != null) {
             notificationRoomHandler.onPublishMedia(request, userName, sdpAnswer, participants, null);
@@ -165,6 +167,7 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
         } catch (RoomException e) {
             log.warn("PARTICIPANT {}: Error unpublishing media", userName, e);
             notificationRoomHandler.onUnpublishMedia(request, null, null, e);
+            RoomErrorDao.saveRoomError(internalManager.getRoomName(pid), userName, "unpublishMedia", e);
         }
         if (unpublished) {
             notificationRoomHandler.onUnpublishMedia(request, userName, participants, null);
