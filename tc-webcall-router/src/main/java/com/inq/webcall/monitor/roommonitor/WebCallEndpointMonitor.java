@@ -13,6 +13,13 @@ import java.util.Map;
 public class WebCallEndpointMonitor {
     private final static Logger log = LoggerFactory.getLogger(WebCallEndpointMonitor.class);
 
+    /**
+     * This is for subscriber static log
+     *
+     * @param inqParticipant
+     * @param subscriber
+     * @param webRtcEndPoint
+     */
     public static void crunchWebRtcEndpoint(InqParticipant inqParticipant, InqParticipant subscriber, WebRtcEndpoint webRtcEndPoint) {
         try {
             // Save room status
@@ -65,10 +72,15 @@ public class WebCallEndpointMonitor {
             // The WebRtcEndpoint may have been released. This does not need to
             // be a "severe" problem
             // TODO log t just in case.
+            inqParticipant.stopWebRtcEndPointStatChecker();
             log.error("Error ", t);
         }
     }
 
+    /**
+     * This is for publisher Endpoint Static log
+     * @param inqParticipant
+     */
     public static void crunchWebRtcEndpoint(InqParticipant inqParticipant) {
         try {
             WebRtcEndpoint webRtcEndpoint = inqParticipant.getPublisher().getWebEndpoint();
@@ -119,6 +131,7 @@ public class WebCallEndpointMonitor {
             // The WebRtcEndpoint may have been released. This does not need to
             // be a "severe" problem
             // TODO log t just in case.
+            inqParticipant.stopWebRtcEndPointChecker();
             log.warn("Error ", t);
         }
     }

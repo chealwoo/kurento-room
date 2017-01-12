@@ -111,10 +111,8 @@ public class InqRoomManager {
      */
     public Set<UserParticipant> joinRoom(String userName, String roomName, boolean dataChannels,
                                          boolean webParticipant, InqIKurentoClientSessionInfo kcSessionInfo, String participantId, String authToken) throws RoomException {
-        log.debug("Request [JOIN_ROOM] user={}, room={}, web={} " + "kcSessionInfo.room={} ({})",
-                userName, roomName, webParticipant, kcSessionInfo != null
-                        ? kcSessionInfo.getRoomName()
-                        : null, participantId);
+        log.debug("joinRoom request step 3; room name:{}, user name:{}, isWeb:{}, participantId:{})",
+                roomName, userName, webParticipant, participantId);
 
         InqEtlMgr.logWebCallRequested(roomName, userName);
 
@@ -124,18 +122,18 @@ public class InqRoomManager {
                       // if WebCallApplication.SSO_AUTH_CHECK is true, call validatieToken()
             createRoom(kcSessionInfo);
             KurentoClient kurentoClient = kcProvider.getKurentoClient(kcSessionInfo);
-            roomEventManager.createRoomEvent(roomName, userName, kurentoClient.getSessionId());
+//            roomEventManager.createRoomEvent(roomName, userName, kurentoClient.getSessionId());
         }
 
         room = rooms.get(roomName);
         if (room == null) {
-            log.warn("Room '{}' not found");
+            log.warn("ERROR: Room '{}' not found", roomName);
             throw new RoomException(Code.ROOM_NOT_FOUND_ERROR_CODE, "Room '" + roomName
                     + "' was not found, must be created before '" + userName + "' can join");
         }
 
         if (room.isClosed()) {
-            log.warn("'{}' is trying to join room '{}' but it is closing", userName, roomName);
+            log.warn("ERROR: Room '{}' is closed when user {} try to join", userName, roomName);
             throw new RoomException(Code.ROOM_CLOSED_ERROR_CODE, "'" + userName
                     + "' is trying to join room '" + roomName + "' but it is closing");
         }
@@ -143,7 +141,7 @@ public class InqRoomManager {
         kcProvider.addFailOver(kcSessionInfo, room);
         Set<UserParticipant> existingParticipants = getParticipants(roomName);
         // Auth Token may required to join room.
-        if ( !WebCallApplication.SSO_AUTH_CHECK || ( TokenValidator.validateToken(userName, authToken) || authToken.equals(room.getAuthToken()) ) ) {
+        if (!WebCallApplication.SSO_AUTH_CHECK || (TokenValidator.validateToken(userName, authToken) || authToken.equals(room.getAuthToken()))) {
             room.join(participantId, userName, dataChannels, webParticipant);
         } else {
             throw new RoomException(Code.ROOM_CLOSED_ERROR_CODE, "'" + userName

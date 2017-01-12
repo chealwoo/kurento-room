@@ -101,11 +101,15 @@ public class InqRoom {
     public void join(String participantId, String userName, boolean dataChannels, boolean webParticipant)
             throws RoomException {
 
+        log.debug("joinRoom request step 4; room name:{}, user name:{}, isWeb:{}, participantId:{}, isClosed:{})",
+                this.name, userName, webParticipant, participantId, this.closed);
+
         checkClosed();
 
         if (userName == null || userName.isEmpty()) {
             throw new RoomException(Code.GENERIC_ERROR_CODE, "Empty user name is not allowed");
         }
+
         for (InqParticipant p : participants.values()) {
             if (p.getName().equals(userName)) {
                 // TC change for recovery.
@@ -391,7 +395,7 @@ public class InqRoom {
                 });
             } catch (Exception e) {
                 // TODO CL KMS might down, need to start fail over.
-                log.error("Unable to create media pipeline for room '{}'", name, e);
+                log.error("Unable to create media pipeline for room '{}'. Check Media Server is running", name, e);
                 pipelineLatch.countDown();
             }
             if (getPipeline() == null) {
@@ -405,6 +409,7 @@ public class InqRoom {
                     String desc = event.getType() + ": " + event.getDescription() + "(errCode="
                             + event.getErrorCode() + ")";
                     log.warn("ROOM {}: Pipeline error encountered: {}", name, desc);
+
                     roomHandler.onPipelineError(name, getParticipantIds(), desc);
                 }
             });

@@ -114,6 +114,7 @@ public class InqParticipant {
      *  Start WebCallEndpointMonitor schedule
      */
     public void startWebRtcEndPointChecker() {
+        log.info("startWebRtcEndPointStatChecker Participant");
         time = new Timer(); // Instantiate Timer Object
         inqWebRtcEndPointChecker = new InqWebRtcEndPointChecker(this);
         time.schedule(inqWebRtcEndPointChecker, 0, 5000); // Create Repetitively task for every 1 secs
@@ -123,20 +124,23 @@ public class InqParticipant {
      *  Stop WebCallEndpointMonitor schedule
      */
     public void stopWebRtcEndPointChecker() {
+        log.info("stop WebRtcEndPointChecker for user {} as Publisher", name);
         if(null != time) {
             time.cancel();
         }
     }
 
     public void startWebRtcEndPointStatChecker(InqParticipant subscriber, WebRtcEndpoint webRtcEndpoint) {
+        log.info("start WebRtcEndPointStatChecker for user {} as SubScriber, webRtcEndpoint: {}", name, webRtcEndpoint.getId());
         subtime = new Timer(); // Instantiate Timer Object
         inqWebRtcEndPointStatChecker = new InqWebRtcEndPointStatChecker(this, subscriber, webRtcEndpoint);
         subtime.schedule(inqWebRtcEndPointStatChecker, 0, 5000); // Create Repetitively task for every 1 secs
     }
 
     public void stopWebRtcEndPointStatChecker() {
-        if(null != time) {
-            time.cancel();
+        log.info("stop WebRtcEndPointStatChecker for user {} as SubScriber", name);
+        if(null != subtime) {
+            subtime.cancel();
         }
     }
 

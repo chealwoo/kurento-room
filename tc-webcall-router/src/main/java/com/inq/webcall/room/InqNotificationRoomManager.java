@@ -60,7 +60,7 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
                          ParticipantRequest request, String authToken) {
         Set<UserParticipant> existingParticipants = null;
 
-        log.debug("***** PARTICIPANT {}: joining/creating room {}", userName, roomName);
+        log.debug("joinRoom request step 2; room name:{}, user name:{}", roomName, userName);
 
         InqKurentoClientSessionInfo kcSessionInfo = null;
         try {

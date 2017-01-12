@@ -12,6 +12,16 @@ kurento_room.controller('callController', function ($scope, $window, ServicePart
 
     $scope.leaveRoom = function () {
 
+        ServiceRoom.getKurento().leave();
+
+        ServiceParticipant.removeParticipants();
+
+        //redirect to login
+        $window.location.href = '#/login';
+    };
+
+    $scope.closeRoom = function () {
+
         ServiceRoom.getKurento().close();
 
         ServiceParticipant.removeParticipants();

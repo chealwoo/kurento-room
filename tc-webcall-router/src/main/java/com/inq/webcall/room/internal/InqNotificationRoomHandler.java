@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.inq.webcall.WebCallApplication;
 import com.inq.webcall.dao.RoomErrorDao;
+import com.inq.webcall.room.InqNotificationRoomManager;
 import com.inq.webcall.room.api.InqINotificationRoomHandler;
 import org.kurento.client.IceCandidate;
 import org.kurento.room.api.UserNotificationService;
@@ -11,11 +12,15 @@ import org.kurento.room.api.pojo.ParticipantRequest;
 import org.kurento.room.api.pojo.UserParticipant;
 import org.kurento.room.exception.RoomException;
 import org.kurento.room.internal.ProtocolElements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
 
 public class InqNotificationRoomHandler implements InqINotificationRoomHandler {
+
+    private final Logger log = LoggerFactory.getLogger(InqNotificationRoomHandler.class);
 
     private UserNotificationService notifService;
 
@@ -253,18 +258,23 @@ public class InqNotificationRoomHandler implements InqINotificationRoomHandler {
 
     @Override
     public void onPipelineError(String roomName, Set<String> participantIds, String description) {
+        log.warn("ROOM {}: Pipeline error encountered: {}", roomName, description);
+
         JsonObject notifParams = new JsonObject();
         notifParams.addProperty(ProtocolElements.MEDIAERROR_ERROR_PARAM, description);
+
         for (String pid : participantIds) {
-            notifService.sendNotification(pid, ProtocolElements.MEDIAERROR_METHOD, notifParams);
+//            notifService.sendNotification(pid, ProtocolElements.MEDIAERROR_METHOD, notifParams);
         }
     }
 
     @Override
     public void onMediaElementError(String roomName, String participantId, String description) {
+        log.warn("ROOM {}: MediaElementError encountered: {}", roomName, description);
+
         JsonObject notifParams = new JsonObject();
         notifParams.addProperty(ProtocolElements.MEDIAERROR_ERROR_PARAM, description);
-        notifService.sendNotification(participantId, ProtocolElements.MEDIAERROR_METHOD, notifParams);
+//        notifService.sendNotification(participantId, ProtocolElements.MEDIAERROR_METHOD, notifParams);
     }
 
 }
