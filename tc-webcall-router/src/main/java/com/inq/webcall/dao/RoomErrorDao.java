@@ -8,18 +8,14 @@ import org.kurento.room.exception.RoomException;
 
 public class RoomErrorDao {
 
-    public static void saveRoomError(String roomId, String participantName, String event, RoomException error) {
-        MongoCollection<Document> roomlog = MongoDBService.getInstance().getDBInstance().getCollection(IMongoDBService.TBL_ROOM_ERROR);
+    public static void saveRoomError(String roomId, String participantName, String method, RoomException error) {
         Document document = new Document();
 
-        document.put("room", roomId);
-        document.put("event", event);
-        document.put("participantName", participantName);
-        document.put("timestamp", System.currentTimeMillis());
+        document.put("method", method);
         document.put("errorCode", error.getCodeValue());
         document.put("errorMsg", error.getMessage());
 
-        roomlog.insertOne(document);
+        saveRoomError(roomId, participantName, document);
     }
 
     public static void saveRoomError(String roomId, String participantName, String method, KurentoServerException error) {

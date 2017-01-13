@@ -31,7 +31,7 @@ public class RoomDao {
     public static void saveParticipantPublishSuccess(String roomName, String partyName, String sdp) {
         Document document = new Document();
         document.put("sdp", sdp);
-        document.put("eventType", RoomEventTypeEnum.SUBSCRIBED);
+        document.put("eventType", RoomEventTypeEnum.SUBSCRIBED.toString());
         saveRoomEvent(document, roomName, partyName);
     }
 
@@ -43,31 +43,31 @@ public class RoomDao {
         Document document = new Document();
         document.put("sdp", sdp);
         document.put("publisherName", pubName);
-        document.put("eventType", RoomEventTypeEnum.SUBSCRIBED);
+        document.put("eventType", RoomEventTypeEnum.SUBSCRIBED.toString());
         saveRoomEvent(document, roomName, partyName);
     }
 
     public static void saveRoomCreatedEvent(String roomName){
         Document document = new Document();
-        document.put("eventType", RoomEventTypeEnum.CREATED);
+        document.put("eventType", RoomEventTypeEnum.CREATED.toString());
         saveRoomEvent(document, roomName);
     }
 
     public static void saveRoomClosedEvent(String roomName){
         Document document = new Document();
-        document.put("eventType", RoomEventTypeEnum.CLOSED);
+        document.put("eventType", RoomEventTypeEnum.CLOSED.toString());
         saveRoomEvent(document, roomName);
     }
 
     public static void saveParticipantJoinEvent(String roomName, String partyName){
         Document document = new Document();
-        document.put("eventType", RoomEventTypeEnum.PARTY_JOIN);
+        document.put("eventType", RoomEventTypeEnum.PARTY_JOIN.toString());
         saveRoomEvent(document, roomName, partyName);
     }
 
     public static void saveParticipantLeaveEvent(String roomName, String partyName){
         Document document = new Document();
-        document.put("eventType", RoomEventTypeEnum.PARTY_LEAVE);
+        document.put("eventType", RoomEventTypeEnum.PARTY_LEAVE.toString());
         saveRoomEvent(document, roomName, partyName);
     }
 
