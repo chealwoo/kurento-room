@@ -23,11 +23,6 @@ public class WebRTCStatDao implements IWebRTCStatDao {
         return webRTCStatDao;
     }
 
-    public void saveRoomStat(Document document) {
-        MongoCollection<Document> roomlog = db.getCollection(IMongoDBService.TBL_ROOM);
-        roomlog.insertOne(document);
-    }
-
     public void saveParticipantStat(Document document) {
         MongoCollection<Document> roomlog = db.getCollection(IMongoDBService.TBL_PARTICIPANT);
         roomlog.insertOne(document);

@@ -2,6 +2,7 @@ package com.inq.webcall.dao;
 
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
+import org.kurento.client.internal.server.KurentoServerException;
 import org.kurento.room.exception.RoomException;
 
 
@@ -12,17 +13,42 @@ public class RoomErrorDao {
         Document document = new Document();
 
         document.put("room", roomId);
-        document.put("participantName", event);
-        document.put("event", participantName);
+        document.put("event", event);
+        document.put("participantName", participantName);
         document.put("timestamp", System.currentTimeMillis());
         document.put("errorCode", error.getCodeValue());
         document.put("errorMsg", error.getMessage());
-/*
-      String dataVal = data != null ? data.toString() : null;
-      t.sendError(error.getCodeValue(), error.getMessage(), dataVal);
- */
 
         roomlog.insertOne(document);
     }
 
+    public static void saveRoomError(String roomId, String participantName, String method, KurentoServerException error) {
+        Document document = new Document();
+
+        document.put("method", method);
+        document.put("errorCode", error.getCode());
+        document.put("errorMsg", error.getMessage());
+
+        saveRoomError(roomId, participantName, document);
+    }
+
+    public static void saveRoomError(String roomId, String participantName, String method, String errorMsg) {
+        Document document = new Document();
+
+        document.put("method", method);
+        document.put("errorMsg", errorMsg);
+
+        saveRoomError(roomId, participantName, document);
+    }
+
+    public static void saveRoomError(String roomId, String participantName, Document document) {
+        MongoCollection<Document> roomlog = MongoDBService.getInstance().getDBInstance().getCollection(IMongoDBService.TBL_ROOM_ERROR);
+
+        document.put("room", roomId);
+        document.put("participantName", participantName);
+        document.put("event", RoomEventTypeEnum.ERROR.toString());
+        document.put("timestamp", System.currentTimeMillis());
+
+        roomlog.insertOne(document);
+    }
 }

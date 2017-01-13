@@ -16,6 +16,8 @@
 package com.inq.webcall.room.internal;
 
 import com.inq.webcall.WebCallApplication;
+import com.inq.webcall.dao.RoomDao;
+import com.inq.webcall.dao.RoomErrorDao;
 import com.inq.webcall.room.endpoint.InqPublisherEndpoint;
 import com.inq.webcall.room.endpoint.InqSubscriberEndpoint;
 import org.kurento.client.*;
@@ -506,46 +508,52 @@ public class InqParticipant {
 
         if (senderName.equals(this.name)) {
             log.warn("PARTICIPANT {}: trying to configure loopback by subscribing", this.name);
-            throw new RoomException(Code.USER_NOT_STREAMING_ERROR_CODE,
+            RoomException roomException = new RoomException(Code.USER_NOT_STREAMING_ERROR_CODE,
                     "Can loopback only when publishing media");
+            RoomErrorDao.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", roomException);
+            throw roomException;
         }
 
         if (sender.getPublisher() == null) {
-            log.warn("PARTICIPANT {}: Trying to connect to a user without " + "a publishing endpoint",
+            log.warn("PARTICIPANT {}: Trying to connect to a user without a publishing endpoint",
                     this.name);
+            RoomErrorDao.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", "PARTICIPANT {}: Trying to connect to a user without a publishing endpoint");
             return null;
         }
 
         log.debug("PARTICIPANT {}: Creating a subscriber endpoint to user {}", this.name, senderName);
 
         InqSubscriberEndpoint subscriber = getNewOrExistingSubscriber(senderName);
-
         try {
             CountDownLatch subscriberLatch = new CountDownLatch(1);
             SdpEndpoint oldMediaEndpoint = subscriber.createEndpoint(subscriberLatch);
             try {
                 if (!subscriberLatch.await(Room.ASYNC_LATCH_TIMEOUT, TimeUnit.SECONDS)) {
-                    throw new RoomException(Code.MEDIA_ENDPOINT_ERROR_CODE,
+                    RoomException roomException = new RoomException(Code.MEDIA_ENDPOINT_ERROR_CODE,
                             "Timeout reached when creating subscriber endpoint");
+                    RoomErrorDao.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", roomException);
+                    throw roomException;
                 }
             } catch (InterruptedException e) {
-                throw new RoomException(Code.MEDIA_ENDPOINT_ERROR_CODE,
+                RoomException roomException = new RoomException(Code.MEDIA_ENDPOINT_ERROR_CODE,
                         "Interrupted when creating subscriber endpoint: " + e.getMessage());
+                RoomErrorDao.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", roomException);
+                throw roomException;
             }
             if (oldMediaEndpoint != null) {
                 log.warn("PARTICIPANT {}: Two threads are trying to create at "
                         + "the same time a subscriber endpoint for user {}", this.name, senderName);
+                RoomErrorDao.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()",
+                        "PARTICIPANT {}: Two threads are trying to create at the same time a subscriber endpoint for user {}");
                 return null;
             }
             if (subscriber.getEndpoint() == null) {
-                throw new RoomException(Code.MEDIA_ENDPOINT_ERROR_CODE,
+                RoomException roomException = new RoomException(Code.MEDIA_ENDPOINT_ERROR_CODE,
                         "Unable to create subscriber endpoint");
+                RoomErrorDao.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", roomException);
+                throw roomException;
             }
 
-            SdpEndpoint endpoint = subscriber.getEndpoint();
-            if( endpoint instanceof WebRtcEndpoint ) {
-                startWebRtcEndPointStatChecker(sender, (WebRtcEndpoint) endpoint);
-            }
         } catch (RoomException e) {
             this.subscribers.remove(senderName);
             throw e;
@@ -554,13 +562,20 @@ public class InqParticipant {
         log.debug("PARTICIPANT {}: Created subscriber endpoint for user {}", this.name, senderName);
         try {
             String sdpAnswer = subscriber.subscribe(sdpOffer, sender.getPublisher());
-            log.trace("USER {}: Subscribing SdpAnswer is {}", this.name, sdpAnswer);
-            log.info("USER {}: Is now receiving video from {} in room {}", this.name, senderName,
+            log.info("USER {}: Is now receiving stream from {} in room {}", this.name, senderName,
                     this.room.getName());
+
+            SdpEndpoint endpoint = subscriber.getEndpoint();
+
+            if( endpoint instanceof WebRtcEndpoint ) {
+                startWebRtcEndPointStatChecker(sender, (WebRtcEndpoint) endpoint);
+            }
+
+            RoomDao.saveParticipantSubscribeSuccess(room.getName(), sdpAnswer, "subscribe", name);
+
             return sdpAnswer;
         } catch (KurentoServerException e) {
-            // TODO Check object status when KurentoClient sets this info in the
-            // object
+            RoomErrorDao.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", e);
             if (e.getCode() == 40101) {
                 log.warn("Publisher endpoint was already released when trying "
                         + "to connect a subscriber endpoint to it", e);
@@ -579,6 +594,8 @@ public class InqParticipant {
         if (subscriberEndpoint == null || subscriberEndpoint.getEndpoint() == null) {
             log.warn("PARTICIPANT {}: Trying to cancel receiving video from user {}. "
                     + "But there is no such subscriber endpoint.", this.name, senderName);
+            RoomErrorDao.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".cancelReceivingMedia()",
+                    String.format("PARTICIPANT {}: Trying to cancel receiving video from user %s. But there is no such subscriber endpoint.", senderName));
         } else {
             log.debug("PARTICIPANT {}: Cancel subscriber endpoint linked to user {}", this.name,
                     senderName);
@@ -645,6 +662,7 @@ public class InqParticipant {
             log.warn("PARTICIPANT {}: Already closed", this.name);
             return;
         }
+
         this.closed = true;
         for (String remoteParticipantName : subscribers.keySet()) {
             InqSubscriberEndpoint subscriber = this.subscribers.get(remoteParticipantName);

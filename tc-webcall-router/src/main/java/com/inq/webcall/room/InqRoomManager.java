@@ -228,7 +228,7 @@ public class InqRoomManager {
 
         SdpType sdpType = isOffer ? SdpType.OFFER : SdpType.ANSWER;
         InqParticipant participant = getParticipant(participantId);
-        String name = participant.getName();
+        String participantName = participant.getName();
         InqRoom room = participant.getRoom();
 
         participant.createPublishingEndpoint();
@@ -240,14 +240,17 @@ public class InqRoomManager {
         String sdpResponse = participant.publishToRoom(sdpType, sdp, doLoopback,
                 loopbackAlternativeSrc, loopbackConnectionType);
 
-        RoomDao.saveRoomEventSDPAccepted(room.getName(), sdpResponse, "publish", name);
-
         if (sdpResponse == null) {
-            throw new RoomException(Code.MEDIA_SDP_ERROR_CODE,
-                    "Error generating SDP response for publishing user " + name);
+            RoomException roomException = new RoomException(Code.MEDIA_SDP_ERROR_CODE,
+                    "Error generating SDP response for publishing user " + participantName);
+            RoomDao.saveParticipantPublishFailure(room.getName(), participantName, this.getClass().getName() + ".publishMedia()", roomException);
+            throw roomException;
         }
 
         room.newPublisher(participant);
+
+        RoomDao.saveParticipantPublishSuccess(room.getName(), participantName, sdpResponse);
+
         return sdpResponse;
     }
 
@@ -361,8 +364,6 @@ public class InqRoomManager {
         }
 
         String sdpAnswer = participant.receiveMediaFrom(senderParticipant, sdpOffer);
-
-        RoomDao.saveRoomEventSDPAccepted(room.getName(), sdpAnswer, "subscribe", name);
 
         if (sdpAnswer == null) {
             throw new RoomException(Code.MEDIA_SDP_ERROR_CODE,
@@ -817,7 +818,7 @@ public class InqRoomManager {
         kcSessionInfo.setRoomCreated(true);
         kcSessionInfo.setAuthToken(room.getAuthToken());
 
-        RoomDao.saveRoomEvent(room.getName(), "created");
+        RoomDao.saveRoomCreatedEvent(room.getName());
         log.warn("No room '{}' exists yet. Created one using KurentoClient '{}'.", roomName,
                 kcName);
     }
@@ -855,7 +856,7 @@ public class InqRoomManager {
         }
         try {
             room.close();
-            RoomDao.saveRoomEvent(roomName, "close");
+            RoomDao.saveRoomClosedEvent(roomName);
         } catch (JsonRpcException e) {
             log.error("Exception closing room {}", roomName, e);
         }

@@ -67,13 +67,12 @@ public class WebCallEndpointMonitor {
         } catch (ProtocolException e) {
 
             log.error("Error ", e);
-
         } catch (Throwable t) {
             // The WebRtcEndpoint may have been released. This does not need to
             // be a "severe" problem
             // TODO log t just in case.
             inqParticipant.stopWebRtcEndPointStatChecker();
-            log.error("Error ", t);
+            log.warn("Never Mind ", t);
         }
     }
 
@@ -113,14 +112,7 @@ public class WebCallEndpointMonitor {
                         default:
                             break;
                     }
-                    try {
-                        WebRTCStatDao.getInstance().saveWebRTCEndpointStat(document);
-                    } catch (Throwable t) {
-                        // The WebRtcEndpoint may have been released. This does not need to
-                        // be a "severe" problem
-                        // TODO log t just in case.
-                        log.error("Error ", t);
-                    }
+                    WebRTCStatDao.getInstance().saveWebRTCEndpointStat(document);
                 }
             }
 
@@ -132,7 +124,7 @@ public class WebCallEndpointMonitor {
             // be a "severe" problem
             // TODO log t just in case.
             inqParticipant.stopWebRtcEndPointChecker();
-            log.warn("Error ", t);
+            log.warn("Never mind ", t);
         }
     }
 
