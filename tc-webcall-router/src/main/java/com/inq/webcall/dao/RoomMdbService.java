@@ -31,7 +31,7 @@ public class RoomMdbService {
     public static void saveParticipantPublishSuccess(String roomName, String partyName, String sdp) {
         Document document = new Document();
         document.put("sdp", sdp);
-        document.put("eventType", RoomEventTypeEnum.SUBSCRIBED.toString());
+        document.put("eventType", RoomEventTypeEnum.PUBLISHED.toString());
         saveRoomEvent(document, roomName, partyName);
     }
 
@@ -70,6 +70,4 @@ public class RoomMdbService {
         document.put("eventType", RoomEventTypeEnum.PARTY_LEAVE.toString());
         saveRoomEvent(document, roomName, partyName);
     }
-
-
 }

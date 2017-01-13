@@ -571,7 +571,7 @@ public class InqParticipant {
                 startWebRtcEndPointStatChecker(sender, (WebRtcEndpoint) endpoint);
             }
 
-            RoomMdbService.saveParticipantSubscribeSuccess(room.getName(), sdpAnswer, "subscribe", name);
+            RoomMdbService.saveParticipantSubscribeSuccess(room.getName(), this.name, sdpAnswer, senderName);
 
             return sdpAnswer;
         } catch (KurentoServerException e) {

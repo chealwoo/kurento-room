@@ -38,7 +38,7 @@ public class RoomErrorMdbService {
     }
 
     public static void saveRoomError(String roomId, String participantName, Document document) {
-        MongoCollection<Document> roomlog = MongoDBService.getInstance().getDBInstance().getCollection(IMongoDBService.TBL_ROOM_ERROR);
+        MongoCollection<Document> roomlog = MongoDBService.getInstance().getDBInstance().getCollection(IMongoDBService.TBL_ROOM);
 
         document.put("room", roomId);
         document.put("participantName", participantName);
