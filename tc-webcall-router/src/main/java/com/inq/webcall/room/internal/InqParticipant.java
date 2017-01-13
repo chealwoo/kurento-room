@@ -16,8 +16,8 @@
 package com.inq.webcall.room.internal;
 
 import com.inq.webcall.WebCallApplication;
-import com.inq.webcall.dao.RoomDao;
-import com.inq.webcall.dao.RoomErrorDao;
+import com.inq.webcall.dao.RoomMdbService;
+import com.inq.webcall.dao.RoomErrorMdbService;
 import com.inq.webcall.room.endpoint.InqPublisherEndpoint;
 import com.inq.webcall.room.endpoint.InqSubscriberEndpoint;
 import org.kurento.client.*;
@@ -510,14 +510,14 @@ public class InqParticipant {
             log.warn("PARTICIPANT {}: trying to configure loopback by subscribing", this.name);
             RoomException roomException = new RoomException(Code.USER_NOT_STREAMING_ERROR_CODE,
                     "Can loopback only when publishing media");
-            RoomErrorDao.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", roomException);
+            RoomErrorMdbService.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", roomException);
             throw roomException;
         }
 
         if (sender.getPublisher() == null) {
             log.warn("PARTICIPANT {}: Trying to connect to a user without a publishing endpoint",
                     this.name);
-            RoomErrorDao.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", "PARTICIPANT {}: Trying to connect to a user without a publishing endpoint");
+            RoomErrorMdbService.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", "PARTICIPANT {}: Trying to connect to a user without a publishing endpoint");
             return null;
         }
 
@@ -531,26 +531,26 @@ public class InqParticipant {
                 if (!subscriberLatch.await(Room.ASYNC_LATCH_TIMEOUT, TimeUnit.SECONDS)) {
                     RoomException roomException = new RoomException(Code.MEDIA_ENDPOINT_ERROR_CODE,
                             "Timeout reached when creating subscriber endpoint");
-                    RoomErrorDao.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", roomException);
+                    RoomErrorMdbService.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", roomException);
                     throw roomException;
                 }
             } catch (InterruptedException e) {
                 RoomException roomException = new RoomException(Code.MEDIA_ENDPOINT_ERROR_CODE,
                         "Interrupted when creating subscriber endpoint: " + e.getMessage());
-                RoomErrorDao.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", roomException);
+                RoomErrorMdbService.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", roomException);
                 throw roomException;
             }
             if (oldMediaEndpoint != null) {
                 log.warn("PARTICIPANT {}: Two threads are trying to create at "
                         + "the same time a subscriber endpoint for user {}", this.name, senderName);
-                RoomErrorDao.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()",
+                RoomErrorMdbService.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()",
                         "PARTICIPANT {}: Two threads are trying to create at the same time a subscriber endpoint for user {}");
                 return null;
             }
             if (subscriber.getEndpoint() == null) {
                 RoomException roomException = new RoomException(Code.MEDIA_ENDPOINT_ERROR_CODE,
                         "Unable to create subscriber endpoint");
-                RoomErrorDao.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", roomException);
+                RoomErrorMdbService.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", roomException);
                 throw roomException;
             }
 
@@ -571,11 +571,11 @@ public class InqParticipant {
                 startWebRtcEndPointStatChecker(sender, (WebRtcEndpoint) endpoint);
             }
 
-            RoomDao.saveParticipantSubscribeSuccess(room.getName(), sdpAnswer, "subscribe", name);
+            RoomMdbService.saveParticipantSubscribeSuccess(room.getName(), sdpAnswer, "subscribe", name);
 
             return sdpAnswer;
         } catch (KurentoServerException e) {
-            RoomErrorDao.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", e);
+            RoomErrorMdbService.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", e);
             if (e.getCode() == 40101) {
                 log.warn("Publisher endpoint was already released when trying "
                         + "to connect a subscriber endpoint to it", e);
@@ -594,7 +594,7 @@ public class InqParticipant {
         if (subscriberEndpoint == null || subscriberEndpoint.getEndpoint() == null) {
             log.warn("PARTICIPANT {}: Trying to cancel receiving video from user {}. "
                     + "But there is no such subscriber endpoint.", this.name, senderName);
-            RoomErrorDao.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".cancelReceivingMedia()",
+            RoomErrorMdbService.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".cancelReceivingMedia()",
                     String.format("PARTICIPANT {}: Trying to cancel receiving video from user %s. But there is no such subscriber endpoint.", senderName));
         } else {
             log.debug("PARTICIPANT {}: Cancel subscriber endpoint linked to user {}", this.name,

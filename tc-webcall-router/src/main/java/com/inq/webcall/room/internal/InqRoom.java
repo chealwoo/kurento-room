@@ -16,7 +16,7 @@
 package com.inq.webcall.room.internal;
 
 import com.inq.webcall.WebCallApplication;
-import com.inq.webcall.dao.RoomDao;
+import com.inq.webcall.dao.RoomMdbService;
 import org.kurento.client.*;
 import org.kurento.client.EventListener;
 import org.kurento.repository.RepositoryClient;
@@ -265,7 +265,7 @@ public class InqRoom {
         }
         this.removeParticipant(participant);
         participant.close();
-        RoomDao.saveParticipantLeaveEvent(name, participant.getName());
+        RoomMdbService.saveParticipantLeaveEvent(name, participant.getName());
     }
 
     public Collection<InqParticipant> getParticipants() {

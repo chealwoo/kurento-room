@@ -3,8 +3,7 @@ package com.inq.webcall.room.internal;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.inq.webcall.WebCallApplication;
-import com.inq.webcall.dao.RoomErrorDao;
-import com.inq.webcall.room.InqNotificationRoomManager;
+import com.inq.webcall.dao.RoomErrorMdbService;
 import com.inq.webcall.room.api.InqINotificationRoomHandler;
 import org.kurento.client.IceCandidate;
 import org.kurento.room.api.UserNotificationService;
@@ -43,7 +42,7 @@ public class InqNotificationRoomHandler implements InqINotificationRoomHandler {
                                     Set<UserParticipant> existingParticipants, RoomException error) {
         if (error != null) {
             notifService.sendErrorResponse(request, null, error);
-            RoomErrorDao.saveRoomError(roomName, newUserName, "onParticipantJoined", error);
+            RoomErrorMdbService.saveRoomError(roomName, newUserName, "onParticipantJoined", error);
             return;
         }
         JsonArray result = new JsonArray();
@@ -73,7 +72,7 @@ public class InqNotificationRoomHandler implements InqINotificationRoomHandler {
                                     Set<UserParticipant> existingParticipants, String authToken, RoomException error) {
         if (error != null) {
             notifService.sendErrorResponse(request, null, error);
-            RoomErrorDao.saveRoomError(roomName, newUserName, "onRoomCreated", error);
+            RoomErrorMdbService.saveRoomError(roomName, newUserName, "onRoomCreated", error);
             return;
         }
         // TODO CL - Add APP server id and room token.

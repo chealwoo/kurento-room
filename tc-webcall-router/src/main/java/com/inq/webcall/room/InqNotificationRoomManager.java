@@ -1,8 +1,7 @@
 package com.inq.webcall.room;
 
-import com.inq.webcall.dao.RoomErrorDao;
+import com.inq.webcall.dao.RoomErrorMdbService;
 import com.inq.webcall.monitor.systemmonitor.SystemMonitor;
-import com.inq.webcall.room.api.InqIKurentoClientSessionInfo;
 import com.inq.webcall.room.api.InqKurentoClientProvider;
 import com.inq.webcall.room.internal.InqKurentoClientSessionInfo;
 import com.inq.webcall.room.internal.InqNotificationRoomHandler;
@@ -130,7 +129,7 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
         } catch (RoomException e) {
             log.warn("PARTICIPANT {}: Error publishing media", userName, e);
             notificationRoomHandler.onPublishMedia(request, null, null, null, e);
-            RoomErrorDao.saveRoomError(internalManager.getRoomName(pid), userName, "onPublishMedia", e);
+            RoomErrorMdbService.saveRoomError(internalManager.getRoomName(pid), userName, "onPublishMedia", e);
         }
         if (sdpAnswer != null) {
             notificationRoomHandler.onPublishMedia(request, userName, sdpAnswer, participants, null);
@@ -167,7 +166,7 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
         } catch (RoomException e) {
             log.warn("PARTICIPANT {}: Error unpublishing media", userName, e);
             notificationRoomHandler.onUnpublishMedia(request, null, null, e);
-            RoomErrorDao.saveRoomError(internalManager.getRoomName(pid), userName, "unpublishMedia", e);
+            RoomErrorMdbService.saveRoomError(internalManager.getRoomName(pid), userName, "unpublishMedia", e);
         }
         if (unpublished) {
             notificationRoomHandler.onUnpublishMedia(request, userName, participants, null);

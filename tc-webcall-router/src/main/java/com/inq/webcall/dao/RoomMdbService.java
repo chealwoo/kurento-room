@@ -5,7 +5,7 @@ import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.kurento.room.exception.RoomException;
 
-public class RoomDao {
+public class RoomMdbService {
 
     private static MongoDatabase db = MongoDBService.getInstance().getDBInstance();
 
@@ -36,7 +36,7 @@ public class RoomDao {
     }
 
     public static void saveParticipantPublishFailure(String roomName, String partyName, String method, RoomException err) {
-        RoomErrorDao.saveRoomError(roomName, partyName, method, err);
+        RoomErrorMdbService.saveRoomError(roomName, partyName, method, err);
     }
 
     public static void saveParticipantSubscribeSuccess(String roomName, String partyName, String sdp, String pubName) {

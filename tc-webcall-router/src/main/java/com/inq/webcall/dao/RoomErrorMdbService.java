@@ -6,7 +6,7 @@ import org.kurento.client.internal.server.KurentoServerException;
 import org.kurento.room.exception.RoomException;
 
 
-public class RoomErrorDao {
+public class RoomErrorMdbService {
 
     public static void saveRoomError(String roomId, String participantName, String method, RoomException error) {
         Document document = new Document();

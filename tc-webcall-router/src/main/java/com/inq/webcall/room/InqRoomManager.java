@@ -18,7 +18,7 @@ package com.inq.webcall.room;
 
 import com.inq.saml.TokenValidator;
 import com.inq.webcall.WebCallApplication;
-import com.inq.webcall.dao.RoomDao;
+import com.inq.webcall.dao.RoomMdbService;
 import com.inq.webcall.room.api.InqIKurentoClientSessionInfo;
 import com.inq.webcall.room.api.InqKurentoClientProvider;
 import com.inq.webcall.room.internal.InqParticipant;
@@ -27,7 +27,6 @@ import com.inq.webcall.util.log.InqEtlMgr;
 import org.kurento.client.*;
 import org.kurento.jsonrpc.JsonRpcException;
 import org.kurento.room.api.KurentoClientProvider;
-import org.kurento.room.api.KurentoClientSessionInfo;
 import org.kurento.room.api.MutedMediaType;
 import org.kurento.room.api.RoomHandler;
 import org.kurento.room.api.pojo.UserParticipant;
@@ -35,7 +34,6 @@ import org.kurento.room.endpoint.SdpType;
 import org.kurento.room.exception.RoomException;
 import org.kurento.room.exception.RoomException.Code;
 import org.kurento.room.internal.helper.RoomEventManager;
-import org.kurento.room.kms.Kms;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -243,13 +241,13 @@ public class InqRoomManager {
         if (sdpResponse == null) {
             RoomException roomException = new RoomException(Code.MEDIA_SDP_ERROR_CODE,
                     "Error generating SDP response for publishing user " + participantName);
-            RoomDao.saveParticipantPublishFailure(room.getName(), participantName, this.getClass().getName() + ".publishMedia()", roomException);
+            RoomMdbService.saveParticipantPublishFailure(room.getName(), participantName, this.getClass().getName() + ".publishMedia()", roomException);
             throw roomException;
         }
 
         room.newPublisher(participant);
 
-        RoomDao.saveParticipantPublishSuccess(room.getName(), participantName, sdpResponse);
+        RoomMdbService.saveParticipantPublishSuccess(room.getName(), participantName, sdpResponse);
 
         return sdpResponse;
     }
@@ -818,7 +816,7 @@ public class InqRoomManager {
         kcSessionInfo.setRoomCreated(true);
         kcSessionInfo.setAuthToken(room.getAuthToken());
 
-        RoomDao.saveRoomCreatedEvent(room.getName());
+        RoomMdbService.saveRoomCreatedEvent(room.getName());
         log.warn("No room '{}' exists yet. Created one using KurentoClient '{}'.", roomName,
                 kcName);
     }
@@ -856,7 +854,7 @@ public class InqRoomManager {
         }
         try {
             room.close();
-            RoomDao.saveRoomClosedEvent(roomName);
+            RoomMdbService.saveRoomClosedEvent(roomName);
         } catch (JsonRpcException e) {
             log.error("Exception closing room {}", roomName, e);
         }
