@@ -16,4 +16,6 @@ public interface IMongoDBService {
     String TBL_KMS_STAT =  "KmsStat";
 
     String TBL_CLIENT_WEBRTCENDPOINT_STAT  = "WebRTCEndpointStatClient";
+    // formatted
+    String TBL_CLIENT_WEBRTCENDPOINT_STAT_FORMATTED  = "WebRTCEndpointStatClientFormatted";
 }
