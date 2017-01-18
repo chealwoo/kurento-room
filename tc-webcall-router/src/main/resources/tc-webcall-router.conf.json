@@ -1,12 +1,12 @@
 {
    "kms": {
-      "uris": ["ws://kms.inq.com:8888/kurento", "ws://kms2.inq.com:8888/kurento"]
+      "uris": ["wss://webrtc-media2-test.inq.com:8433/kurento", "wss://webrtc-media1-test.inq.com:8433/kurento"]
    },
    "app": {
       "uri": "wss://kms-app.inq.com:8443/room"
    },
    "mongodb": {
-      "uris": [ "mongo-pri.inq.com" ],
+      "uris": [ "mongod.inq.com" ],
       "dbname": "kmslog"
    },
    "kurento": {

@@ -128,83 +128,91 @@ public class InqFixedNKmsManager extends KmsManager implements InqKurentoClientP
      * @param kmsLoadLimit
      */
     public InqFixedNKmsManager(List<String> kmsWsUri, int kmsLoadLimit) {
+
         for (String uri : kmsWsUri) {
-            InqKms kms = new InqKms(KurentoClient.create(uri, new KurentoConnectionListener() {
-                private boolean connected = false;
+            try {
+                InqKms kms = new InqKms(KurentoClient.create(uri, new KurentoConnectionListener() {
+                    private boolean connected = false;
 
-                @Override
-                public void reconnected(boolean arg0) {
-                    for (InqKms k : InqFixedNKmsManager.this.kmsFailOverMap.keySet()) {
-                        if (k.getUri().equals(uri)) {
-                            k.getLoadManager().setOn(true);
-                            log.debug("Kms uri={} has been reconnected", uri);
+                    @Override
+                    public void reconnected(boolean arg0) {
+                        for (InqKms k : InqFixedNKmsManager.this.kmsFailOverMap.keySet()) {
+                            if (k.getUri().equals(uri)) {
+                                k.getLoadManager().setOn(true);
+                                log.debug("Kms uri={} has been reconnected", uri);
+                            }
+                        }
+                        this.connected = true;
+                        runKmsMonitor();
+                    }
+
+                    @Override
+                    public void disconnected() {
+                        InqKms kms = null;
+                        for (InqKms k : InqFixedNKmsManager.this.kmsFailOverMap.keySet()) {
+                            if (k.getUri().equals(uri)) {
+                                kms = k;
+                                break;
+                            }
+                        }
+                        if (null != kms) {
+                            log.warn("Kms uri={} has been disconnected", uri);
+                            kms.getLoadManager().setOn(false);
+                            ConcurrentMap<String, InqRoom> roomMap = InqFixedNKmsManager.this.kmsFailOverMap.get(kms);
+                            InqFixedNKmsManager.this.kmsFailOverMap.put(kms, new ConcurrentHashMap<>());
+                            Set<String> names = roomMap.keySet();
+                            int i = 0;
+                            for (String name : names) {
+                                try {
+                                    log.info("KMS Disconnected; Removing room '{}' during failover {} / {}", name, i++, names.size());
+                                    roomMap.remove(name);
+                                    roomManager.closeRoomWithMediaError(name);
+                                } catch (Exception e) {
+                                    log.error("Error while removing room '{}' during failover", name, e);
+                                }
+                            }
+                            log.debug("Kms uri={} has been disconnected and cleaned up", uri);
                         }
                     }
-                    this.connected = true;
-                    runKmsMonitor();
-                }
 
-                @Override
-                public void disconnected() {
-                    InqKms kms = null;
-                    for (InqKms k : InqFixedNKmsManager.this.kmsFailOverMap.keySet()) {
-                        if (k.getUri().equals(uri)) {
-                            kms = k;
-                            break;
-                        }
+                    @Override
+                    public void connectionFailed() {
+                        log.debug("Kms uri={} has been connectionFailed", uri);
                     }
-                    if (null != kms) {
-                        log.warn("Kms uri={} has been disconnected", uri);
-                        kms.getLoadManager().setOn(false);
-                        ConcurrentMap<String, InqRoom> roomMap = InqFixedNKmsManager.this.kmsFailOverMap.get(kms);
-                        InqFixedNKmsManager.this.kmsFailOverMap.put(kms, new ConcurrentHashMap<>());
-                        Set<String> names = roomMap.keySet();
-                        int i = 0;
-                        for (String name : names) {
+
+                    @Override
+                    public void connected() {
+                        this.connected = true;
+                        runKmsMonitor();
+                        log.debug("Kms uri={} has been connected", uri);
+                    }
+
+                    // run KMS server monitor
+                    private void runKmsMonitor() {
+                        ExecutorService executor = Executors.newSingleThreadExecutor();
+                        executor.submit(() -> {
+                            KmsMonitorService kmsMonitorService = new KmsMonitorService(uri);
                             try {
-                                log.info("KMS Disconnected; Removing room '{}' during failover {} / {}", name, i++, names.size());
-                                roomMap.remove(name);
-                                roomManager.closeRoomWithMediaError(name);
-                            } catch (Exception e) {
-                                log.error("Error while removing room '{}' during failover", name, e);
+                                while (this.connected) {
+                                    kmsMonitorService.saveKmsStat();
+                                    Thread.sleep(3000);
+                                }
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
                             }
-                        }
-                        log.debug("Kms uri={} has been disconnected and cleaned up", uri);
+                        });
                     }
-                }
+                }), uri);
 
-                @Override
-                public void connectionFailed() {
-                    log.debug("Kms uri={} has been connectionFailed", uri);
-                }
-
-                @Override
-                public void connected() {
-                    this.connected = true;
-                    runKmsMonitor();
-                    log.debug("Kms uri={} has been connected", uri);
-                }
-
-                // run KMS server monitor
-                private void runKmsMonitor() {
-                    ExecutorService executor = Executors.newSingleThreadExecutor();
-                    executor.submit(() -> {
-                        KmsMonitorService kmsMonitorService = new KmsMonitorService(uri);
-                        try {
-                            while (this.connected) {
-                                kmsMonitorService.saveKmsStat();
-                                Thread.sleep(3000);
-                            }
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                }
-            }), uri);
-
-            kms.setLoadManager(new InqMaxWebRtcLoadManager(kmsLoadLimit));
-            this.kmsFailOverMap.put(kms, new ConcurrentHashMap<>());
-            this.addKms(kms);
+                kms.setLoadManager(new InqMaxWebRtcLoadManager(kmsLoadLimit));
+                this.kmsFailOverMap.put(kms, new ConcurrentHashMap<>());
+                this.addKms(kms);
+            } catch (org.kurento.commons.exception.KurentoException e) {
+                log.error("Fail to create KMS instance of " + uri, e);
+            }
+        }
+        if(this.getKmssSortedByLoad().size() <= 0) {
+            throw new org.kurento.commons.exception.KurentoException("No KMS Server has been connected");
         }
     }
 
