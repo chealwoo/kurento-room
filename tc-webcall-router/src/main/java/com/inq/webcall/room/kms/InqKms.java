@@ -4,7 +4,7 @@ import org.kurento.client.KurentoClient;
 import org.kurento.room.kms.Kms;
 
 /**
- * Created by dlee on 9/15/2016.
+ * InqKms extends Kms
  */
 public class InqKms extends Kms{
     private InqLoadManager loadManager = new InqMaxWebRtcLoadManager(10000);
@@ -21,5 +21,17 @@ public class InqKms extends Kms{
 
     public InqLoadManager getLoadManager() {
         return loadManager;
+    }
+
+    public boolean isBlocked() {
+        return loadManager.isBlocked();
+    }
+
+    public void setBlocked(boolean isBlocked){
+        loadManager.setBlocked(isBlocked);
+    }
+
+    public double getRealLoad() {
+        return loadManager.calculateRealLoad(this);
     }
 }

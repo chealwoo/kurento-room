@@ -1,5 +1,6 @@
 package com.inq.webcall.room.kms;
 
+import org.kurento.room.kms.Kms;
 import org.kurento.room.kms.LoadManager;
 
 /**
@@ -8,4 +9,12 @@ import org.kurento.room.kms.LoadManager;
 public interface InqLoadManager extends LoadManager{
 
     void setOn(boolean isOn);
+
+    boolean isOn();
+
+    boolean isBlocked();
+
+    void setBlocked(boolean isBlocked);
+
+    double calculateRealLoad(Kms kms);
 }

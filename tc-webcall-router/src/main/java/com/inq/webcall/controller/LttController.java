@@ -1,25 +1,20 @@
 package com.inq.webcall.controller;
 
-import com.inq.webcall.WebCallApplication;
-import com.inq.webcall.dao.WebRTCStatDao;
 import com.inq.webcall.room.InqNotificationRoomManager;
-import com.inq.webcall.service.InqFixedNKmsManager;
-import com.inq.webcall.service.KMSReport;
+import com.inq.webcall.room.kms.InqKmsManager;
 import org.kurento.commons.PropertiesManager;
-import org.kurento.room.exception.RoomException;
 import org.kurento.room.kms.KmsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @RestController
 public class LttController {
@@ -39,7 +34,7 @@ public class LttController {
     private InqNotificationRoomManager roomManager;
 
     @Autowired
-    private KmsManager kmsManager;
+    private InqKmsManager kmsManager;
 
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
     public class ResourceNotFoundException extends RuntimeException {

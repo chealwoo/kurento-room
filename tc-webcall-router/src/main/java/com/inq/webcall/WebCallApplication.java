@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.inq.webcall.room.InqNotificationRoomManager;
 import com.inq.webcall.room.InqRoomJsonRpcHandler;
 import com.inq.webcall.room.api.InqKurentoClientProvider;
+import com.inq.webcall.room.kms.InqKmsManager;
 import com.inq.webcall.room.rpc.InqJsonRpcUserControl;
 import com.inq.webcall.service.InqFixedNKmsManager;
 import org.kurento.commons.ConfigFileManager;
@@ -61,7 +62,7 @@ public class WebCallApplication  extends KurentoRoomServerApp {
     public static final String DEFAULT_APP_SERVER_URL = PropertiesManager.getProperty("app.uri",
             "https://localhost:8443");
 
-    private final Integer DEMO_KMS_NODE_LIMIT = PropertiesManager.getProperty("demo.kmsLimit", 1000);
+    public static final Integer DEMO_KMS_NODE_LIMIT = PropertiesManager.getProperty("demo.kmsLimit", 1000);
     private final String DEMO_AUTH_REGEX = PropertiesManager.getProperty("demo.authRegex");
     private final String DEMO_HAT_URL = PropertiesManager.getProperty("demo.hatUrl",
             "mario-wings.png");
@@ -94,7 +95,7 @@ public class WebCallApplication  extends KurentoRoomServerApp {
             File.separator + "keys" + File.separator + "saml.crt");
 
     @Override
-    public KmsManager kmsManager() {
+    public InqKmsManager kmsManager() {
         JsonArray kmsUris = getPropertyJson(KurentoRoomServerApp.KMSS_URIS_PROPERTY,
                 KurentoRoomServerApp.KMSS_URIS_DEFAULT, JsonArray.class);
         List<String> kmsWsUris = JsonUtils.toStringList(kmsUris);

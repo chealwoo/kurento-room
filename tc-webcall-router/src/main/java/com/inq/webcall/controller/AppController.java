@@ -3,9 +3,11 @@ package com.inq.webcall.controller;
 import com.inq.webcall.WebCallApplication;
 import com.inq.webcall.dao.WebRTCStatDao;
 import com.inq.webcall.room.InqNotificationRoomManager;
+import com.inq.webcall.room.kms.InqKmsManager;
 import org.kurento.commons.PropertiesManager;
 import com.inq.webcall.service.InqFixedNKmsManager;
 import com.inq.webcall.service.KMSReport;
+import org.kurento.commons.exception.KurentoException;
 import org.kurento.room.exception.RoomException;
 import org.kurento.room.kms.KmsManager;
 import org.slf4j.Logger;
@@ -18,6 +20,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static com.inq.webcall.WebCallApplication.DEMO_KMS_NODE_LIMIT;
 
 @RestController
 public class AppController {
@@ -42,7 +46,7 @@ public class AppController {
     private InqNotificationRoomManager roomManager;
 
     @Autowired
-    private KmsManager kmsManager;
+    private InqKmsManager kmsManager;
 
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
     public class ResourceNotFoundException extends RuntimeException {
@@ -83,20 +87,64 @@ public class AppController {
         return config;
     }
 
-
-    @RequestMapping("/getKmsReport")
+    @RequestMapping("/admin/getKmsReport")
     public Set<KMSReport> report() {
-        List<KmsManager.KmsLoad> kmsloads = new ArrayList<>();
+        List<InqKmsManager.KmsLoad> kmsloads = new ArrayList<>();
         if(kmsManager instanceof InqFixedNKmsManager) {
             kmsloads = ((InqFixedNKmsManager) kmsManager).getKmsLoads();
         }
 
         Set<KMSReport> kmsSet = new HashSet<>();
 
-        for (KmsManager.KmsLoad kl: kmsloads) {
+        for (InqKmsManager.KmsLoad kl: kmsloads) {
             kmsSet.add(new KMSReport(kl.getKms().getUri(), kl.getKms().getLoad(), kl.getKms().getKurentoClient().getSessionId()));
         }
         return kmsSet;
+    }
+
+    /**
+     * block a KMS (uri) so no more room is assigned on blocked KMS
+     * @param uri
+     * @return
+     */
+    @RequestMapping("/admin/blockKms")
+    public boolean blockKms(@RequestParam("uri") String uri)  {
+        if(kmsManager instanceof InqFixedNKmsManager) {
+            return ((InqFixedNKmsManager) kmsManager).blockKms(uri);
+        }
+        return false;
+    }
+
+    /**
+     * remove a KMS (uri) from KMS Manager
+     * @param uri   - KMS Uri
+     * @return boolean - remove result
+     */
+    @RequestMapping("/admin/removeKms")
+    public boolean removeKms(@RequestParam("uri") String uri)  {
+        if(kmsManager != null && kmsManager instanceof InqFixedNKmsManager) {
+            return ((InqFixedNKmsManager) kmsManager).removeKms(uri);
+        }
+        return false;
+    }
+
+    /**
+     * add a new KMS (uri) into KMS Manager
+     * @param uri
+     * @return
+     */
+    @RequestMapping("/admin/addKms")
+    public boolean addKms(@RequestParam("uri") String uri)  {
+        if(kmsManager instanceof InqFixedNKmsManager) {
+            try {
+                ((InqFixedNKmsManager) kmsManager).addKms(uri, DEMO_KMS_NODE_LIMIT);
+                return true;
+            } catch (KurentoException e) {
+                // sTODO You may want to print out message.
+                e.printStackTrace();
+            }
+        }
+        return false;
     }
 
     @CrossOrigin(origins = "*", methods = RequestMethod.POST)
