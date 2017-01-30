@@ -45,6 +45,7 @@ public class InqJsonRpcUserControl extends JsonRpcUserControl {
 
     private static final String SESSION_ATTRIBUTE_HAT_FILTER = "hatFilter";
     private static final String CUSTOM_REQUEST_HAT_PARAM = "hat";
+    public static final String JOINROOM_SITEID_PARAM = "siteId";
 
     private static final Logger log = LoggerFactory.getLogger(InqJsonRpcUserControl.class);
 
@@ -87,12 +88,21 @@ public class InqJsonRpcUserControl extends JsonRpcUserControl {
             }
         }
 
+        String siteId = "";
+        try {
+            siteId = getStringParam(request, JOINROOM_SITEID_PARAM);
+        } catch (RuntimeException e) {
+            if (!e.getMessage().contains("Request element")) {
+                throw e;
+            }
+        }
+
         ParticipantSession participantSession = getParticipantSession(transaction);
         participantSession.setParticipantName(userName);
         participantSession.setRoomName(roomName);
         participantSession.setDataChannels(dataChannels);
 
-        roomManager.joinRoom(userName, roomName, dataChannels, true, participantRequest, authToken);
+        roomManager.joinRoom(userName, roomName, dataChannels, true, participantRequest, authToken, siteId);
     }
 
     /**

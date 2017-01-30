@@ -166,6 +166,7 @@ public class InqParticipant {
                 log.info("PARTICIPANT [{}] in room {} create repoItem with repositoryClient with repository", this.name, this.room.getName());
                 try {
                     Map<String, String> metadata = new HashMap<>();
+                    metadata.put("siteId", this.room.getSiteId());
                     metadata.put("chatId", this.room.getName());
                     metadata.put("participant", this.name);
                     this.repoItem = repositoryClient.createRepositoryItem(metadata);

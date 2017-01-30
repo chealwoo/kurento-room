@@ -8,9 +8,11 @@ public class InqKurentoClientSessionInfo extends DefaultKurentoClientSessionInfo
 
     private boolean isRoomCreated = false;
     private String authToken = "";
+    private String siteId = "";
 
-    public InqKurentoClientSessionInfo(String participantId, String roomName) {
+    public InqKurentoClientSessionInfo(String participantId, String roomName, String siteId) {
         super(participantId, roomName);
+        setSiteId(siteId);
     }
 
     @Override
@@ -31,5 +33,15 @@ public class InqKurentoClientSessionInfo extends DefaultKurentoClientSessionInfo
     @Override
     public String getAuthToken() {
         return authToken;
+    }
+
+    @Override
+    public String getSiteId() {
+        return siteId;
+    }
+
+    @Override
+    public void setSiteId(String siteId) {
+        this.siteId = siteId;
     }
 }

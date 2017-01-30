@@ -56,7 +56,7 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
      * @see InqRoomManager joinRoom
      */
     public void joinRoom(String userName, String roomName, boolean dataChannels, boolean webParticipant,
-                         ParticipantRequest request, String authToken) {
+                         ParticipantRequest request, String authToken, String siteId) {
         Set<UserParticipant> existingParticipants = null;
 
         log.debug("joinRoom request step 2; room name:{}, user name:{}", roomName, userName);
@@ -64,7 +64,7 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
         InqKurentoClientSessionInfo kcSessionInfo = null;
         try {
             kcSessionInfo = new InqKurentoClientSessionInfo(
-                    request.getParticipantId(), roomName);
+                    request.getParticipantId(), roomName, siteId);
             existingParticipants = internalManager.joinRoom(userName, roomName, dataChannels, webParticipant,
                     kcSessionInfo, request.getParticipantId(), authToken);
         } catch (RoomException e) {

@@ -66,6 +66,7 @@ public class InqRoom {
     private volatile boolean pipelineReleased = false;
     private boolean destroyKurentoClient;
     private String authToken = "";
+    private String siteId = "";
 
     private Composite composite = null;
     private static final String RECORDING_EXT = ".webm";
@@ -77,12 +78,13 @@ public class InqRoom {
     private HubPort hubPort;
 
     public InqRoom(String roomName, KurentoClient kurentoClient, RoomHandler roomHandler,
-                   boolean destroyKurentoClient) {
+                   boolean destroyKurentoClient, String siteId) {
         this.name = roomName;
         this.kurentoClient = kurentoClient;
         this.destroyKurentoClient = destroyKurentoClient;
         this.roomHandler = roomHandler;
         this.authToken = "" + System.currentTimeMillis() + roomName;
+        this.siteId = siteId;
         log.debug("New ROOM instance, named '{}'", roomName);
     }
 
@@ -148,6 +150,7 @@ public class InqRoom {
                     log.info("create repoItem with repositoryClient room name {}", name);
                     try {
                         Map<String, String> metadata = new HashMap<>();
+                        metadata.put("siteId", siteId);
                         metadata.put("chatId", name);
                         metadata.put("participant", name);
                         this.repoItem = repositoryClient.createRepositoryItem(metadata);
@@ -450,5 +453,9 @@ public class InqRoom {
 
     public KurentoClient getKurentoClient() {
         return kurentoClient;
+    }
+
+    public String getSiteId() {
+        return siteId;
     }
 }

@@ -14,4 +14,7 @@ public interface InqIKurentoClientSessionInfo extends KurentoClientSessionInfo {
 
     void setAuthToken(String authToken);
     String getAuthToken();
+
+    void setSiteId(String siteId);
+    String getSiteId();
 }

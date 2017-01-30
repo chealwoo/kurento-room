@@ -108,7 +108,8 @@ public class InqRoomManager {
      * @throws RoomException on error while joining (like the room is not found or is closing)
      */
     public Set<UserParticipant> joinRoom(String userName, String roomName, boolean dataChannels,
-                                         boolean webParticipant, InqIKurentoClientSessionInfo kcSessionInfo, String participantId, String authToken) throws RoomException {
+                                         boolean webParticipant, InqIKurentoClientSessionInfo kcSessionInfo,
+                                         String participantId, String authToken) throws RoomException {
         log.debug("joinRoom request step 3; room name:{}, user name:{}, isWeb:{}, participantId:{})",
                 roomName, userName, webParticipant, participantId);
 
@@ -786,8 +787,9 @@ public class InqRoomManager {
                     + "' already exists");
         }
         KurentoClient kurentoClient = kcProvider.getKurentoClient(kcSessionInfo);
+        String siteId = kcSessionInfo.getSiteId();
 
-        room = new InqRoom(roomName, kurentoClient, roomHandler, kcProvider.destroyWhenUnused());
+        room = new InqRoom(roomName, kurentoClient, roomHandler, kcProvider.destroyWhenUnused(), siteId);
 
         InqRoom oldRoom = rooms.putIfAbsent(roomName, room);
         if (oldRoom != null) {
