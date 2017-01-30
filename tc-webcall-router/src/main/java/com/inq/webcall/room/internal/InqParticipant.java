@@ -163,7 +163,7 @@ public class InqParticipant {
             }
 
             if (repositoryClient != null) {
-                log.info("PARTICIPANT [{}] in room {} create repoItem with repositoryClient with repository", this.name, this.room.getName());
+                log.info("PARTICIPANT [{}] in room {} create repoItem with repositoryClient with repository (siteId:{})", this.name, this.room.getName(), this.room.getSiteId());
                 try {
                     Map<String, String> metadata = new HashMap<>();
                     metadata.put("siteId", this.room.getSiteId());

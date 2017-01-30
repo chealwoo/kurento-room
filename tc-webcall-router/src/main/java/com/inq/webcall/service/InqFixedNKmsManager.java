@@ -198,7 +198,7 @@ public class InqFixedNKmsManager extends InqKmsManager implements InqKurentoClie
 
             @Override
             public void connectionFailed() {
-                log.debug("Kms uri={} has been connectionFailed", uri);
+                log.debug("Kms uri={} has been connection Failed", uri);
             }
 
             @Override
@@ -228,6 +228,7 @@ public class InqFixedNKmsManager extends InqKmsManager implements InqKurentoClie
         kms.setLoadManager(new InqMaxWebRtcLoadManager(kmsLoadLimit));
         this.kmsFailOverMap.put(kms, new ConcurrentHashMap<>());
         this.addKms(kms);
+        log.info("kms {} has been added into kmss", kms.getUri());
     }
 
     public synchronized void setAuthRegex(String regex) {

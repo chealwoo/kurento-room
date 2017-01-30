@@ -138,3 +138,7 @@ $ sudo apt-get install -y mongodb-org
 origin  https://github.com/chealwoo/kurento-room.git (fetch)
 origin  https://github.com/chealwoo/kurento-room.git (push)
 ```
+
+
+install java 8 on ubuntu
+sudo apt-add-repository ppa:webupd8team/java

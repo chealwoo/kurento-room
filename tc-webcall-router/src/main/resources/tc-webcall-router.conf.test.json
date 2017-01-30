@@ -9,6 +9,9 @@
       "uris": [ "mongo-pri.inq.com", "mongo-sec.inq.com" ],
       "dbname": "kmslog"
    },
+   "repository": {
+      "uri": "http://kms-repo.inq.com:7676"
+   },
    "kurento": {
       "client": {
          "requestTimeout": 20000
