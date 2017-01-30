@@ -92,9 +92,9 @@ public abstract class InqKmsManager implements KurentoClientProvider {
         return false;
     }
 
-    public boolean removeKms(String uri) {
+    public boolean removeKms(String uri, boolean force) {
         InqKms kms = getKms(uri);
-        if(kms != null && kms.getLoadManager().isBlocked() && kms.getRealLoad() == 0.0) {
+        if(kms != null && ((kms.getLoadManager().isBlocked() && kms.getRealLoad() == 0.0 ) || force)) {
             return this.kmss.remove(kms);
         }
         return false;

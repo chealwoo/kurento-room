@@ -121,9 +121,10 @@ public class AppController {
      * @return boolean - remove result
      */
     @RequestMapping("/admin/removeKms")
-    public boolean removeKms(@RequestParam("uri") String uri)  {
+    public boolean removeKms(@RequestParam("uri") String uri,
+                             @RequestParam(value="force", required = false, defaultValue = "false") boolean force)  {
         if(kmsManager != null && kmsManager instanceof InqFixedNKmsManager) {
-            return ((InqFixedNKmsManager) kmsManager).removeKms(uri);
+            return ((InqFixedNKmsManager) kmsManager).removeKms(uri, force);
         }
         return false;
     }
