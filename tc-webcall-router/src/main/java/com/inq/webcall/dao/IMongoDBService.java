@@ -18,4 +18,5 @@ public interface IMongoDBService {
     String TBL_CLIENT_WEBRTCENDPOINT_STAT  = "WebRTCEndpointStatClient";
     // formatted
     String TBL_CLIENT_WEBRTCENDPOINT_STAT_FORMATTED  = "WebRTCEndpointStatClientFormatted";
+    String TBL_CLIENT_LOG_LINE  = "ClientLogLine";
 }

@@ -50,6 +50,19 @@ public class WebRTCStatDao implements IWebRTCStatDao {
         roomlog.insertOne(document);
     }
 
+    /**
+     * Saves client log
+     * @param chatId
+     * @param logLines
+     */
+    public void saveClientLogLine(String chatId, String logLines) {
+        MongoCollection<Document> roomlog = db.getCollection(IMongoDBService.TBL_CLIENT_LOG_LINE);
+        Document document = new Document();
+        document.put("chatId", chatId);
+        document.put("logLines", logLines);
+        roomlog.insertOne(document);
+    }
+
     public void findWebRTCEndpointStat(String roomName) {
         MongoCollection<Document> roomlog = db.getCollection(IMongoDBService.TBL_WEBRTCENDPOINT_STAT);
 

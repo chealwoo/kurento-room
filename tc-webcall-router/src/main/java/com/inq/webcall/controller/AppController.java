@@ -155,4 +155,12 @@ public class AppController {
         // Save it to Mongodb
         WebRTCStatDao.getInstance().saveWebRTCEndpointStat(stats);
     }
+
+    @CrossOrigin(origins = "*", methods = RequestMethod.POST)
+    @RequestMapping("/addClientLog")
+    public void addClientLog(@RequestParam("chatId") String chatId, @RequestParam("logLines") String logLines) {
+        log.trace("log lines has received for : chatId: {}" , chatId);
+        // Save it to Mongodb
+        WebRTCStatDao.getInstance().saveClientLogLine(chatId, logLines);
+    }
 }
