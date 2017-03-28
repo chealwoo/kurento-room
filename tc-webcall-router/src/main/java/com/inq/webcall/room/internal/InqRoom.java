@@ -85,7 +85,7 @@ public class InqRoom {
         this.roomHandler = roomHandler;
         this.authToken = "" + System.currentTimeMillis() + roomName;
         this.siteId = siteId;
-        log.debug("New ROOM instance, named '{}'", roomName);
+        log.debug("ROOM {}: New ROOM instance created", roomName);
     }
 
     public String getName() {
@@ -104,23 +104,36 @@ public class InqRoom {
     public void join(String participantId, String userName, boolean dataChannels, boolean webParticipant)
             throws RoomException {
 
-        log.debug("joinRoom request step 4; room name:{}, user name:{}, isWeb:{}, participantId:{}, isClosed:{})",
+        log.debug("ROOM {}: joinRoom request step 4; user name:{}, isWeb:{}, participantId:{}, isClosed:{})",
                 this.name, userName, webParticipant, participantId, this.closed);
 
         checkClosed();
 
         if (userName == null || userName.isEmpty()) {
-            throw new RoomException(Code.GENERIC_ERROR_CODE, "Empty user name is not allowed");
+            throw new RoomException(Code.GENERIC_ERROR_CODE, String.format("Room(%s) Empty user name is not allowed", name));
         }
 
-        for (InqParticipant p : participants.values()) {
-            if (p.getName().equals(userName)) {
-                // TC change for recovery.
-                log.warn("User '{}' already exists in room '{}'", userName, name);
-                p.close();
-                break;
-//                throw new RoomException(Code.EXISTING_USER_IN_ROOM_ERROR_CODE, "User '" + userName
-//                        + "' already exists in room '" + name + "'");
+        Collection<InqParticipant> participantsValues = participants.values();
+
+        /*
+            Because the first participant is always agent,
+            And agent is not allowed to rejoin when it is alone.
+            Customer uses name + seq num and should not rejected.
+         */
+        if(participantsValues.size() == 1) {
+            InqParticipant p = participantsValues.iterator().next();
+            if( p.getName().equals(userName) ) {
+                throw new RoomException(Code.EXISTING_USER_IN_ROOM_ERROR_CODE,
+                        String.format("ROOM %s: User '%s' already exists", name, userName));
+            }
+        } else {
+            for (InqParticipant p : participants.values()) {
+                if (p.getName().equals(userName)) {
+                    // TC change for recovery.
+                    log.warn("ROOM {}: User '{}' already exists", name, userName);
+                    p.close();
+                    break;
+                }
             }
         }
 
@@ -142,37 +155,37 @@ public class InqRoom {
         if(this.recorder == null) {
             try {
                 if (repositoryClient == null) {
-                    log.info("repositoryClient is null and try to reinitate it.");
+                    log.info("ROOM {}: repositoryClient is null and try to reinitate it.", name);
                     repositoryClient = RepositoryClientProvider.create(WebCallApplication.REPOSITORY_SERVER_URI);
                 }
 
                 if (repositoryClient != null) {
-                    log.info("create repoItem with repositoryClient room name {}", name);
+                    log.info("ROOM {}: create repoItem with repositoryClient", name);
                     try {
                         Map<String, String> metadata = new HashMap<>();
                         metadata.put("siteId", siteId);
                         metadata.put("chatId", name);
-                        metadata.put("participant", name);
+//                        metadata.put("participant", name);
                         this.repoItem = repositoryClient.createRepositoryItem(metadata);
                     } catch (Exception e) {
-                        log.warn("Unable to create kurento repository items", e);
+                        log.warn("ROOM {}: Unable to create kurento repository items", e);
                     }
                 } else {
-                    log.info("create repoItem as file room name {}", this.name);
+                    log.info("ROOM {}: create repoItem as file.", this.name);
                     String now = InqParticipant.df.format(new Date());
                     String filePath = WebCallApplication.REPOSITORY_SERVER_URI + "/" + now + RECORDING_EXT;
                     this.repoItem = new RepositoryItemRecorder();
                     this.repoItem.setId(now);
                     this.repoItem.setUrl(filePath);
                 }
-                log.info("Media will be recorded {}by KMS: id={} , url={}",
-                        (repositoryClient == null ? "locally " : ""), this.repoItem.getId(), this.repoItem.getUrl());
+                log.info("ROOM {}: Media will be recorded {}by KMS: id={} , url={}",
+                        (repositoryClient == null ? "locally " : ""), this.name, this.repoItem.getId(), this.repoItem.getUrl());
 
                 this.recorder = new RecorderEndpoint.Builder(pipeline, this.repoItem.getUrl())
                         .withMediaProfile(MediaProfileSpecType.WEBM).build();
-                log.info("recorder has been created for participant {}", this.name);
+                log.info("ROOM {}: recorder has been created", this.name);
             } catch (Exception e) {
-                log.error("Fail to create recorder of participant id={}; " + e.getMessage(), name, e);
+                log.error("ROOM {}: Fail to create recorder: " + e.getMessage(), name, e);
             }
         }
     }
@@ -187,7 +200,7 @@ public class InqRoom {
         try {
             if(!isRecording) {
                 createRecorder(pipeline);
-                log.info("Room composite Media will be recorded {} by KMS: id={} , url={}",
+                log.info("ROOM {}: Room composite Media will be recorded {} by KMS: id={} , url={}", name,
                         (repositoryClient == null ? "locally " : ""), this.repoItem.getId(), this.repoItem.getUrl());
 
                 hubPort = new HubPort.Builder(composite).build();
@@ -195,16 +208,16 @@ public class InqRoom {
                     @Override
                     public void onSuccess(Void result) throws Exception {
                         recorder.record();
-                        log.info("Composite start recording recorder {}", name, recorder.getName());
+                        log.info("ROOM {}: Composite start recording recorder {}", name, recorder.getName());
                         isRecording = true;
-                        log.debug("EP {}: Elements have been connected (source {} -> sink {})",
-                                hubPort.getId(), recorder.getId());
+                        log.debug("ROOM {}: EP {}: Elements have been connected (source {} -> sink {})",
+                                name, hubPort.getId(), recorder.getId());
                     }
 
                     @Override
                     public void onError(Throwable cause) throws Exception {
-                        log.warn("Composite Failed to connect media elements (source {} -> sink {})",
-                                hubPort.getId(), recorder.getId(), cause);
+                        log.warn("ROOM {}: Composite Failed to connect media elements (source {} -> sink {})",
+                                name, hubPort.getId(), recorder.getId(), cause);
                     }
                 });
 
@@ -212,7 +225,7 @@ public class InqRoom {
                 log.info("Room {} already recording ", name);
             }
         } catch (Exception e) {
-            log.error("Fail to connect webRtcEndpoint to recorder in participant id={}; " + e.getMessage(), name, e);
+            log.error("ROOM {}: Fail to connect webRtcEndpoint to recorder; " + e.getMessage(), name, e);
         }
     }
 
@@ -324,7 +337,7 @@ public class InqRoom {
 
             this.closed = true;
         } else {
-            log.warn("Closing an already closed room '{}'", this.name);
+            log.warn("ROOM {}: Closing an already closed room", this.name);
         }
     }
 
@@ -400,7 +413,7 @@ public class InqRoom {
                 });
             } catch (Exception e) {
                 // TODO CL KMS might down, need to start fail over.
-                log.error("Unable to create media pipeline for room '{}'. Check Media Server is running", name, e);
+                log.error("ROOM {}: Unable to create media pipeline. Check Media Server is running", name, e);
                 pipelineLatch.countDown();
             }
             if (getPipeline() == null) {

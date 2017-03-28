@@ -220,15 +220,15 @@ public class InqRoomManager {
     public String publishMedia(String participantId, boolean isOffer, String sdp,
                                MediaElement loopbackAlternativeSrc, MediaType loopbackConnectionType, boolean doLoopback,
                                MediaElement... mediaElements) throws RoomException {
-        log.debug("Request [PUBLISH_MEDIA] isOffer={} sdp={} "
-                        + "loopbackAltSrc={} lpbkConnType={} doLoopback={} mediaElements={} ({})", isOffer, sdp,
-                loopbackAlternativeSrc == null, loopbackConnectionType, doLoopback, mediaElements,
-                participantId);
-
         SdpType sdpType = isOffer ? SdpType.OFFER : SdpType.ANSWER;
         InqParticipant participant = getParticipant(participantId);
         String participantName = participant.getName();
         InqRoom room = participant.getRoom();
+
+        log.debug("Request [PUBLISH_MEDIA] isOffer={} sdp={} "
+                        + "loopbackAltSrc={} lpbkConnType={} doLoopback={} mediaElements={} ({}:{})", isOffer, sdp,
+                loopbackAlternativeSrc == null, loopbackConnectionType, doLoopback, mediaElements,
+                room.getName(), participantId);
 
         participant.createPublishingEndpoint();
 
