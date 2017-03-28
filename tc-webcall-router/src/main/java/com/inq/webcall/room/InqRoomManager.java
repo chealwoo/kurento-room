@@ -937,6 +937,17 @@ public class InqRoomManager {
         InqParticipant participant = getParticipant(participantId);
         return participant.getRoom().getName();
     }
+    /**
+     * Finds the room's name of a given participant.
+     *
+     * @param participantId identifier of the participant
+     * @return the name of the room
+     * @throws RoomException in case the participant doesn't exist
+     */
+    public InqRoom getRoom(String participantId) throws RoomException {
+        InqParticipant participant = getParticipant(participantId);
+        return participant.getRoom();
+    }
 
     /**
      * Finds the participant's username.

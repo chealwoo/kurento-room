@@ -18,7 +18,16 @@ public class InqEtlMgr {
         etlMap.put(JasperEtlDAO.PARAM_CHAT_ID, chatId);
         etlMap.put(JasperEtlDAO.PARAM_CUSTOMER_ID, participantId);
 
-        logEtlRecord(JasperEtlDAO.DOMAIN_CHAT, JasperEtlDAO.EVENT_CALL_REQUESTED, logStringFromMap(etlMap)
+        logEtlRecord(JasperEtlDAO.DOMAIN_EVENT_CALL, JasperEtlDAO.EVENT_CALL_REQUESTED, logStringFromMap(etlMap)
+                , System.currentTimeMillis());
+    }
+
+    public static void logAgentConnected(String chatId, String participantId) {
+        Map<String, String> etlMap = new TreeMap<String, String>();
+        etlMap.put(JasperEtlDAO.PARAM_CHAT_ID, chatId);
+        etlMap.put(JasperEtlDAO.PARAM_CUSTOMER_ID, participantId);
+
+        logEtlRecord(JasperEtlDAO.DOMAIN_EVENT_CALL, JasperEtlDAO.EVENT_WBBCALL_AGENT_CONNECTED, logStringFromMap(etlMap)
                 , System.currentTimeMillis());
     }
 

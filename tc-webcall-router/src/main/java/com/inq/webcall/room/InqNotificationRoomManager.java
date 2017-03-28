@@ -5,6 +5,7 @@ import com.inq.webcall.monitor.systemmonitor.SystemMonitor;
 import com.inq.webcall.room.api.InqKurentoClientProvider;
 import com.inq.webcall.room.internal.InqKurentoClientSessionInfo;
 import com.inq.webcall.room.internal.InqNotificationRoomHandler;
+import com.inq.webcall.util.log.InqEtlMgr;
 import org.kurento.client.MediaElement;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.MediaType;
@@ -135,6 +136,10 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
         }
         if (sdpAnswer != null) {
             log.debug("PARTICIPANT {} has published media in room {}", userName, roomName);
+            // For now, the first participant is considered as an agent.
+            if( internalManager.getRoom(pid).getParticipants().size() == 1) {
+                InqEtlMgr.logAgentConnected(roomName, userName);
+            }
             notificationRoomHandler.onPublishMedia(request, userName, sdpAnswer, participants, null);
         }
     }
