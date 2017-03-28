@@ -142,3 +142,66 @@ origin  https://github.com/chealwoo/kurento-room.git (push)
 
 install java 8 on ubuntu
 sudo apt-add-repository ppa:webupd8team/java
+
+
+
+## 10.22.111.72 test configuration
+
+
+127.0.0.1       localhost
+127.0.1.1       webrtc-E73
+10.22.111.72    kms.inq.com
+10.22.111.72    webrtc-media1-test.inq.com
+10.22.111.69    webrtc-media2-test.inq.com
+10.22.111.72    webrtc-app1-test.inq.com
+10.22.111.72    mongod.inq.com  mongo-pri.inq.com
+
+--
+{
+   "kms": {
+      "uris": ["ws://webrtc-media2-test.inq.com:8888/kurento"]
+   },
+   "app": {
+      "uri": "wss://webrtc-app1-test.inq.com:8443/room"
+   },
+   "repository": {
+      "uri": "http://webrtc-media1-test.inq.com:7676"
+   },
+   "kurento": {
+      "client": {
+         //milliseconds
+         "requestTimeout": 20000
+      }
+   },
+   "security": {
+      "ssoAuthCheck": false,
+      "certificationPath": "/etc/kurento/saml.crt"
+   },
+   "demo": {
+      //mario-wings.png or wizard.png
+      "hatUrl": "mario-wings.png",
+      "hatCoords": {
+         // mario-wings hat
+         "offsetXPercent": -0.35F,
+         "offsetYPercent": -1.2F,
+         "widthPercent": 1.6F,
+         "heightPercent": 1.6F
+
+         //wizard hat
+         //"offsetXPercent": -0.2F,
+         //"offsetYPercent": -1.35F,
+         //"widthPercent": 1.5F,
+         //"heightPercent": 1.5F
+      },
+      "loopback" : {
+         "remote": false,
+         //matters only when remote is true
+         "andLocal": false
+      },
+      "authRegex": ".*",
+      "kmsLimit": 10
+   },
+   "updateSpeakerInterval": 1800,
+   "thresholdSpeaker": -50
+}
+tc-webcall-router.conf.json (END)
