@@ -121,17 +121,20 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
         String userName = null;
         Set<UserParticipant> participants = null;
         String sdpAnswer = null;
+        String roomName = null;
         try {
             userName = internalManager.getParticipantName(pid);
             sdpAnswer = internalManager.publishMedia(request.getParticipantId(), isOffer, sdp,
                     loopbackAlternativeSrc, loopbackConnectionType, doLoopback, mediaElements);
-            participants = internalManager.getParticipants(internalManager.getRoomName(pid));
+            roomName = internalManager.getRoomName(pid);
+            participants = internalManager.getParticipants(roomName);
         } catch (RoomException e) {
             log.warn("PARTICIPANT {}: Error publishing media", userName, e);
             notificationRoomHandler.onPublishMedia(request, null, null, null, e);
             RoomErrorMdbService.saveRoomError(internalManager.getRoomName(pid), userName, "onPublishMedia", e);
         }
         if (sdpAnswer != null) {
+            log.debug("PARTICIPANT {} has published media in room {}", userName, roomName);
             notificationRoomHandler.onPublishMedia(request, userName, sdpAnswer, participants, null);
         }
     }

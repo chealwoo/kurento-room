@@ -61,6 +61,7 @@ public class InqParticipant {
 
     private String id;
     private String name;
+    private String roomName;
     private boolean web = false;
     private boolean dataChannels = false;
 
@@ -81,6 +82,7 @@ public class InqParticipant {
 
     private volatile boolean streaming = false;
     private volatile boolean closed;
+    private volatile boolean dirty = false;
 
     private InqWebRtcEndPointChecker inqWebRtcEndPointChecker = null;
     private Timer time;
@@ -94,6 +96,7 @@ public class InqParticipant {
         this.dataChannels = dataChannels;
         this.pipeline = pipeline;
         this.room = room;
+        this.roomName = room.getName();
 
         createRecorder(pipeline);
 
@@ -116,7 +119,7 @@ public class InqParticipant {
      *  Start WebCallEndpointMonitor schedule
      */
     public void startWebRtcEndPointChecker() {
-        log.info("startWebRtcEndPointStatChecker Participant");
+        log.info("Participant '{}/{}' startWebRtcEndPointStatChecker Participant", roomName, name);
         time = new Timer(); // Instantiate Timer Object
         inqWebRtcEndPointChecker = new InqWebRtcEndPointChecker(this);
         time.schedule(inqWebRtcEndPointChecker, 0, 5000); // Create Repetitively task for every 1 secs
@@ -126,21 +129,22 @@ public class InqParticipant {
      *  Stop WebCallEndpointMonitor schedule
      */
     public void stopWebRtcEndPointChecker() {
-        log.info("stop WebRtcEndPointChecker for user {} as Publisher", name);
+        log.info("Participant '{}/{}' stop WebRtcEndPointChecker as Publisher", roomName, name);
         if(null != time) {
             time.cancel();
         }
     }
 
     public void startWebRtcEndPointStatChecker(InqParticipant subscriber, WebRtcEndpoint webRtcEndpoint) {
-        log.info("start WebRtcEndPointStatChecker for user {} as SubScriber, webRtcEndpoint: {}", name, webRtcEndpoint.getId());
+        log.info("Participant '{}/{}' start WebRtcEndPointStatChecker as SubScriber, webRtcEndpoint: {}",
+                roomName, name, webRtcEndpoint.getId());
         subtime = new Timer(); // Instantiate Timer Object
         inqWebRtcEndPointStatChecker = new InqWebRtcEndPointStatChecker(this, subscriber, webRtcEndpoint);
         subtime.schedule(inqWebRtcEndPointStatChecker, 0, 5000); // Create Repetitively task for every 1 secs
     }
 
     public void stopWebRtcEndPointStatChecker() {
-        log.info("stop WebRtcEndPointStatChecker for user {} as SubScriber", name);
+        log.info("Participant '{}/{}' stop WebRtcEndPointStatChecker as SubScriber", roomName, name);
         if(null != subtime) {
             subtime.cancel();
         }
@@ -158,12 +162,12 @@ public class InqParticipant {
 
         try {
             if (repositoryClient == null) {
-                log.info("PARTICIPANT [{}] repositoryClient is null and try to reinitate it.", name);
+                log.info("Participant '{}/{}' repositoryClient is null and try to reinitate it.", roomName, name);
                 repositoryClient = RepositoryClientProvider.create(WebCallApplication.REPOSITORY_SERVER_URI);
             }
 
             if (repositoryClient != null) {
-                log.info("PARTICIPANT [{}] in room {} create repoItem with repositoryClient with repository (siteId:{})", this.name, this.room.getName(), this.room.getSiteId());
+                log.info("Participant '{}/{}' create repoItem with repositoryClient with repository (siteId:{})", roomName, this.name, this.room.getSiteId());
                 try {
                     Map<String, String> metadata = new HashMap<>();
                     metadata.put("siteId", this.room.getSiteId());
@@ -171,24 +175,24 @@ public class InqParticipant {
                     metadata.put("participant", this.name);
                     this.repoItem = repositoryClient.createRepositoryItem(metadata);
                 } catch (Exception e) {
-                    log.warn("Unable to create kurento repository items", e);
+                    log.warn("Participant '{}/{}' Unable to create kurento repository items", roomName, name, e);
                 }
             } else {
-                log.info("PARTICIPANT [{}] in room {} create repoItem with repositoryClient in file", this.name, this.room.getName());
+                log.info("Participant '{}/{}' create repoItem with repositoryClient in file", this.room.getName(), this.name);
                 String now = df.format(new Date());
                 String filePath = WebCallApplication.REPOSITORY_SERVER_URI + "/" + now + RECORDING_EXT;
                 this.repoItem = new RepositoryItemRecorder();
                 this.repoItem.setId(now);
                 this.repoItem.setUrl(filePath);
             }
-            log.info("Media will be recorded {}by KMS: id={} , url={}",
+            log.info("Participant '{}/{}' Media will be recorded {}by KMS: id={} , url={}", roomName, room,
                     (repositoryClient == null ? "locally " : ""), this.repoItem.getId(), this.repoItem.getUrl());
 
             this.recorder = new RecorderEndpoint.Builder(pipeline, this.repoItem.getUrl())
                     .withMediaProfile(MediaProfileSpecType.WEBM).build();
-            log.info("recorder has been created for participant {}", this.name);
+            log.info("Participant '{}/{}' recorder has been created", roomName, this.name);
         } catch (Exception e) {
-            log.error("Fail to create recorder of participant id={}; " + e.getMessage(), name, e);
+            log.error("Participant '{}/{}' Fail to create recorder: " + e.getMessage(), roomName, name, e);
         }
     }
 
@@ -198,24 +202,24 @@ public class InqParticipant {
      */
     public void connectRecorder(WebRtcEndpoint webRtcEndpoint) {
         try {
-            log.info("Participant {} connect recorder {}", name, webRtcEndpoint.getName());
+            log.info("Participant '{}/{}' connect recorder {}", roomName, name, webRtcEndpoint.getName());
             webRtcEndpoint.connect(webRtcEndpoint);
             webRtcEndpoint.connect(this.recorder, new Continuation<Void>() {
                 @Override
                 public void onSuccess(Void result) throws Exception {
-                    log.debug("EP {}: Elements have been connected (source {} -> sink {})", getPublisher().getEndpointName(),
-                            webRtcEndpoint.getId(), recorder.getId());
+                    log.debug("Participant '{}/{}' EP {}: Elements have been connected (source {} -> sink {})", roomName, name,
+                            getPublisher().getEndpointName(), webRtcEndpoint.getId(), recorder.getId());
                 }
 
                 @Override
                 public void onError(Throwable cause) throws Exception {
-                    log.warn("EP {}: Failed to connect media elements (source {} -> sink {})",
+                    log.warn("Participant '{}/{}' EP {}: Failed to connect media elements (source {} -> sink {})", roomName, name,
                             getPublisher().getEndpointName(),
                             webRtcEndpoint.getId(), recorder.getId(), cause);
                 }
             });
         } catch (Exception e) {
-            log.error("Fail to connect webRtcEndpoint to recorder in participant id={}; " + e.getMessage(), name, e);
+            log.error("Participant '{}/{}' Fail to connect webRtcEndpoint to recorder: " + e.getMessage(), roomName, name, e);
         }
     }
 
@@ -226,25 +230,26 @@ public class InqParticipant {
     public void disconnectRecorder(WebRtcEndpoint webRtcEndpoint) {
         try {
             if(null != this.recorder) {
-                log.info("Participant {} connect recorder {}", name, webRtcEndpoint.getName());
+                log.info("Participant '{}/{}' connect recorder {}", roomName, name, webRtcEndpoint.getName());
                 webRtcEndpoint.disconnect(this.recorder, new Continuation<Void>() {
                     @Override
                     public void onSuccess(Void result) throws Exception {
-                        log.debug("EP {}: Elements have been disconnect (source {} -> sink {})", getPublisher().getEndpointName(),
+                        log.debug("Participant '{}/{}' EP {}: Elements have been disconnect (source {} -> sink {})",
+                                roomName, name, getPublisher().getEndpointName(),
                                 webRtcEndpoint.getId(), recorder.getId());
                     }
 
                     @Override
                     public void onError(Throwable cause) throws Exception {
-                        log.warn("EP {}: Failed to disconnect media elements (source {} -> sink {})",
-                                getPublisher().getEndpointName(),
+                        log.warn("Participant '{}/{}' EP {}: Failed to disconnect media elements (source {} -> sink {})",
+                                roomName, name, getPublisher().getEndpointName(),
                                 webRtcEndpoint.getId(), recorder.getId(), cause);
                     }
                 });
                 webRtcEndpoint.disconnect(webRtcEndpoint);
             }
         } catch (Exception e) {
-            log.error("Fail to disconnect webRtcEndpoint to recorder in participant id={}; " + e.getMessage(), name, e);
+            log.error("Participant '{}/{}' Fail to disconnect webRtcEndpoint to recorder: " + e.getMessage(), roomName, name, e);
         }
     }
 
@@ -261,16 +266,17 @@ public class InqParticipant {
     public void startRecorder() {
         try {
             if(!isRecording) {
-                log.info("Participant {} start recording recorder {}", name, recorder.getName());
+                log.info("Participant '{}/{}' start recording recorder {}", roomName, name, recorder.getName());
                 if(WebCallApplication.PARTICIPANT_RECORDER_SWITCH) {
                     this.recorder.record();
                     isRecording = true;
                 }
             } else {
-                log.info("Participant {} already recording ", name);
+                log.info("Participant '{}/{}' already recording ", roomName, name);
             }
         } catch (Exception e) {
-            log.error("Fail to connect webRtcEndpoint to recorder in participant id={}; " + e.getMessage(), name, e);
+            log.error("Participant '{}/{}' Fail to connect webRtcEndpoint to recorder in participant id={}; " + e.getMessage(),
+                    roomName, name, e);
         }
     }
 
@@ -281,14 +287,14 @@ public class InqParticipant {
     public void stopRecorder(WebRtcEndpoint webRtcEndpoint) {
         try {
             if(isRecording) {
-                log.info("Participant {} stop recording ", name);
+                log.info("Participant '{}/{}' stop recording ", roomName, name);
                 this.recorder.stop();
                 isRecording = false;
             } else {
-                log.info("Participant {} is not recording ", name);
+                log.info("Participant '{}/{}' is not recording ", roomName, name);
             }
         } catch (Exception e) {
-            log.error("Fail to connect webRtcEndpoint to recorder in participant id={}; " + e.getMessage(), name, e);
+            log.error("Participant '{}/{}' Fail to connect webRtcEndpoint to recorder: " + e.getMessage(), roomName, name, e);
         }
     }
 
@@ -299,9 +305,9 @@ public class InqParticipant {
     public void createHubPort() {
         try {
             this.hubPort = new HubPort.Builder(room.getComposite()).build();
-            log.debug("PARTICIPANT {}: HubPort: created hubPort {}", name, hubPort.getId());
+            log.debug("Participant '{}/{}' HubPort: created hubPort {}", roomName, name, hubPort.getId());
         } catch (Exception e) {
-            log.error("Fail to create hubPort of participant id={} " + e.getMessage(), name, e);
+            log.error("Participant '{}/{}' Fail to create hubPort: " + e.getMessage(), roomName, name, e);
         }
     }
 
@@ -310,14 +316,14 @@ public class InqParticipant {
      */
     public void removeHubPort() {
         try {
-            log.debug("PARTICIPANT {}: Removing HubPort {}", name, hubPort.getId());
+            log.debug("Participant '{}/{}' Removing HubPort {}", roomName, name, hubPort.getId());
             if(this.hubPort != null) {
                 this.hubPort.release();
                 this.hubPort = null;
             }
-            log.debug("PARTICIPANT {}: HubPort is removed", name);
+            log.debug("Participant '{}/{}' HubPort is removed", roomName, name);
         } catch (Exception e) {
-            log.error("Fail to remove hubPort of participant id={} " + e.getMessage(), name, e);
+            log.error("Participant '{}/{}' Fail to remove hubPort" + e.getMessage(), roomName, name, e);
         }
     }
 
@@ -331,19 +337,19 @@ public class InqParticipant {
             webRtcEndpoint.connect(this.hubPort, new Continuation<Void>() {
                 @Override
                 public void onSuccess(Void result) throws Exception {
-                    log.debug("PARTICIPANT {}: HubPort: Elements have been connected (EndPoint {} -> hubPort {})", getPublisher().getEndpointName(),
-                            webRtcEndpoint.getId(), hubPort.getId());
+                    log.debug("Participant '{}/{}' Endpoint '{}' HubPort: Elements have been connected (EndPoint {} -> hubPort {})",
+                            roomName, name, getPublisher().getEndpointName(), webRtcEndpoint.getId(), hubPort.getId());
                 }
 
                 @Override
                 public void onError(Throwable cause) throws Exception {
-                    log.warn("PARTICIPANT {}: Failed to connect media elements (source {} -> sink {})",
-                            getPublisher().getEndpointName(),
-                            webRtcEndpoint.getId(), hubPort.getId(), cause);
+                    log.warn("Participant '{}/{}' Endpoint '{}' Failed to connect media elements (source {} -> sink {})",
+                            roomName, name, getPublisher().getEndpointName(), webRtcEndpoint.getId(), hubPort.getId(), cause);
                 }
             });
         } catch (Exception e) {
-            log.error("Fail to connect webRtcEndpoint.connect(hubPort) in participant id={} " + e.getMessage(), name, e);
+            log.error("Participant '{}/{}' Fail to connect webRtcEndpoint.connect(hubPort) in participant id={} " + e.getMessage(),
+                    roomName, name, e);
         }
     }
 
@@ -357,26 +363,27 @@ public class InqParticipant {
             webRtcEndpoint.disconnect(this.hubPort, new Continuation<Void>() {
                 @Override
                 public void onSuccess(Void result) throws Exception {
-                    log.debug("PARTICIPANT {}: HubPort: Elements have been disconnected (EndPoint {} -> hubPort {})", getPublisher().getEndpointName(),
-                            webRtcEndpoint.getId(), hubPort.getId());
+                    log.debug("Participant '{}/{}' Endpoint '{}' HubPort: Elements have been disconnected (EndPoint {} -> hubPort {})",
+                            roomName, name, getPublisher().getEndpointName(), webRtcEndpoint.getId(), hubPort.getId());
                 }
 
                 @Override
                 public void onError(Throwable cause) throws Exception {
-                    log.warn("PARTICIPANT {}: Failed to disconnect media elements (source {} -> sink {})",
-                            getPublisher().getEndpointName(),
-                            webRtcEndpoint.getId(), hubPort.getId(), cause);
+                    log.warn("Participant '{}/{}' Endpoint '{}' Failed to disconnect media elements (source {} -> sink {})",
+                            roomName, name, getPublisher().getEndpointName(), webRtcEndpoint.getId(), hubPort.getId(), cause);
                 }
             });
         } catch (Exception e) {
-            log.error("Fail to connect webRtcEndpoint.connect(hubPort) in participant id={} " + e.getMessage(), name, e);
+            log.error("Participant '{}/{}' Fail to connect webRtcEndpoint.connect(hubPort) in participant id={} " + e.getMessage(),
+                    roomName, name, e);
         }
     }
 
     public void createPublishingEndpoint() {
         publisher.createEndpoint(endPointLatch);
         if (getPublisher().getEndpoint() == null) {
-            throw new RoomException(Code.MEDIA_ENDPOINT_ERROR_CODE, "Unable to create publisher endpoint");
+            throw new RoomException(Code.MEDIA_ENDPOINT_ERROR_CODE,
+                    String.format("Participant '%s/%s' Unable to create publisher endpoint", roomName, name));
         }
     }
 
@@ -400,11 +407,11 @@ public class InqParticipant {
         try {
             if (!endPointLatch.await(Room.ASYNC_LATCH_TIMEOUT, TimeUnit.SECONDS)) {
                 throw new RoomException(Code.MEDIA_ENDPOINT_ERROR_CODE,
-                        "Timeout reached while waiting for publisher endpoint to be ready");
+                        String.format("Participant '%s/%s' Timeout reached while waiting for publisher endpoint to be ready", roomName, name));
             }
         } catch (InterruptedException e) {
             throw new RoomException(Code.MEDIA_ENDPOINT_ERROR_CODE,
-                    "Interrupted while waiting for publisher endpoint to be ready: " + e.getMessage());
+                    String.format("Participant '%s/%s' Interrupted while waiting for publisher endpoint to be ready: " + e.getMessage(), roomName, name));
         }
         return this.publisher;
     }
@@ -453,29 +460,27 @@ public class InqParticipant {
     }
 
     public String preparePublishConnection() {
-        log.info("USER {}: Request to publish video in room {} by "
-                + "initiating connection from server", this.name, this.room.getName());
+        log.info("Participant '{}/{}' Request to publish video by initiating connection from server",
+                roomName, this.name);
 
         String sdpOffer = this.getPublisher().preparePublishConnection();
 
-        log.trace("USER {}: Publishing SdpOffer is {}", this.name, sdpOffer);
-        log.info("USER {}: Generated Sdp offer for publishing in room {}", this.name,
-                this.room.getName());
+        log.trace("Participant '{}/{}' Publishing SdpOffer is {}", roomName, this.name, sdpOffer);
+        log.info("Participant '{}/{}' Generated Sdp offer for publishing", roomName, this.name);
         return sdpOffer;
     }
 
     public String publishToRoom(SdpType sdpType, String sdpString, boolean doLoopback,
                                 MediaElement loopbackAlternativeSrc, MediaType loopbackConnectionType) {
-        log.info("USER {}: Request to publish video in room {} (sdp type {})", this.name,
-                this.room.getName(), sdpType);
-        log.trace("USER {}: Publishing Sdp ({}) is {}", this.name, sdpType, sdpString);
+        log.info("Participant '{}/{}' Request to publish video (sdp type {})", roomName, this.name, sdpType);
+        log.trace("Participant '{}/{}' Publishing Sdp ({}) is {}", roomName, this.name, sdpType, sdpString);
 
         String sdpResponse = this.getPublisher().publish(sdpType, sdpString, doLoopback,
                 loopbackAlternativeSrc, loopbackConnectionType);
         this.streaming = true;
 
-        log.trace("USER {}: Publishing Sdp ({}) is {}", this.name, sdpType, sdpResponse);
-        log.info("USER {}: Is now publishing video in room {}", this.name, this.room.getName());
+        log.trace("Participant '{}/{}' Publishing Sdp ({}) is {}", roomName, this.name, sdpType, sdpResponse);
+        log.info("Participant '{}/{}' Is now publishing video in room {}", roomName, this.name, this.room.getName());
 
         // TODO Monitoring - should be event listener I think
         // WebCallEndpointMonitor.crunchWebRtcEndpoint(this.getPublisher().getWebEndpoint());
@@ -492,37 +497,35 @@ public class InqParticipant {
     }
 
     public void unpublishMedia() {
-        log.debug("PARTICIPANT {}: unpublishing media stream from room {}", this.name,
-                this.room.getName());
+        log.debug("Participant '{}/{}' unpublishing media stream", roomName, this.name);
         releasePublisherEndpoint();
         this.publisher = new InqPublisherEndpoint(web, dataChannels, this, name, pipeline);
-        log.debug("PARTICIPANT {}: released publisher endpoint and left it "
-                + "initialized (ready for future streaming)", this.name);
+        log.debug("Participant '{}/{}' released publisher endpoint and left it "
+                + "initialized (ready for future streaming)", roomName, this.name);
     }
 
     public String receiveMediaFrom(InqParticipant sender, String sdpOffer) {
         final String senderName = sender.getName();
 
-        log.info("USER {}: Request to receive media from {} in room {}", this.name, senderName,
-                this.room.getName());
-        log.trace("USER {}: SdpOffer for {} is {}", this.name, senderName, sdpOffer);
+        log.info("Participant '{}/{}' Request to receive media from {}", roomName, this.name, senderName);
+        log.trace("Participant '{}/{}' SdpOffer for {} is {}", roomName, this.name, senderName, sdpOffer);
 
         if (senderName.equals(this.name)) {
-            log.warn("PARTICIPANT {}: trying to configure loopback by subscribing", this.name);
+            log.warn("Participant '{}/{}' trying to configure loopback by subscribing", roomName, this.name);
             RoomException roomException = new RoomException(Code.USER_NOT_STREAMING_ERROR_CODE,
-                    "Can loopback only when publishing media");
+                    String.format("Participant '%s/%s' Can loopback only when publishing media", roomName, name));
             RoomErrorMdbService.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", roomException);
             throw roomException;
         }
 
         if (sender.getPublisher() == null) {
-            log.warn("PARTICIPANT {}: Trying to connect to a user without a publishing endpoint",
-                    this.name);
+            log.warn("Participant '{}/{}' Trying to connect to a user without a publishing endpoint",
+                    roomName, this.name);
             RoomErrorMdbService.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", "PARTICIPANT {}: Trying to connect to a user without a publishing endpoint");
             return null;
         }
 
-        log.debug("PARTICIPANT {}: Creating a subscriber endpoint to user {}", this.name, senderName);
+        log.debug("Participant '{}/{}' Creating a subscriber endpoint to user {}", roomName, this.name, senderName);
 
         InqSubscriberEndpoint subscriber = getNewOrExistingSubscriber(senderName);
         try {
@@ -531,26 +534,26 @@ public class InqParticipant {
             try {
                 if (!subscriberLatch.await(Room.ASYNC_LATCH_TIMEOUT, TimeUnit.SECONDS)) {
                     RoomException roomException = new RoomException(Code.MEDIA_ENDPOINT_ERROR_CODE,
-                            "Timeout reached when creating subscriber endpoint");
+                            String.format("Participant '%s/%s' Timeout reached when creating subscriber endpoint", roomName, name));
                     RoomErrorMdbService.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", roomException);
                     throw roomException;
                 }
             } catch (InterruptedException e) {
                 RoomException roomException = new RoomException(Code.MEDIA_ENDPOINT_ERROR_CODE,
-                        "Interrupted when creating subscriber endpoint: " + e.getMessage());
+                        String.format("Participant '%s/%s' Interrupted when creating subscriber endpoint: " + e.getMessage(), roomName, name));
                 RoomErrorMdbService.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", roomException);
                 throw roomException;
             }
             if (oldMediaEndpoint != null) {
-                log.warn("PARTICIPANT {}: Two threads are trying to create at "
-                        + "the same time a subscriber endpoint for user {}", this.name, senderName);
+                log.warn("Participant '{}/{}' Two threads are trying to create at the same time a subscriber endpoint for user {}",
+                        roomName, this.name, senderName);
                 RoomErrorMdbService.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()",
                         "PARTICIPANT {}: Two threads are trying to create at the same time a subscriber endpoint for user {}");
                 return null;
             }
             if (subscriber.getEndpoint() == null) {
                 RoomException roomException = new RoomException(Code.MEDIA_ENDPOINT_ERROR_CODE,
-                        "Unable to create subscriber endpoint");
+                        String.format("Participant '%s/%s' Unable to create subscriber endpoint", roomName, name));
                 RoomErrorMdbService.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", roomException);
                 throw roomException;
             }
@@ -560,10 +563,10 @@ public class InqParticipant {
             throw e;
         }
 
-        log.debug("PARTICIPANT {}: Created subscriber endpoint for user {}", this.name, senderName);
+        log.debug("Participant '{}/{}' Created subscriber endpoint for user {}", roomName, this.name, senderName);
         try {
             String sdpAnswer = subscriber.subscribe(sdpOffer, sender.getPublisher());
-            log.info("USER {}: Is now receiving stream from {} in room {}", this.name, senderName,
+            log.info("Participant '{}/{}' Is now receiving stream from {} in room {}", roomName, this.name, senderName,
                     this.room.getName());
 
             SdpEndpoint endpoint = subscriber.getEndpoint();
@@ -578,10 +581,11 @@ public class InqParticipant {
         } catch (KurentoServerException e) {
             RoomErrorMdbService.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".receiveMediaFrom()", e);
             if (e.getCode() == 40101) {
-                log.warn("Publisher endpoint was already released when trying "
-                        + "to connect a subscriber endpoint to it", e);
+                log.warn("Participant '{}/{}' Publisher endpoint was already released when trying to connect a subscriber endpoint to it",
+                        roomName, name, e);
             } else {
-                log.error("Exception connecting subscriber endpoint " + "to publisher endpoint", e);
+                log.error("Participant '{}/{}' Exception connecting subscriber endpoint " + "to publisher endpoint",
+                        roomName, name, e);
             }
             this.subscribers.remove(senderName);
             releaseSubscriberEndpoint(senderName, subscriber);
@@ -590,15 +594,15 @@ public class InqParticipant {
     }
 
     public void cancelReceivingMedia(String senderName) {
-        log.debug("PARTICIPANT {}: cancel receiving media from {}", this.name, senderName);
+        log.debug("Participant '{}/{}' cancel receiving media from {}", roomName, this.name, senderName);
         InqSubscriberEndpoint subscriberEndpoint = subscribers.remove(senderName);
         if (subscriberEndpoint == null || subscriberEndpoint.getEndpoint() == null) {
-            log.warn("PARTICIPANT {}: Trying to cancel receiving video from user {}. "
-                    + "But there is no such subscriber endpoint.", this.name, senderName);
+            log.warn("Participant '{}/{}' Trying to cancel receiving video from user {}. But there is no such subscriber endpoint.",
+                    roomName, this.name, senderName);
             RoomErrorMdbService.saveRoomError(this.room.getName(), this.name, this.getClass().getSimpleName() + ".cancelReceivingMedia()",
                     String.format("PARTICIPANT {}: Trying to cancel receiving video from user %s. But there is no such subscriber endpoint.", senderName));
         } else {
-            log.debug("PARTICIPANT {}: Cancel subscriber endpoint linked to user {}", this.name,
+            log.debug("Participant '{}/{}' Cancel subscriber endpoint linked to user {}", roomName, this.name,
                     senderName);
 
             releaseSubscriberEndpoint(senderName, subscriberEndpoint);
@@ -607,15 +611,16 @@ public class InqParticipant {
 
     public void mutePublishedMedia(MutedMediaType muteType) {
         if (muteType == null) {
-            throw new RoomException(Code.MEDIA_MUTE_ERROR_CODE, "Mute type cannot be null");
+            throw new RoomException(Code.MEDIA_MUTE_ERROR_CODE,
+                    String.format("Participant '%s/%s' Mute type cannot be null", roomName, name));
         }
         this.getPublisher().mute(muteType);
     }
 
     public void unmutePublishedMedia() {
         if (this.getPublisher().getMuteType() == null) {
-            log.warn("PARTICIPANT {}: Trying to unmute published media. " + "But media is not muted.",
-                    this.name);
+            log.warn("Participant '{}/{}' Trying to unmute published media. " + "But media is not muted.",
+                    roomName, this.name);
         } else {
             this.getPublisher().unmute();
         }
@@ -628,10 +633,10 @@ public class InqParticipant {
         String senderName = sender.getName();
         InqSubscriberEndpoint subscriberEndpoint = subscribers.get(senderName);
         if (subscriberEndpoint == null || subscriberEndpoint.getEndpoint() == null) {
-            log.warn("PARTICIPANT {}: Trying to mute incoming media from user {}. "
-                    + "But there is no such subscriber endpoint.", this.name, senderName);
+            log.warn("Participant '{}/{}' Trying to mute incoming media from user {}. But there is no such subscriber endpoint.",
+                    roomName, this.name, senderName);
         } else {
-            log.debug("PARTICIPANT {}: Mute subscriber endpoint linked to user {}", this.name, senderName);
+            log.debug("Participant '{}/{}' Mute subscriber endpoint linked to user {}", roomName, this.name, senderName);
             subscriberEndpoint.mute(muteType);
         }
     }
@@ -640,14 +645,14 @@ public class InqParticipant {
         String senderName = sender.getName();
         InqSubscriberEndpoint subscriberEndpoint = subscribers.get(senderName);
         if (subscriberEndpoint == null || subscriberEndpoint.getEndpoint() == null) {
-            log.warn("PARTICIPANT {}: Trying to unmute incoming media from user {}. "
-                    + "But there is no such subscriber endpoint.", this.name, senderName);
+            log.warn("Participant '{}/{}' Trying to unmute incoming media from user {}. "
+                    + "But there is no such subscriber endpoint.", roomName, this.name, senderName);
         } else {
             if (subscriberEndpoint.getMuteType() == null) {
-                log.warn("PARTICIPANT {}: Trying to unmute incoming media from user {}. "
-                        + "But media is not muted.", this.name, senderName);
+                log.warn("Participant '{}/{}' Trying to unmute incoming media from user {}. "
+                        + "But media is not muted.", roomName, this.name, senderName);
             } else {
-                log.debug("PARTICIPANT {}: Unmute subscriber endpoint linked to user {}", this.name,
+                log.debug("Participant '{}/{}' Unmute subscriber endpoint linked to user {}", roomName, this.name,
                         senderName);
                 subscriberEndpoint.unmute();
             }
@@ -658,22 +663,23 @@ public class InqParticipant {
      * close participant
      */
     public void close() {
-        log.debug("PARTICIPANT {}: Closing user", this.name);
+        log.debug("Participant '{}/{}' Closing user", roomName, this.name);
         if (isClosed()) {
-            log.warn("PARTICIPANT {}: Already closed", this.name);
+            log.warn("Participant '{}/{}' Already closed", roomName, this.name);
             return;
         }
 
         this.closed = true;
+        this.dirty = true;     // Start clean up dirty resources
         for (String remoteParticipantName : subscribers.keySet()) {
             InqSubscriberEndpoint subscriber = this.subscribers.get(remoteParticipantName);
             if (subscriber != null && subscriber.getEndpoint() != null) {
                 releaseSubscriberEndpoint(remoteParticipantName, subscriber);
-                log.debug("PARTICIPANT {}: Released subscriber endpoint to {}", this.name,
+                log.debug("Participant '{}/{}' Released subscriber endpoint to {}", roomName, this.name,
                         remoteParticipantName);
             } else {
-                log.warn("PARTICIPANT {}: Trying to close subscriber endpoint to {}. "
-                        + "But the endpoint was never instantiated.", this.name, remoteParticipantName);
+                log.warn("Participant '{}/{}' Trying to close subscriber endpoint to {}. "
+                        + "But the endpoint was never instantiated.", roomName, this.name, remoteParticipantName);
             }
         }
         // disconnet recorder.
@@ -685,6 +691,7 @@ public class InqParticipant {
 
         // release endpoint
         releasePublisherEndpoint();
+        this.dirty = false;    // resources are clean now.
     }
 
     /**
@@ -700,10 +707,10 @@ public class InqParticipant {
                 sendingEndpoint);
         if (existingSendingEndpoint != null) {
             sendingEndpoint = existingSendingEndpoint;
-            log.trace("PARTICIPANT {}: Already exists a subscriber endpoint to user {}", this.name,
+            log.trace("Participant '{}/{}' Already exists a subscriber endpoint to user {}", roomName, this.name,
                     remoteName);
         } else {
-            log.debug("PARTICIPANT {}: New subscriber endpoint to user {}", this.name, remoteName);
+            log.debug("Participant '{}/{}' New subscriber endpoint to user {}", roomName, this.name, remoteName);
         }
         return sendingEndpoint;
     }
@@ -723,7 +730,7 @@ public class InqParticipant {
     public void sendMediaError(ErrorEvent event) {
         String desc = event.getType() + ": " + event.getDescription() + "(errCode="
                 + event.getErrorCode() + ")";
-        log.warn("PARTICIPANT {}: Media error encountered: {}", name, desc);
+        log.warn("Participant '{}/{}' Media error encountered: {}", roomName, name, desc);
         room.sendMediaError(id, desc);
     }
 
@@ -737,7 +744,7 @@ public class InqParticipant {
             releaseElement(name, publisher.getEndpoint());
             publisher = null;
         } else {
-            log.warn("PARTICIPANT {}: Trying to release publisher endpoint but is null", name);
+            log.warn("Participant '{}/{}' Trying to release publisher endpoint but is null", roomName, name);
         }
     }
 
@@ -746,7 +753,7 @@ public class InqParticipant {
             subscriber.unregisterErrorListeners();
             releaseElement(senderName, subscriber.getEndpoint());
         } else {
-            log.warn("PARTICIPANT {}: Trying to release subscriber endpoint for '{}' but is null", name,
+            log.warn("Participant '{}/{}' Trying to release subscriber endpoint for '{}' but is null", roomName, name,
                     senderName);
         }
     }
@@ -757,25 +764,25 @@ public class InqParticipant {
             element.release(new Continuation<Void>() {
                 @Override
                 public void onSuccess(Void result) throws Exception {
-                    log.debug("PARTICIPANT {}: Released successfully media element #{} for {}",
-                            InqParticipant.this.name, eid, senderName);
+                    log.debug("Participant '{}/{}' Released successfully media element #{} for {}",
+                            roomName, InqParticipant.this.name, eid, senderName);
                 }
 
                 @Override
                 public void onError(Throwable cause) throws Exception {
-                    log.warn("PARTICIPANT {}: Could not release media element #{} for {}",
-                            InqParticipant.this.name, eid, senderName, cause);
+                    log.warn("Participant '{}/{}' Could not release media element #{} for {}",
+                            roomName, InqParticipant.this.name, eid, senderName, cause);
                 }
             });
         } catch (Exception e) {
-            log.error("PARTICIPANT {}: Error calling release on elem #{} for {}", name, eid, senderName,
-                    e);
+            log.error("Participant '{}/{}' Error calling release on elem #{} for {}",
+                    roomName, name, eid, senderName, e);
         }
     }
 
     @Override
     public String toString() {
-        return "[User: " + name + "]";
+        return String.format("[Room:%s,User:%s]", roomName, name);
     }
 
     @Override
