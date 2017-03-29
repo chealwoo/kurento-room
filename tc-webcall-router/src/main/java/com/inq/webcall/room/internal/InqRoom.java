@@ -130,7 +130,7 @@ public class InqRoom {
             for (InqParticipant p : participants.values()) {
                 if (p.getName().equals(userName)) {
                     // TC change for recovery.
-                    log.warn("ROOM {}: User '{}' already exists", name, userName);
+                    log.warn("ROOM {}: User '{}' already exists and closing it.", name, userName);
                     p.close();
                     break;
                 }
@@ -142,7 +142,7 @@ public class InqRoom {
         participants.put(participantId, new InqParticipant(participantId, userName, this, getPipeline(),
                dataChannels, webParticipant));
 
-        log.info("ROOM {}: Added participant {}", name, userName);
+        log.info("ROOM {}: participant {} is added.", name, userName);
 
     }
 

@@ -185,7 +185,7 @@ public class InqParticipant {
                 this.repoItem.setId(now);
                 this.repoItem.setUrl(filePath);
             }
-            log.info("Participant '{}/{}' Media will be recorded {}by KMS: id={} , url={}", roomName, room,
+            log.info("Participant '{}/{}' Media will be recorded {}by KMS: id={} , url={}", roomName, name,
                     (repositoryClient == null ? "locally " : ""), this.repoItem.getId(), this.repoItem.getUrl());
 
             this.recorder = new RecorderEndpoint.Builder(pipeline, this.repoItem.getUrl())
