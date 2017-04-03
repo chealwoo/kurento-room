@@ -6,6 +6,7 @@ import com.inq.webcall.room.api.InqKurentoClientProvider;
 import com.inq.webcall.room.internal.InqKurentoClientSessionInfo;
 import com.inq.webcall.room.internal.InqNotificationRoomHandler;
 import com.inq.webcall.util.log.InqEtlMgr;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.kurento.client.MediaElement;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.MediaType;
@@ -65,7 +66,9 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
         try {
             existingParticipants = internalManager.joinRoom(userName, roomName, dataChannels, webParticipant,
                     kcSessionInfo, participantRequest.getParticipantId());
+            InqEtlMgr.logJoin(roomName, userName);
         } catch (RoomException e) {
+            InqEtlMgr.logJoinFail(roomName, userName);
             log.warn("PARTICIPANT {}: Error joining/creating room {}", userName, roomName, e);
             notificationRoomHandler.onParticipantJoined(participantRequest, roomName, userName, null, e);
         }
@@ -95,6 +98,8 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
         try {
             roomName = internalManager.getRoomName(pid);
             userName = internalManager.getParticipantName(pid);
+            // fire etl log upon request NOT result.
+            InqEtlMgr.logLeave(roomName, userName);
             remainingParticipants = internalManager.leaveRoom(pid);
         } catch (RoomException e) {
             log.warn("PARTICIPANT {}: Error leaving room {}", userName, roomName, e);
@@ -127,17 +132,18 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
             roomName = internalManager.getRoomName(pid);
             participants = internalManager.getParticipants(roomName);
         } catch (RoomException e) {
+            InqEtlMgr.logPublishFail(roomName, userName);
             log.warn("PARTICIPANT {}: Error publishing media", userName, e);
             notificationRoomHandler.onPublishMedia(request, null, null, null, e);
             RoomErrorMdbService.saveRoomError(internalManager.getRoomName(pid), userName, "onPublishMedia", e);
         }
         if (sdpAnswer != null) {
-            log.debug("PARTICIPANT {} has published media in room {}", userName, roomName);
-            // For now, the first participant is considered as an agent.
-            if( internalManager.getRoom(pid).getParticipants().size() == 1) {
-                InqEtlMgr.logAgentConnected(roomName, userName);
-            }
+//            log.debug("PARTICIPANT {} has published media in room {}", userName, roomName);
+            InqEtlMgr.logPublished(roomName, userName, sdpAnswer);
             notificationRoomHandler.onPublishMedia(request, userName, sdpAnswer, participants, null);
+        } else {
+//            log.warn("PARTICIPANT {} has failed to publish media in room {}", userName, roomName);
+            InqEtlMgr.logPublishFail(roomName, userName);
         }
     }
 
@@ -188,15 +194,20 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
         String pid = request.getParticipantId();
         String userName = null;
         String sdpAnswer = null;
+        String roomName = internalManager.getRoomName(request.getParticipantId());
         try {
             userName = internalManager.getParticipantName(pid);
             sdpAnswer = internalManager.subscribe(remoteName, sdpOffer, pid);
         } catch (RoomException e) {
+            InqEtlMgr.logSubscribeFail(roomName, userName, remoteName, sdpOffer);
             log.warn("PARTICIPANT {}: Error subscribing to {}", userName, remoteName, e);
             notificationRoomHandler.onSubscribe(request, null, e);
         }
         if (sdpAnswer != null) {
+            InqEtlMgr.logSubscribe(roomName, userName, remoteName, sdpAnswer);
             notificationRoomHandler.onSubscribe(request, sdpAnswer, null);
+        } else {
+            InqEtlMgr.logSubscribeFail(roomName, userName, remoteName, sdpOffer);
         }
     }
 
