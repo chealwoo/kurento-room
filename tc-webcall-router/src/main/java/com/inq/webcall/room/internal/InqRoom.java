@@ -17,6 +17,7 @@ package com.inq.webcall.room.internal;
 
 import com.inq.webcall.WebCallApplication;
 import com.inq.webcall.dao.RoomMdbService;
+import com.inq.webcall.util.log.InqEtlMgr;
 import org.kurento.client.*;
 import org.kurento.client.EventListener;
 import org.kurento.repository.RepositoryClient;
@@ -85,7 +86,8 @@ public class InqRoom {
         this.roomHandler = roomHandler;
         this.authToken = "" + System.currentTimeMillis() + roomName;
         this.siteId = siteId;
-        log.debug("ROOM {}: New ROOM instance created", roomName);
+//        log.debug("ROOM {}: New ROOM instance created", roomName);
+        InqEtlMgr.logRoomCreated(siteId, roomName);
     }
 
     public String getName() {
@@ -307,6 +309,8 @@ public class InqRoom {
 
     public void close() {
         if (!closed) {
+
+            InqEtlMgr.logCloseRoom(getName());
 
             for (InqParticipant user : participants.values()) {
                 user.close();
