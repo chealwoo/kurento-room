@@ -113,27 +113,14 @@ public class InqRoom {
             throw new RoomException(Code.GENERIC_ERROR_CODE, String.format("Room(%s) Empty user name is not allowed", name));
         }
 
-        Collection<InqParticipant> participantsValues = participants.values();
-
-        /*
-            Because the first participant is always agent,
-            And agent is not allowed to rejoin when it is alone.
-            Customer uses name + seq num and should not rejected.
-         */
-        if(participantsValues.size() == 1) {
-            InqParticipant p = participantsValues.iterator().next();
-            if( p.getName().equals(userName) ) {
-                throw new RoomException(Code.EXISTING_USER_IN_ROOM_ERROR_CODE,
-                        String.format("ROOM %s: User '%s' already exists", name, userName));
-            }
-        } else {
-            for (InqParticipant p : participants.values()) {
-                if (p.getName().equals(userName)) {
-                    // TC change for recovery.
-                    log.warn("ROOM {}: User '{}' already exists and closing it.", name, userName);
-                    p.close();
-                    break;
-                }
+        for (InqParticipant p : participants.values()) {
+            if (p.getName().equals(userName)) {
+                // TC change for recovery.
+                log.warn("User '{}' already exists in room '{}'", userName, name);
+                p.close();
+                break;
+//                throw new RoomException(Code.EXISTING_USER_IN_ROOM_ERROR_CODE, "User '" + userName
+//                        + "' already exists in room '" + name + "'");
             }
         }
 
