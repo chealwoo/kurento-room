@@ -15,7 +15,6 @@ import org.kurento.jsonrpc.server.JsonRpcHandlerRegistry;
 import org.kurento.repository.RepositoryClient;
 import org.kurento.repository.RepositoryClientProvider;
 import org.kurento.room.KurentoRoomServerApp;
-import org.kurento.room.kms.KmsManager;
 import org.kurento.room.rpc.JsonRpcUserControl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

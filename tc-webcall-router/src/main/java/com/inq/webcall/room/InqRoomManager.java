@@ -110,8 +110,6 @@ public class InqRoomManager {
     public Set<UserParticipant> joinRoom(String userName, String roomName, boolean dataChannels,
                                          boolean webParticipant, InqIKurentoClientSessionInfo kcSessionInfo,
                                          String participantId, String authToken) throws RoomException {
-        log.debug("joinRoom request step 3; room name:{}, user name:{}, isWeb:{}, participantId:{})",
-                roomName, userName, webParticipant, participantId);
 
         InqEtlMgr.logWebCallRequested(roomName, userName);
 
@@ -819,8 +817,7 @@ public class InqRoomManager {
         kcSessionInfo.setAuthToken(room.getAuthToken());
 
         RoomMdbService.saveRoomCreatedEvent(room.getName());
-        log.warn("No room '{}' exists yet. Created one using KurentoClient '{}'.", roomName,
-                kcName);
+        log.warn("Room '{}' is created by '{}'.", roomName, kcName);
     }
 
     /**
@@ -936,6 +933,17 @@ public class InqRoomManager {
     public String getRoomName(String participantId) throws RoomException {
         InqParticipant participant = getParticipant(participantId);
         return participant.getRoom().getName();
+    }
+    /**
+     * Finds the room's name of a given participant.
+     *
+     * @param participantId identifier of the participant
+     * @return the name of the room
+     * @throws RoomException in case the participant doesn't exist
+     */
+    public InqRoom getRoom(String participantId) throws RoomException {
+        InqParticipant participant = getParticipant(participantId);
+        return participant.getRoom();
     }
 
     /**

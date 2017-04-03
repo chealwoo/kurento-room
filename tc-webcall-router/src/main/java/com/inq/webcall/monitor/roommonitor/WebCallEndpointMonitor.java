@@ -115,10 +115,10 @@ public class WebCallEndpointMonitor {
                     WebRTCStatDao.getInstance().saveWebRTCEndpointStat(document);
                 }
             }
-
         } catch (ProtocolException e) {
-
             log.error("Error ", e);
+        } catch (NullPointerException e) {
+            log.info("NullPointerException thrown most likely caused by participant closing webEndpoint");
         } catch (Throwable t) {
             // The WebRtcEndpoint may have been released. This does not need to
             // be a "severe" problem

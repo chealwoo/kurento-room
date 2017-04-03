@@ -134,8 +134,8 @@ public class JsonRpcNotificationService implements UserNotificationService {
       log.info("Sent notification '{}': {} to user id {}", method, params,
               participantId);
     } catch (Exception e) {
-      log.error("Exception sending notification '{}': {} to user id {}", method, params,
-          participantId, e);
+      // This is error level, changed to warn to reduce log.
+      log.warn("ERROR: Exception while sending notification '{}': {} to user id {}", method, params, participantId, e);
     }
   }
 

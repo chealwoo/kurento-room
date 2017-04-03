@@ -95,11 +95,10 @@ public class NotificationRoomManager {
   // ----------------- CLIENT-ORIGINATED REQUESTS ------------
 
   /**
-   * Calls {@link RoomManager#joinRoom(String, String, boolean, KurentoClientSessionInfo, String)}
+   * Calls {@link RoomManager#joinRoom(String, String, boolean, boolean,KurentoClientSessionInfo, String)}
    * with a {@link DefaultKurentoClientSessionInfo} bean as implementation of the
    * {@link KurentoClientSessionInfo}.
    * 
-   * @param b
    *
    * @param request
    *          instance of {@link ParticipantRequest} POJO containing the participant's id and a

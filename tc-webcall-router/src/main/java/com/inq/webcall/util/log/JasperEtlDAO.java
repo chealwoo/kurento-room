@@ -47,6 +47,15 @@ public class JasperEtlDAO {
     public static final String EVENT_CUSTOMER_CHATLINE_UPDATED = "customerChatlineMasked";
     public static final String EVENT_CALL_REQUESTED = "callRequested";
     public static final String EVENT_FILE_UPLOADED = "fileUploaded";
+    public static final String EVENT_WBBCALL_REQUESTED = "callRequested";
+    public static final String EVENT_WBBCALL_AGENT_DIALED = "dialed";
+    public static final String EVENT_WBBCALL_AGENT_CONNECTED = "agentConnected";
+    public static final String EVENT_WBBCALL_CLIENT_CONNECTED = "connected";
+    public static final String EVENT_WBBCALL_ENDED = "completed";
+    public static final String EVENT_WBBCALL_ERROR = "failed";
+    public static final String EVENT_WBBCALL_ABANDONED = "abandoned";
+    public static final String EVENT_WBBCALL_DENIED = "denied";
+    public static final String EVENT_WBBCALL_QUEUED = "queued";
 
     public static final String EVENT_COBROWSE_STARTED = "cobrowseStarted";
     public static final String EVENT_COBROWSE_DECLINED = "cobrowseDeclined";
