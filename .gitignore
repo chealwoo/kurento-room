@@ -19,3 +19,4 @@ nbactions.xml
 *.log
 logs/*.log.?
 logs/tc-webcall-router.log.*
+loadtest/

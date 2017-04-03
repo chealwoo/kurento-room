@@ -1,6 +1,7 @@
 package com.inq.webcall.room.kms;
 
 
+import com.inq.webcall.room.api.InqIKurentoClientSessionInfo;
 import org.kurento.client.KurentoClient;
 import org.kurento.room.api.KurentoClientProvider;
 import org.kurento.room.api.KurentoClientSessionInfo;
@@ -56,7 +57,15 @@ public abstract class InqKmsManager implements KurentoClientProvider {
             throw new RoomException(Code.GENERIC_ERROR_CODE, "Unkown session info bean type (expected "
                     + DefaultKurentoClientSessionInfo.class.getName() + ")");
         }
-        return getKms((DefaultKurentoClientSessionInfo) sessionInfo).getKurentoClient();
+
+        InqKms kms = getKms((DefaultKurentoClientSessionInfo) sessionInfo);
+
+        try {
+            ((InqIKurentoClientSessionInfo) sessionInfo).setKmsUri(kms.getUri());
+        } catch (Exception e) {
+            // Try to add kms uri into session info. This is just informational and should continue next step.
+        }
+        return kms.getKurentoClient();
     }
 
     /**

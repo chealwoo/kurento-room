@@ -49,7 +49,7 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
      * with a {@link DefaultKurentoClientSessionInfo} bean as implementation of the
      * {@link KurentoClientSessionInfo}.
      *
-     * @param request
+     * @param participantRequest
      *          instance of {@link ParticipantRequest} POJO containing the participant's id and a
      *          request id (optional identifier of the request at the communications level, included
      *          when responding back to the client)
@@ -57,29 +57,26 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
      * @see InqRoomManager joinRoom
      */
     public void joinRoom(String userName, String roomName, boolean dataChannels, boolean webParticipant,
-                         ParticipantRequest request, String authToken, String siteId) {
+                         ParticipantRequest participantRequest, InqKurentoClientSessionInfo kcSessionInfo) {
         Set<UserParticipant> existingParticipants = null;
 
-        log.debug("joinRoom request step 2; room name:{}, user name:{}", roomName, userName);
+        log.debug("Participant '{}/{}' joinRoom request", roomName, userName);
 
-        InqKurentoClientSessionInfo kcSessionInfo = null;
         try {
-            kcSessionInfo = new InqKurentoClientSessionInfo(
-                    request.getParticipantId(), roomName, siteId);
             existingParticipants = internalManager.joinRoom(userName, roomName, dataChannels, webParticipant,
-                    kcSessionInfo, request.getParticipantId(), authToken);
+                    kcSessionInfo, participantRequest.getParticipantId());
         } catch (RoomException e) {
             log.warn("PARTICIPANT {}: Error joining/creating room {}", userName, roomName, e);
-            notificationRoomHandler.onParticipantJoined(request, roomName, userName, null, e);
+            notificationRoomHandler.onParticipantJoined(participantRequest, roomName, userName, null, e);
         }
 
         if (existingParticipants != null) {
             if(kcSessionInfo.isRoomCreated()) {
-                notificationRoomHandler.onRoomCreated(request, roomName, userName,
-                        existingParticipants, kcSessionInfo.getAuthToken(), null);
+                notificationRoomHandler.onRoomCreated(participantRequest, roomName, userName,
+                        existingParticipants, kcSessionInfo, null);
             } else {
-                notificationRoomHandler.onParticipantJoined(request, roomName, userName,
-                        existingParticipants, null);
+                notificationRoomHandler.onParticipantJoined(participantRequest, roomName, userName,
+                        existingParticipants, kcSessionInfo, null);
             }
         }
     }

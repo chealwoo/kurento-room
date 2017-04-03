@@ -246,10 +246,14 @@ public class InqFixedNKmsManager extends InqKmsManager implements InqKurentoClie
         return kms.isBlocked();
     }
 
-    @Override
-    public synchronized InqKms getKms(DefaultKurentoClientSessionInfo sessionInfo) {
+//    @Override
+//    public synchronized InqKms getKms(DefaultKurentoClientSessionInfo sessionInfo) {
+    /*
+        CHECK ME: Doesn't look like this code is used. check it when system is stable.
+     */
+    public synchronized InqKms getKms(InqIKurentoClientSessionInfo sessionInfo) {
         String userName = null;
-        String participantId = sessionInfo.getParticipantId();
+        String participantId = ((DefaultKurentoClientSessionInfo) sessionInfo).getParticipantId();
         Session session = notificationService.getSession(participantId);
         if (session != null) {
             Object sessionValue = session.getAttributes().get(ParticipantSession.SESSION_KEY);
@@ -267,29 +271,16 @@ public class InqFixedNKmsManager extends InqKmsManager implements InqKurentoClie
             throw new RoomException(RoomException.Code.ROOM_CANNOT_BE_CREATED_ERROR_CODE,
                     "User cannot create a new room");
         }
-        InqKms kms = null;
-//    String type = "";
-//    boolean hq = isUserHQ(userName);
-// No special
-//    if (hq) {
-        kms = (InqKms) getLessLoadedKms();
-/*    } else {
-      kms = getNextLessLoadedKms();
-      if (!kms.allowMoreElements()) {
-        kms = getLessLoadedKms();
-      } else {
-        type = "next ";
-      }
-    }
-*/
+        InqKms kms = (InqKms) getLessLoadedKms();
+
         if (!kms.allowMoreElements()) {
-//      log.debug("Was trying Kms which has no resources left: highQ={}, " + "{}less loaded KMS, uri={}", hq, type, kms.getUri());
             log.debug("Was trying Kms which has no resources left: less loaded KMS, uri={}", kms.getUri());
             throw new RoomException(RoomException.Code.ROOM_CANNOT_BE_CREATED_ERROR_CODE,
                     "No resources left to create new room");
         }
-//    log.debug("Offering Kms: highQ={}, {}less loaded KMS, uri={}", hq, type, kms.getUri());
-        log.debug("Offering Kms: less loaded KMS, uri={}", kms.getUri());
+
+        sessionInfo.setKmsUri(kms.getUri());
+        log.debug("Participant '{}/{}' Offering Kms: less loaded KMS, uri={}", sessionInfo.getRoomName(),((DefaultKurentoClientSessionInfo) sessionInfo).getParticipantId(), kms.getUri());
         return kms;
     }
 

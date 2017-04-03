@@ -22,12 +22,14 @@ import java.util.concurrent.ExecutionException;
 import com.inq.webcall.monitor.systemmonitor.SystemMonitor;
 import com.inq.webcall.WebCallApplication;
 import com.inq.webcall.room.InqNotificationRoomManager;
+import com.inq.webcall.room.internal.InqKurentoClientSessionInfo;
 import org.kurento.client.FaceOverlayFilter;
 import org.kurento.client.MediaElement;
 import org.kurento.jsonrpc.Transaction;
 import org.kurento.jsonrpc.message.Request;
 import org.kurento.room.api.pojo.ParticipantRequest;
 import org.kurento.room.api.pojo.UserParticipant;
+import org.kurento.room.exception.RoomException;
 import org.kurento.room.internal.ProtocolElements;
 import org.kurento.room.rpc.JsonRpcUserControl;
 import org.kurento.room.rpc.ParticipantSession;
@@ -68,28 +70,21 @@ public class InqJsonRpcUserControl extends JsonRpcUserControl {
     public void joinRoom(Transaction transaction, Request<JsonObject> request,
                          ParticipantRequest participantRequest) throws IOException, InterruptedException,
             ExecutionException {
+
+        // Must have
         String roomName = getStringParam(request, ProtocolElements.JOINROOM_ROOM_PARAM);
         String userName = getStringParam(request, ProtocolElements.JOINROOM_USER_PARAM);
-
-        log.debug("joinRoom request room name:{}, user name:{}", roomName, userName);
-
         boolean dataChannels = false;
         if (request.getParams().has(ProtocolElements.JOINROOM_DATACHANNELS_PARAM)) {
             dataChannels = request.getParams().get(ProtocolElements.JOINROOM_DATACHANNELS_PARAM)
                     .getAsBoolean();
         }
 
+        // Optional ?
         String authToken = "";
-        try {
-            authToken = getStringParam(request, ProtocolElements.JOINROOM_TOKEN_PARAM);
-        } catch (RuntimeException e) {
-            if (!e.getMessage().contains("Request element")) {
-                throw e;
-            }
-        }
-
         String siteId = "";
         try {
+            authToken = getStringParam(request, ProtocolElements.JOINROOM_TOKEN_PARAM);
             siteId = getStringParam(request, JOINROOM_SITEID_PARAM);
         } catch (RuntimeException e) {
             if (!e.getMessage().contains("Request element")) {
@@ -97,12 +92,20 @@ public class InqJsonRpcUserControl extends JsonRpcUserControl {
             }
         }
 
-        ParticipantSession participantSession = getParticipantSession(transaction);
-        participantSession.setParticipantName(userName);
-        participantSession.setRoomName(roomName);
-        participantSession.setDataChannels(dataChannels);
+        // session information holder used in process of joinRoom request.
+        InqKurentoClientSessionInfo kcSessionInfo = null;
+        try {
+            kcSessionInfo = new InqKurentoClientSessionInfo(
+                    participantRequest.getParticipantId(), roomName, userName);
+        } catch (RoomException e) {
+            log.warn("PARTICIPANT {}: Error joining/creating room {}", userName, roomName, e);
+        }
+        kcSessionInfo.setAuthToken(authToken);
+        kcSessionInfo.setSiteId(siteId);
 
-        roomManager.joinRoom(userName, roomName, dataChannels, true, participantRequest, authToken, siteId);
+        log.debug("joinRoom request room name:{}, user name:{}", roomName, userName);
+
+        roomManager.joinRoom(userName, roomName, dataChannels, true, participantRequest, kcSessionInfo);
     }
 
     /**
