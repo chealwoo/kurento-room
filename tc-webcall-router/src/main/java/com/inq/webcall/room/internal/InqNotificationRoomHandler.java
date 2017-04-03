@@ -37,15 +37,30 @@ public class InqNotificationRoomHandler implements InqINotificationRoomHandler {
         }
     }
 
+
     @Override
     public void onParticipantJoined(ParticipantRequest request, String roomName, String newUserName,
                                     Set<UserParticipant> existingParticipants, RoomException error) {
+        onParticipantJoined(request, roomName, newUserName, existingParticipants, null, error);
+    }
+
+    @Override
+    public void onParticipantJoined(ParticipantRequest request, String roomName, String newUserName,
+                                    Set<UserParticipant> existingParticipants, InqKurentoClientSessionInfo kcSessionInfo, RoomException error) {
         if (error != null) {
             notifService.sendErrorResponse(request, null, error);
             RoomErrorMdbService.saveRoomError(roomName, newUserName, "onParticipantJoined", error);
             return;
         }
         JsonArray result = new JsonArray();
+
+        // Adding new room notification
+        if(kcSessionInfo != null) {
+            JsonObject newRoom = new JsonObject();
+            newRoom.addProperty(InqProtocolElements.CREATEROOM_KMS_URI_PARAM, kcSessionInfo.getKmsUri());
+            result.add(newRoom);
+        }
+
         for (UserParticipant participant : existingParticipants) {
             JsonObject participantJson = new JsonObject();
             participantJson
@@ -67,21 +82,22 @@ public class InqNotificationRoomHandler implements InqINotificationRoomHandler {
         notifService.sendResponse(request, result);
     }
 
-    @Override
+    // @Override
     public void onRoomCreated(ParticipantRequest request, String roomName, String newUserName,
-                                    Set<UserParticipant> existingParticipants, String authToken, RoomException error) {
+                                    Set<UserParticipant> existingParticipants, InqKurentoClientSessionInfo kcSessionInfo, RoomException error) {
+        String authToken = kcSessionInfo.getAuthToken();
         if (error != null) {
             notifService.sendErrorResponse(request, null, error);
             RoomErrorMdbService.saveRoomError(roomName, newUserName, "onRoomCreated", error);
             return;
         }
-        // TODO CL - Add APP server id and room token.
         JsonArray result = new JsonArray();
 
         // Adding new room notification
         JsonObject newRoom = new JsonObject();
         newRoom.addProperty(ProtocolElements.CREATEROOM_APPID_PARAM, WebCallApplication.DEFAULT_APP_SERVER_URL);
         newRoom.addProperty(ProtocolElements.CREATEROOM_TOKEN_PARAM, authToken);
+        newRoom.addProperty(InqProtocolElements.CREATEROOM_KMS_URI_PARAM, kcSessionInfo.getKmsUri());
         result.add(newRoom);
 
         for (UserParticipant participant : existingParticipants) {

@@ -17,4 +17,10 @@ public interface InqIKurentoClientSessionInfo extends KurentoClientSessionInfo {
 
     void setSiteId(String siteId);
     String getSiteId();
+
+    void setKmsUri(String kmsUri);
+    String getKmsUri();
+
+    void setParticipantName(String participantName);
+    String getParticipantName();
 }

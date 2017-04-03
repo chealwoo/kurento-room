@@ -7,12 +7,14 @@ import org.kurento.room.internal.DefaultKurentoClientSessionInfo;
 public class InqKurentoClientSessionInfo extends DefaultKurentoClientSessionInfo implements InqIKurentoClientSessionInfo {
 
     private boolean isRoomCreated = false;
+    private String participantName = "";
     private String authToken = "";
     private String siteId = "";
+    private String kmsUri = "";
 
-    public InqKurentoClientSessionInfo(String participantId, String roomName, String siteId) {
+    public InqKurentoClientSessionInfo(String participantId, String roomName, String participantName) {
         super(participantId, roomName);
-        setSiteId(siteId);
+        setParticipantName(participantName);
     }
 
     @Override
@@ -44,4 +46,26 @@ public class InqKurentoClientSessionInfo extends DefaultKurentoClientSessionInfo
     public void setSiteId(String siteId) {
         this.siteId = siteId;
     }
+
+    @Override
+    public void setKmsUri(String kmsUri) {
+        this.kmsUri = kmsUri;
+    }
+
+    @Override
+    public String getKmsUri() {
+        return kmsUri;
+    }
+
+    @Override
+    public void setParticipantName(String participantName) {
+        this.participantName = participantName;
+    }
+
+    @Override
+    public String getParticipantName() {
+        return participantName;
+    }
+
+
 }

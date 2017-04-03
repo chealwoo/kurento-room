@@ -109,11 +109,12 @@ public class InqRoomManager {
      */
     public Set<UserParticipant> joinRoom(String userName, String roomName, boolean dataChannels,
                                          boolean webParticipant, InqIKurentoClientSessionInfo kcSessionInfo,
-                                         String participantId, String authToken) throws RoomException {
+                                         String participantId) throws RoomException {
 
         InqEtlMgr.logWebCallRequested(roomName, userName);
 
         InqRoom room = rooms.get(roomName);
+        String authToken = kcSessionInfo.getAuthToken();
         if (room == null && kcSessionInfo != null
                 && ( !WebCallApplication.SSO_AUTH_CHECK || TokenValidator.validateToken(userName, authToken) ) ) {
                       // if WebCallApplication.SSO_AUTH_CHECK is true, call validatieToken()
@@ -124,7 +125,7 @@ public class InqRoomManager {
 
         room = rooms.get(roomName);
         if (room == null) {
-            log.warn("ERROR: Room '{}' not found", roomName);
+            log.warn("ERROR: Room '{}' is NULL when user {} try to join", userName, roomName);
             throw new RoomException(Code.ROOM_NOT_FOUND_ERROR_CODE, "Room '" + roomName
                     + "' was not found, must be created before '" + userName + "' can join");
         }
@@ -784,6 +785,7 @@ public class InqRoomManager {
             throw new RoomException(Code.ROOM_CANNOT_BE_CREATED_ERROR_CODE, "Room '" + roomName
                     + "' already exists");
         }
+        // TODO: Need to save kms info to be used
         KurentoClient kurentoClient = kcProvider.getKurentoClient(kcSessionInfo);
         String siteId = kcSessionInfo.getSiteId();
 
