@@ -166,7 +166,7 @@ public class AppController {
     public void submitStatus(@RequestParam("chatId") String chatId, @RequestParam("stats") String stats) {
         log.trace("Stats has received for : stats: {}" , stats);
         // Save it to Mongodb
-        WebRTCStatDao.getInstance().saveWebRTCEndpointStat(stats);
+        WebRTCStatDao.getInstance().saveWebRTCEndpointStat(chatId, stats);
     }
 
     @CrossOrigin(origins = "*", methods = RequestMethod.POST)
