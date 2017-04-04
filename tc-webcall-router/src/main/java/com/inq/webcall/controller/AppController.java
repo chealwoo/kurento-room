@@ -87,6 +87,11 @@ public class AppController {
         return config;
     }
 
+    @RequestMapping("/admin/currentRooms")
+    public Set<String> currentRooms() {
+        return roomManager.getRooms();
+    }
+
     @RequestMapping("/admin/getKmsReport")
     public Set<KMSReport> report() {
         List<InqKmsManager.KmsLoad> kmsloads = new ArrayList<>();
