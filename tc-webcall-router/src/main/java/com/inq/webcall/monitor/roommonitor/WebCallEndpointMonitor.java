@@ -65,14 +65,10 @@ public class WebCallEndpointMonitor {
             }
 
         } catch (ProtocolException e) {
-
             log.error("Error ", e);
         } catch (Throwable t) {
-            // The WebRtcEndpoint may have been released. This does not need to
-            // be a "severe" problem
-            // TODO log t just in case.
             inqParticipant.stopWebRtcEndPointStatChecker();
-            log.warn("Never Mind ", t);
+            log.warn("Closing WebRtcEndPointStatChecker: " + t.getMessage());
         }
     }
 

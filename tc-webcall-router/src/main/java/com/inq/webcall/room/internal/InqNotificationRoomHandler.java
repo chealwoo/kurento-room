@@ -6,6 +6,7 @@ import com.inq.webcall.WebCallApplication;
 import com.inq.webcall.dao.RoomErrorMdbService;
 import com.inq.webcall.room.api.InqINotificationRoomHandler;
 import org.kurento.client.IceCandidate;
+import org.kurento.commons.exception.KurentoException;
 import org.kurento.room.api.UserNotificationService;
 import org.kurento.room.api.pojo.ParticipantRequest;
 import org.kurento.room.api.pojo.UserParticipant;
@@ -253,8 +254,12 @@ public class InqNotificationRoomHandler implements InqINotificationRoomHandler {
 
     @Override
     public void onParticipantEvicted(UserParticipant participant) {
-        notifService.sendNotification(participant.getParticipantId(),
-                ProtocolElements.PARTICIPANTEVICTED_METHOD, new JsonObject());
+        try {
+            notifService.sendNotification(participant.getParticipantId(),
+                    ProtocolElements.PARTICIPANTEVICTED_METHOD, new JsonObject());
+        } catch (KurentoException e) {
+            log.warn("Exception while participantEvicted event (participant may have disconnected alreay)\n" + e.getMessage());
+        }
     }
 
     // ------------ EVENTS FROM ROOM HANDLER -----
