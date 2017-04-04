@@ -155,18 +155,14 @@ public class AppController {
 
     @CrossOrigin(origins = "*", methods = RequestMethod.POST)
     @RequestMapping("/submitStats")
-    public void submitStatus(@RequestParam("stats") String stats) {
+    public void submitStatus(@RequestParam(value = "chatId", required=false) String chatId, @RequestParam("stats") String stats) {
         log.trace("Stats has received for : stats: {}" , stats);
         // Save it to Mongodb
-        WebRTCStatDao.getInstance().saveWebRTCEndpointStat(stats);
-    }
-
-    @CrossOrigin(origins = "*", methods = RequestMethod.POST)
-    @RequestMapping("/submitStats")
-    public void submitStatus(@RequestParam("chatId") String chatId, @RequestParam("stats") String stats) {
-        log.trace("Stats has received for : stats: {}" , stats);
-        // Save it to Mongodb
-        WebRTCStatDao.getInstance().saveWebRTCEndpointStat(chatId, stats);
+        if(chatId != null) {
+            WebRTCStatDao.getInstance().saveWebRTCEndpointStat(chatId, stats);
+        } else {
+            WebRTCStatDao.getInstance().saveWebRTCEndpointStat(stats);
+        }
     }
 
     @CrossOrigin(origins = "*", methods = RequestMethod.POST)
