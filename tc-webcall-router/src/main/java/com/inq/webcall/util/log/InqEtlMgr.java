@@ -61,17 +61,19 @@ public class InqEtlMgr {
      * @param sdpAnswer
      */
     public static void logPublished(String chatId, String participantId, String sdpAnswer) {
-        String event = InqEtlMgr.isCustomerId(participantId)
-                ? JasperEtlDAO.EVENT_WBBCALL_CUSTOMER_CONNECTED
-                : JasperEtlDAO.EVENT_WBBCALL_AGENT_CONNECTED;
-
         Map<String, String> etlMap = new TreeMap<String, String>();
         etlMap.put(JasperEtlDAO.PARAM_CHAT_ID, chatId);
-        etlMap.put(JasperEtlDAO.PARAM_AGENT_NAME, participantId);
-        etlMap.put(JasperEtlDAO.PARAM_SDP_ANSWER, sdpAnswer.replace("\r\n","\t"));
+        etlMap.put(JasperEtlDAO.PARAM_SDP_ANSWER, sdpAnswer.replace("\r\n", "\t"));
 
-        logEtlRecord(JasperEtlDAO.DOMAIN_EVENT_CALL, event, logStringFromMap(etlMap)
-                , System.currentTimeMillis());
+        if (InqEtlMgr.isCustomerId(participantId)) {
+            etlMap.put(JasperEtlDAO.PARAM_CUSTOMER_ID, participantId);
+            logEtlRecord(JasperEtlDAO.DOMAIN_EVENT_CALL, JasperEtlDAO.EVENT_WBBCALL_CUSTOMER_CONNECTED, logStringFromMap(etlMap)
+                    , System.currentTimeMillis());
+        } else {
+            etlMap.put(JasperEtlDAO.PARAM_AGENT_NAME, participantId);
+            logEtlRecord(JasperEtlDAO.DOMAIN_EVENT_CALL, JasperEtlDAO.EVENT_WBBCALL_AGENT_CONNECTED, logStringFromMap(etlMap)
+                    , System.currentTimeMillis());
+        }
     }
 
     public static void logJoin(String chatId, String participantId) {
