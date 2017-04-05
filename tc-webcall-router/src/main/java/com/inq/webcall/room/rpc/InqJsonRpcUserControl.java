@@ -82,9 +82,16 @@ public class InqJsonRpcUserControl extends JsonRpcUserControl {
 
         // Optional ?
         String authToken = "";
-        String siteId = "";
         try {
             authToken = getStringParam(request, ProtocolElements.JOINROOM_TOKEN_PARAM);
+        } catch (RuntimeException e) {
+            if (!e.getMessage().contains("Request element")) {
+                throw e;
+            }
+        }
+
+        String siteId = "";
+        try {
             siteId = getStringParam(request, JOINROOM_SITEID_PARAM);
         } catch (RuntimeException e) {
             if (!e.getMessage().contains("Request element")) {
@@ -100,6 +107,7 @@ public class InqJsonRpcUserControl extends JsonRpcUserControl {
         } catch (RoomException e) {
             log.warn("PARTICIPANT {}: Error joining/creating room {}", userName, roomName, e);
         }
+
         kcSessionInfo.setAuthToken(authToken);
         kcSessionInfo.setSiteId(siteId);
 

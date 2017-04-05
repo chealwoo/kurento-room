@@ -98,8 +98,6 @@ public class InqNotificationRoomManager extends NotificationRoomManager{
         try {
             roomName = internalManager.getRoomName(pid);
             userName = internalManager.getParticipantName(pid);
-            // fire etl log upon request NOT result.
-            InqEtlMgr.logLeave(roomName, userName);
             remainingParticipants = internalManager.leaveRoom(pid);
         } catch (RoomException e) {
             log.warn("PARTICIPANT {}: Error leaving room {}", userName, roomName, e);

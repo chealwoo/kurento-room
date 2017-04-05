@@ -164,6 +164,7 @@ public class InqRoomManager {
         InqParticipant participant = getParticipant(participantId);
         InqRoom room = participant.getRoom();
         String roomName = room.getName();
+        InqEtlMgr.logLeave(roomName, participant.getName());
         if (room.isClosed()) {
             log.warn("'{}' is trying to leave from room '{}' but it is closing", participant.getName(),
                     roomName);
