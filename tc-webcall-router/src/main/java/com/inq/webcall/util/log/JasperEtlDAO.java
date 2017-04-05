@@ -54,7 +54,7 @@ public interface JasperEtlDAO {
     String WEBRTC_APP_CUSTOMREQUEST_METHOD = "customerQuest";
 
     String EVENT_WEBCALL_ROOM_CREATED_EVENT = "roomCreated";
-    String EVENT_CALL_REQUESTED = "callRequested";
+    String EVENT_JOIN_REQUESTED = "joinRequested";
     String EVENT_WBBCALL_JOIN_ROOM = "userJoinRoom";
     String EVENT_WBBCALL_JOIN_ROOM_FAIL = "userJoinRoomFail";
     String EVENT_WBBCALL_AGENT_CONNECTED = "agentPublished";

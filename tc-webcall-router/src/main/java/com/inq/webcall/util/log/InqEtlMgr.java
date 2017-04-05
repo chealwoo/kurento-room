@@ -17,9 +17,13 @@ public class InqEtlMgr {
     public static void logWebCallRequested(String chatId, String participantId) {
         Map<String, String> etlMap = new TreeMap<String, String>();
         etlMap.put(JasperEtlDAO.PARAM_CHAT_ID, chatId);
-        etlMap.put(JasperEtlDAO.PARAM_CUSTOMER_ID, participantId);
+        if(InqEtlMgr.isCustomerId(participantId)) {
+            etlMap.put(JasperEtlDAO.PARAM_CUSTOMER_ID, participantId);
+        } else {
+            etlMap.put(JasperEtlDAO.PARAM_AGENT_NAME, participantId);
+        }
 
-        logEtlRecord(JasperEtlDAO.DOMAIN_EVENT_CALL, JasperEtlDAO.EVENT_CALL_REQUESTED, logStringFromMap(etlMap)
+        logEtlRecord(JasperEtlDAO.DOMAIN_EVENT_CALL, JasperEtlDAO.EVENT_JOIN_REQUESTED, logStringFromMap(etlMap)
                 , System.currentTimeMillis());
     }
 
@@ -64,7 +68,7 @@ public class InqEtlMgr {
         Map<String, String> etlMap = new TreeMap<String, String>();
         etlMap.put(JasperEtlDAO.PARAM_CHAT_ID, chatId);
         etlMap.put(JasperEtlDAO.PARAM_AGENT_NAME, participantId);
-        etlMap.put(JasperEtlDAO.PARAM_SDP_ANSWER, sdpAnswer);
+        etlMap.put(JasperEtlDAO.PARAM_SDP_ANSWER, sdpAnswer.replace("\r\n","\t"));
 
         logEtlRecord(JasperEtlDAO.DOMAIN_EVENT_CALL, event, logStringFromMap(etlMap)
                 , System.currentTimeMillis());
@@ -73,7 +77,11 @@ public class InqEtlMgr {
     public static void logJoin(String chatId, String participantId) {
         Map<String, String> etlMap = new TreeMap<String, String>();
         etlMap.put(JasperEtlDAO.PARAM_CHAT_ID, chatId);
-        etlMap.put(JasperEtlDAO.PARAM_AGENT_NAME, participantId);
+        if(InqEtlMgr.isCustomerId(participantId)) {
+            etlMap.put(JasperEtlDAO.PARAM_CUSTOMER_ID, participantId);
+        } else {
+            etlMap.put(JasperEtlDAO.PARAM_AGENT_NAME, participantId);
+        }
 
         logEtlRecord(JasperEtlDAO.DOMAIN_EVENT_CALL, JasperEtlDAO.EVENT_WBBCALL_JOIN_ROOM, logStringFromMap(etlMap)
                 , System.currentTimeMillis());
@@ -91,7 +99,11 @@ public class InqEtlMgr {
     public static void logLeave(String chatId, String participantId) {
         Map<String, String> etlMap = new TreeMap<String, String>();
         etlMap.put(JasperEtlDAO.PARAM_CHAT_ID, chatId);
-        etlMap.put(JasperEtlDAO.PARAM_AGENT_NAME, participantId);
+        if(InqEtlMgr.isCustomerId(participantId)) {
+            etlMap.put(JasperEtlDAO.PARAM_CUSTOMER_ID, participantId);
+        } else {
+            etlMap.put(JasperEtlDAO.PARAM_AGENT_NAME, participantId);
+        }
 
         logEtlRecord(JasperEtlDAO.DOMAIN_EVENT_CALL, JasperEtlDAO.EVENT_WBBCALL_LEAVE_ROOM, logStringFromMap(etlMap)
                 , System.currentTimeMillis());
@@ -99,9 +111,10 @@ public class InqEtlMgr {
 
     public static void logSubscribe(String chatId, String userName, String remoteName, String sdpAnswer) {
         Map<String, String> etlMap = new TreeMap<String, String>();
+        etlMap.put(JasperEtlDAO.PARAM_CHAT_ID, chatId);
         etlMap.put(JasperEtlDAO.PARAM_USER_ID, userName);
         etlMap.put(JasperEtlDAO.PARAM_REMOTE_USER_ID, remoteName);
-        etlMap.put(JasperEtlDAO.PARAM_SDP_ANSWER, sdpAnswer);
+        etlMap.put(JasperEtlDAO.PARAM_SDP_ANSWER, sdpAnswer.replace("\r\n","\t"));
 
         logEtlRecord(JasperEtlDAO.DOMAIN_EVENT_CALL, JasperEtlDAO.EVENT_WBBCALL_SUBSCRIBE, logStringFromMap(etlMap)
                 , System.currentTimeMillis());
@@ -109,9 +122,10 @@ public class InqEtlMgr {
 
     public static void logSubscribeFail(String chatId, String userName, String remoteName, String sdpOffer) {
         Map<String, String> etlMap = new TreeMap<String, String>();
+        etlMap.put(JasperEtlDAO.PARAM_CHAT_ID, chatId);
         etlMap.put(JasperEtlDAO.PARAM_USER_ID, userName);
         etlMap.put(JasperEtlDAO.PARAM_REMOTE_USER_ID, remoteName);
-        etlMap.put(JasperEtlDAO.PARAM_SDP_OFFER, sdpOffer);
+        etlMap.put(JasperEtlDAO.PARAM_SDP_OFFER, sdpOffer.replace("\r\n","\t"));
 
         logEtlRecord(JasperEtlDAO.DOMAIN_EVENT_CALL, JasperEtlDAO.EVENT_WBBCALL_SUBSCRIBE_FAIL, logStringFromMap(etlMap)
                 , System.currentTimeMillis());

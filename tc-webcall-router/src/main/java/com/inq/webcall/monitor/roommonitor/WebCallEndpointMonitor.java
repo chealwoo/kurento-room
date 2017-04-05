@@ -116,11 +116,8 @@ public class WebCallEndpointMonitor {
         } catch (NullPointerException e) {
             log.info("NullPointerException thrown most likely caused by participant closing webEndpoint");
         } catch (Throwable t) {
-            // The WebRtcEndpoint may have been released. This does not need to
-            // be a "severe" problem
-            // TODO log t just in case.
             inqParticipant.stopWebRtcEndPointChecker();
-            log.warn("Never mind ", t);
+            log.warn("Closing WebRtcEndPointStatChecker: " + t.getMessage());
         }
     }
 
