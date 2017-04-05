@@ -1,12 +1,16 @@
 {
    "kms": {
-      "uris": ["ws://webrtc-media1-test.inq.com:8888/kurento", "ws://webrtc-media2-test.inq.com:8888/kurento"]
+      "uris": ["wss://kms-media1.inq.com:8433/kurento","wss://kms-media2.inq.com:8433/kurento"]
    },
    "app": {
       "uri": "wss://webrtc-app1-test.inq.com:8443/room"
    },
    "repository": {
-      "uri": "http://webrtc-media1-test.inq.com:7676"
+      "uri": "http://kms-media1.inq.com:7676"
+   },
+   "mongodb": {
+      "uris": ["10.0.100.5", "10.0.100.7"],
+      "dbname": "kmslog"
    },
    "kurento": {
       "client": {
